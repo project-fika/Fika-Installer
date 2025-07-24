@@ -32,6 +32,8 @@ namespace Fika_Installer
                 Menus.MainMenu();
             }
 
+
+
             Menus.MainMenu();
         }
 

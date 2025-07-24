@@ -84,7 +84,12 @@ namespace Fika_Installer
                     File.Copy(filePath, destFile, overwrite: true);
                     filesCopied++;
 
-                    progressBar.Draw(filesCopied, totalFiles);
+                    string fileName = Path.GetFileName(filePath);
+                    
+                    string message = $"Copying: {fileName}";
+                    double ratio = (double)filesCopied / totalFiles;
+
+                    progressBar.Draw(message, ratio);
                 }
 
                 result = true;
