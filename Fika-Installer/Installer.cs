@@ -1,43 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Fika_Installer.Models;
 
 namespace Fika_Installer
 {
     public static class Installer
     {
-        public static bool InstallFika(string sptFolder, string fikaFolder)
+        public static void InstallFika()
         {
-            // Initial checks
-            string sptServerPath = Path.Combine(sptFolder, "SPT.Server.exe");
-            string sptLauncherPath = Path.Combine(sptFolder, "SPT.Launcher.exe");
+            string sptFolder = Utils.BrowseFolder("Please select your SPT installation folder.");
+            string fikaFolder = Constants.FikaDirectory;
 
-            if (!File.Exists(sptServerPath) || !File.Exists(sptLauncherPath))
+            if (string.IsNullOrEmpty(sptFolder))
             {
-                Console.WriteLine("The selected folder does not contain a valid SPT installation.");
-                return false;
+                Menus.MainMenu();
             }
 
-            string sptAssemblyCSharpBak = Path.Combine(sptFolder, @"EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll.spt-bak");
+            SptValidationResult sptValidationResult = Utils.ValidateSptFolder(sptFolder);
 
-            if (!File.Exists(sptAssemblyCSharpBak))
+            if (sptValidationResult != SptValidationResult.OK)
             {
-                Console.WriteLine("You must run SPT.Launcher.exe and start the game at least once before you attempt to install Fika using the selected SPT folder.");
-                return false;
+                Utils.WriteLineConfirmation("An error occurred during installation of Fika.");
+                Menus.MainMenu();
             }
 
-            string fikaPath = Path.Combine(sptFolder, @"BepInEx\plugins\Fika.Core.dll");
-            string fikaHeadlessPath = Path.Combine(sptFolder, @"BepInEx\plugins\Fika.Headless.dll");
+            Console.WriteLine($"Found valid installation of SPT: {sptFolder}");
 
-            if (File.Exists(fikaPath) || File.Exists(fikaHeadlessPath))
+            bool copySptResult = Utils.CopyFolderWithProgress(sptFolder, fikaFolder);
+
+            if (!copySptResult)
             {
-                Console.WriteLine("The selected folder already contains Fika and/or Fika headless. Please select a fresh SPT install folder.");
-                return false;
+                Utils.WriteLineConfirmation("An error occurred during copy of SPT folder.");
+                Menus.MainMenu();
             }
 
-            return true;
+            Menus.MainMenu();
+        }
+
+        public static void InstallFikaHeadless()
+        {
+
         }
     }
 }
