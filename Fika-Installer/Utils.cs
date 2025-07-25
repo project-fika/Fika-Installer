@@ -1,11 +1,4 @@
-﻿using Fika_Installer.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Fika_Installer
+﻿namespace Fika_Installer
 {
     public static class Utils
     {        
@@ -34,7 +27,7 @@ namespace Fika_Installer
             int totalFiles = allFiles.Length;
             int filesCopied = 0;
 
-            ProgressBar progressBar = new("Copying...");
+            ProgressBar progressBar = new();
 
             try
             {
@@ -49,15 +42,15 @@ namespace Fika_Installer
                         Directory.CreateDirectory(destDir);
                     }
 
-                    File.Copy(filePath, destFile, overwrite: true);
-                    filesCopied++;
-
                     string fileName = Path.GetFileName(filePath);
-                    
+
                     string message = $"Copying: {fileName}";
                     double ratio = (double)filesCopied / totalFiles;
 
                     progressBar.Draw(message, ratio);
+
+                    File.Copy(filePath, destFile, overwrite: true);
+                    filesCopied++;
                 }
 
                 result = true;

@@ -7,7 +7,7 @@
         private int _messageCursorTopPos;
         private int _progressBarCursorTopPos;
 
-        public ProgressBar(string message, int barWidth = 50)
+        public ProgressBar(string message = "", int barWidth = 50)
         {
             _message = message;
             _barWidth = barWidth;

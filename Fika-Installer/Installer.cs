@@ -16,7 +16,7 @@
 
             if (!sptValidationResult)
             {
-                Utils.WriteLineConfirmation("An error occurred during installation of Fika.");
+                Utils.WriteLineConfirmation("An error occurred during validation of SPT folder.");
                 Menus.MainMenu();
             }
 
@@ -30,16 +30,26 @@
                 Menus.MainMenu();
             }
 
+            DownloadFika(fikaReleaseUrl);
+
+            Console.ReadKey();
+
+            Menus.MainMenu();
+        }
+
+        public static void UpdateFika(string fikaReleaseUrl)
+        {
+
+        }
+
+        public static void DownloadFika(string fikaReleaseUrl)
+        {
             string[] assetsUrl = GitHub.RetrieveAssetsUrl(fikaReleaseUrl);
 
             foreach (string assetUrl in assetsUrl)
             {
                 Console.WriteLine(assetUrl);
             }
-
-            Console.ReadKey();
-
-            Menus.MainMenu();
         }
 
         public static bool ValidateSptFolder(string sptFolder)
