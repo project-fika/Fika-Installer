@@ -1,27 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Fika_Installer
+﻿namespace Fika_Installer
 {
     public class ProgressBar
     {
-        string Message { get; set; }
-        int BarWidth { get; set; }
-        int MessageCursorPos;
-        int ProgressBarCursorPos;
+        private string _message;
+        private int _barWidth;
+        private int _messageCursorTopPos;
+        private int _progressBarCursorTopPos;
 
         public ProgressBar(string message, int barWidth = 50)
         {
-            Message = message;
-            BarWidth = barWidth;
+            _message = message;
+            _barWidth = barWidth;
 
-            MessageCursorPos = Console.GetCursorPosition().Top;
-            ProgressBarCursorPos = Console.GetCursorPosition().Top + 1;
+            _messageCursorTopPos = Console.GetCursorPosition().Top;
+            _progressBarCursorTopPos = Console.GetCursorPosition().Top + 1;
 
-            Console.WriteLine(Message);
+            Console.WriteLine(_message);
             Draw(0);
 
             Console.CursorVisible = false;
@@ -29,45 +23,55 @@ namespace Fika_Installer
 
         public void Draw(double ratio)
         {
-            int completedWidth = (int)Math.Round(ratio * BarWidth);
-            string visualProgress = new('#', completedWidth);
-            string visualRemaining = new('-', BarWidth - completedWidth);
+            int completedWidth = (int)Math.Round(ratio * _barWidth);
+
+            string barProgress = new('#', completedWidth);
+            string barRemaining = new('-', _barWidth - completedWidth);
 
             int percent = (int)Math.Round(ratio * 100);
 
-            string progressBar = $"[{visualProgress}{visualRemaining}] {percent}%";
+            string progressBar = $"[{barProgress}{barRemaining}] {percent}%";
 
-            Console.SetCursorPosition(0, Console.CursorTop);
-            Console.Write(progressBar);
+            Console.Write($"\r{progressBar}");
         }
 
         public void Draw(string message, double ratio)
         {
-            Erase(MessageCursorPos, Message.Length);
-       
-            Message = message;
-            Console.Write(message);
+            int oldMessageLength = _message.Length;
+            int newMessageLength = message.Length;
+            int lengthToRemove = oldMessageLength - newMessageLength;
 
-            Console.SetCursorPosition(0, MessageCursorPos + 1);
+            if (lengthToRemove > 0)
+            {
+                Erase(newMessageLength, _messageCursorTopPos, lengthToRemove);
+            }
+            
+            Console.SetCursorPosition(0, _messageCursorTopPos);
+            Console.Write($"\r{message}");
+            Console.SetCursorPosition(0, _progressBarCursorTopPos);
+
+            _message = message;
+
             Draw(ratio);
         }
+
         public void Dispose()
         {
-            Erase(MessageCursorPos, Message.Length);
+            Erase(0, _messageCursorTopPos, _message.Length);
 
-            int messageLength = Message.Length; // Message + space
-            int barWidth = BarWidth + 2; // Progress bar + [ and ]
+            int messageLength = _message.Length; // Message + space
+            int barWidth = _barWidth + 2; // Progress bar + [ and ]
             int percentageLength = 5; // Space + 100%
             int progressBarTotalLength = messageLength + barWidth + percentageLength;
 
-            Erase(ProgressBarCursorPos, progressBarTotalLength);
+            Erase(0, _progressBarCursorTopPos, progressBarTotalLength);
 
             Console.CursorVisible = true;
         }
 
-        private void Erase(int pos, int length)
+        private void Erase(int left, int top, int length)
         {
-            Console.SetCursorPosition(0, pos);
+            Console.SetCursorPosition(left, top);
             string empty = new(' ', length);
             Console.Write(empty);
             Console.SetCursorPosition(0, Console.CursorTop);
