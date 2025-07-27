@@ -1,4 +1,6 @@
-﻿namespace Fika_Installer
+﻿using Fika_Installer.Models;
+
+namespace Fika_Installer
 {
     public static class Menus
     {
@@ -6,36 +8,40 @@
         {
             List<MenuChoice> menuChoices = [];
 
-            bool fikaDetected = File.Exists(Constants.FikaCorePath);
-            string fikaRelease = Constants.FikaReleases["Fika.Core"];
+            string fikaCorePath = Constants.FikaCorePath;
+            bool fikaDetected = File.Exists(fikaCorePath);
 
             if (fikaDetected)
             {
-                MenuChoice updateFikaChoice = new("Update Fika", ConsoleKey.D1, () => Installer.UpdateFika(fikaRelease));
+                MenuChoice updateFikaChoice = new("Update Fika", ConsoleKey.D1, Pages.UpdateFikaPage);
                 menuChoices.Add(updateFikaChoice);
             }
             else
             {
-                MenuChoice installFikaChoice = new("Install Fika", ConsoleKey.D1, () => Installer.InstallFika(fikaRelease));
+                MenuChoice installFikaChoice = new("Install Fika", ConsoleKey.D1, Pages.InstallFikaPage);
                 menuChoices.Add(installFikaChoice);
             }
 
-            bool fikaHeadlessDetected = File.Exists(Constants.FikaHeadlessPath);
-            string fikaHeadlessRelease = Constants.FikaReleases["Fika.Headless"];
+            string fikaHeadlessPath = Constants.FikaHeadlessPath;
+            bool fikaHeadlessDetected = File.Exists(fikaHeadlessPath);
 
             if (fikaHeadlessDetected)
             {
-                MenuChoice updateFikaChoice = new("Update Fika Headless", ConsoleKey.D1, () => Installer.UpdateFika(fikaHeadlessRelease));
+                MenuChoice updateFikaChoice = new("Update Fika Headless", ConsoleKey.D1, Pages.UpdateFikaHeadlessPage);
                 menuChoices.Add(updateFikaChoice);
             }
             else
             {
-                MenuChoice installFikaHeadlessChoice = new("Install Fika Headless", ConsoleKey.D2, () => Installer.InstallFika(fikaHeadlessRelease));
+                MenuChoice installFikaHeadlessChoice = new("Install Fika Headless", ConsoleKey.D2, Pages.InstallFikaHeadlessPage);
                 menuChoices.Add(installFikaHeadlessChoice);
             }
 
             Menu mainMenu = new(menuChoices);
-            mainMenu.Show();
+
+            while (true)
+            {
+                mainMenu.Show();
+            }
         }
     }
 }

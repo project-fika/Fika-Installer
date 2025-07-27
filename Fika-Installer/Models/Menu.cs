@@ -1,4 +1,4 @@
-﻿namespace Fika_Installer
+﻿namespace Fika_Installer.Models
 {
     public class MenuChoice(string text, ConsoleKey key, Action action)
     {

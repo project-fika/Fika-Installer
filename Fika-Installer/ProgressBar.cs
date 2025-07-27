@@ -66,6 +66,7 @@
 
             Erase(0, _progressBarCursorTopPos, progressBarTotalLength);
 
+            Console.SetCursorPosition(0, _messageCursorTopPos);
             Console.CursorVisible = true;
         }
 
