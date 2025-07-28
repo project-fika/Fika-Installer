@@ -13,7 +13,7 @@
 
         public void Show()
         {
-            InitMenu();
+            Header.Show();
             
             foreach (MenuChoice choice in Choices)
             {
@@ -40,13 +40,6 @@
             {
                 Show();
             }
-        }
-
-        private void InitMenu()
-        {
-            Console.Clear();
-            Console.WriteLine(Constants.FikaInstallerVersionString);
-            Console.WriteLine();
         }
     }
 }

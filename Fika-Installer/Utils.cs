@@ -1,4 +1,6 @@
-﻿namespace Fika_Installer
+﻿using System.IO.Compression;
+
+namespace Fika_Installer
 {
     public static class Utils
     {        
@@ -133,6 +135,19 @@
             }
 
             return result;
+        }
+
+        public static void ExtractZip(string zipFilePath, string outputDirectory)
+        {
+            try
+            {
+                Directory.CreateDirectory(outputDirectory);
+                ZipFile.ExtractToDirectory(zipFilePath, outputDirectory, overwriteFiles: true);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         public static void WriteLineConfirmation(string message)

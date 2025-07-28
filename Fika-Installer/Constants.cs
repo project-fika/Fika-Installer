@@ -13,7 +13,7 @@ namespace Fika_Installer
         public static readonly string SptLauncherPath = Path.Combine(FikaDirectory, "SPT.Launcher.exe");
         public static readonly string SptUserModsPath = Path.Combine(FikaDirectory, @"user\mods");
         public static readonly string SptProfilesPath = Path.Combine(FikaDirectory, @"user\profiles");
-
+        public static readonly string FikaInstallerTemp = Path.Combine(FikaDirectory, @"FikaInstallerTemp\");
         public static readonly Dictionary<string, string> FikaReleases = new()
         {
             { "Fika.Core", "https://api.github.com/repos/project-fika/Fika-Plugin/releases/latest" },

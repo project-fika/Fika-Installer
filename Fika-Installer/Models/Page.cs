@@ -6,15 +6,8 @@
 
         public void Show()
         {
-            InitPage();
+            Header.Show();
             Action.Invoke();
-        }
-
-        private static void InitPage()
-        {
-            Console.Clear();
-            Console.WriteLine(Constants.FikaInstallerVersionString);
-            Console.WriteLine();
         }
     }
 }
