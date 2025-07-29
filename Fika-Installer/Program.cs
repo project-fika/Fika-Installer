@@ -1,4 +1,6 @@
-﻿namespace Fika_Installer
+﻿using Fika_Installer.UI;
+
+namespace Fika_Installer
 {
     public class Program
     {

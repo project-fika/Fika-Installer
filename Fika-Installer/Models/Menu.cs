@@ -1,19 +1,48 @@
-﻿namespace Fika_Installer.Models
+﻿using Fika_Installer.UI;
+
+namespace Fika_Installer.Models
 {
-    public class MenuChoice(string text, ConsoleKey key, Action action)
+    public class MenuResult(string id, ConsoleKey key, bool validEntry)
     {
+        public string Id = id;
+        public ConsoleKey Key = key;
+        public bool ValidEntry = validEntry;
+    }
+    
+    public class MenuChoice(string id, string text, ConsoleKey key)
+    {
+        public string Id = id;
         public string Text = text;
         public ConsoleKey Key = key;
-        public Action Action = action;
     }
 
-    public class Menu(List<MenuChoice> choices)
+    public class Menu
     {
-        public List<MenuChoice> Choices = choices;
+        public string Message;
+        public List<MenuChoice> Choices;
 
-        public void Show()
+        public Menu(List<MenuChoice> choices)
         {
+            Choices = choices;
+        }
+
+        public Menu(string message, List<MenuChoice> choices)
+        {
+            Message = message;
+            Choices = choices;
+        }
+
+        public MenuResult Show()
+        {
+            MenuResult menuResult = new("InvalidEntry", ConsoleKey.D0, false);
+
+            Console.Clear();
             Header.Show();
+
+            if (!string.IsNullOrEmpty(Message))
+            {
+                Console.WriteLine(Message);
+            }
             
             foreach (MenuChoice choice in Choices)
             {
@@ -25,21 +54,17 @@
 
             ConsoleKeyInfo inputKey = Console.ReadKey(true);
 
-            bool validChoice = false;
-
             foreach (MenuChoice choice in Choices)
             {
                 if (inputKey.Key == choice.Key)
                 {
-                    choice.Action?.Invoke();
-                    validChoice = true;
+                    string id = choice.Id;
+                    menuResult = new(id, inputKey.Key, true);
+                    return menuResult;
                 }
             }
 
-            if (!validChoice)
-            {
-                Show();
-            }
+            return menuResult;
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using Fika_Installer.Models;
+using Fika_Installer.UI;
+using Newtonsoft.Json.Linq;
 
 namespace Fika_Installer
 {   
@@ -39,37 +41,59 @@ namespace Fika_Installer
 
             string fikaReleaseName = downloadFikaResult.Name;
             string fikaReleaseZipFilePath = Path.Combine(fikaTempPath, fikaReleaseName);
+            string fikaDirectory = Constants.FikaDirectory;
 
-            bool extractFikaResult = ExtractRelease(fikaReleaseZipFilePath, Constants.FikaDirectory);
+            bool extractFikaResult = ExtractRelease(fikaReleaseZipFilePath, fikaDirectory);
 
             if (!extractFikaResult)
             {
                 return;
             }
 
-            Utils.WriteLineConfirmation("Fika installed successfully.");
+            Utils.WriteLineConfirm("Fika installed successfully.");
         }
 
         public static void UpdateFika()
         {
+            string fikaReleaseUrl = Constants.FikaReleases["Fika.Core"];
+            string fikaTempPath = Constants.FikaInstallerTemp;
 
+            DownloadReleaseResult downloadFikaResult = DownloadRelease(fikaReleaseUrl, fikaTempPath);
+
+            if (!downloadFikaResult.Result)
+            {
+                return;
+            }
+
+            string fikaReleaseName = downloadFikaResult.Name;
+            string fikaReleaseZipFilePath = Path.Combine(fikaTempPath, fikaReleaseName);
+            string fikaDirectory = Constants.FikaDirectory;
+
+            bool extractFikaResult = ExtractRelease(fikaReleaseZipFilePath, fikaDirectory);
+
+            if (!extractFikaResult)
+            {
+                return;
+            }
+
+            Utils.WriteLineConfirm("Fika updated successfully.");
         }
 
         public static void InstallFikaHeadless()
         {
             string fikaFolder = Constants.FikaDirectory;
 
+            string sptFolder = BrowseSptFolderAndValidate();
+
+            if (string.IsNullOrEmpty(sptFolder))
+            {
+                return;
+            }
+
             bool isSptInstalled = IsSptInstalled(fikaFolder);
 
             if (!isSptInstalled) 
             {
-                string sptFolder = BrowseSptFolderAndValidate();
-
-                if (string.IsNullOrEmpty(sptFolder))
-                {
-                    return;
-                }
-
                 bool copySptFolderResult = CopySptFolder(sptFolder, fikaFolder);
 
                 if (!copySptFolderResult)
@@ -90,8 +114,9 @@ namespace Fika_Installer
             
             string fikaHeadlessReleaseName = downloadHeadlessResult.Name;
             string fikaHeadlessReleaseZipFilePath = Path.Combine(fikaTempPath, fikaHeadlessReleaseName);
-            
-            bool extractHeadlessResult = ExtractRelease(fikaHeadlessReleaseZipFilePath, Constants.FikaDirectory);
+            string fikaDirectory = Constants.FikaDirectory;
+
+            bool extractHeadlessResult = ExtractRelease(fikaHeadlessReleaseZipFilePath, fikaDirectory);
 
             if (!extractHeadlessResult)
             {
@@ -114,7 +139,7 @@ namespace Fika_Installer
                 string fikaReleaseName = downloadFikaResult.Name;
                 string fikaReleaseZipFilePath = Path.Combine(fikaTempPath, fikaReleaseName);
 
-                bool extractfikaResult = ExtractRelease(fikaReleaseZipFilePath, Constants.FikaDirectory);
+                bool extractfikaResult = ExtractRelease(fikaReleaseZipFilePath, fikaDirectory);
 
                 if (!extractfikaResult)
                 {
@@ -122,15 +147,37 @@ namespace Fika_Installer
                 }
             }
 
-            Utils.WriteLineConfirmation("Fika Headless installed successfully.");
+            Utils.WriteLineConfirm("Fika Headless installed successfully. Press any key to configure the headless profile.");
+
+            Menus.ProfileSelectionMenu(sptFolder);
         }
 
         public static void UpdateFikaHeadless()
         {
+            string fikaHeadlessReleaseUrl = Constants.FikaReleases["Fika.Headless"];
+            string fikaTempPath = Constants.FikaInstallerTemp;
 
+            DownloadReleaseResult downloadHeadlessResult = DownloadRelease(fikaHeadlessReleaseUrl, fikaTempPath);
+
+            if (!downloadHeadlessResult.Result)
+            {
+                return;
+            }
+
+            string fikaHeadlessReleaseName = downloadHeadlessResult.Name;
+            string fikaHeadlessReleaseZipFilePath = Path.Combine(fikaTempPath, fikaHeadlessReleaseName);
+
+            bool extractHeadlessResult = ExtractRelease(fikaHeadlessReleaseZipFilePath, Constants.FikaDirectory);
+
+            if (!extractHeadlessResult)
+            {
+                return;
+            }
+
+            Utils.WriteLineConfirm("Fika Headless updated successfully.");
         }
 
-        public static bool ValidateSptFolder(string sptFolder)
+        private static bool ValidateSptFolder(string sptFolder)
         {
             string sptServerPath = Path.Combine(sptFolder, "SPT.Server.exe");
             string sptLauncherPath = Path.Combine(sptFolder, "SPT.Launcher.exe");
@@ -152,7 +199,7 @@ namespace Fika_Installer
             return true;
         }
 
-        public static string BrowseSptFolderAndValidate()
+        private static string BrowseSptFolderAndValidate()
         {
             string sptFolder = Utils.BrowseFolder("Please select your SPT installation folder.");
 
@@ -169,14 +216,14 @@ namespace Fika_Installer
             }
             else
             {
-                Utils.WriteLineConfirmation("An error occurred during validation of SPT folder.");
+                Utils.WriteLineConfirm("An error occurred during validation of SPT folder.");
                 return string.Empty;
             }
 
             return sptFolder;
         }
 
-        public static bool CopySptFolder(string sptFolder, string fikaFolder)
+        private static bool CopySptFolder(string sptFolder, string fikaFolder)
         {
             bool copySptResult = Utils.CopyFolderWithProgress(sptFolder, fikaFolder);
 
@@ -186,16 +233,16 @@ namespace Fika_Installer
             }
             else
             {
-                Utils.WriteLineConfirmation("An error occurred during copy of SPT folder.");
+                Utils.WriteLineConfirm("An error occurred during copy of SPT folder.");
             }
 
             return copySptResult;
         }
 
-        public static bool IsSptInstalled(string path)
+        private static bool IsSptInstalled(string path)
         {
-            string sptServerPath = Constants.SptServerPath;
-            string sptLauncherPath = Constants.SptLauncherPath;
+            string sptServerPath = Path.Combine(path, "SPT.Server.exe");
+            string sptLauncherPath = Path.Combine(path, "SPT.Launcher.exe");
 
             bool sptServerFound = File.Exists(sptServerPath);
             bool sptLauncherFound = File.Exists(sptLauncherPath);
@@ -208,7 +255,7 @@ namespace Fika_Installer
             return false;
         }
 
-        public static DownloadReleaseResult DownloadRelease(string releaseUrl, string outputDir)
+        private static DownloadReleaseResult DownloadRelease(string releaseUrl, string outputDir)
         {
             GitHubAsset[] githubAssets = GitHub.FetchGitHubAssets(releaseUrl);
 
@@ -225,11 +272,11 @@ namespace Fika_Installer
 
                 if (downloadResult)
                 {
-                    Console.WriteLine($"{releaseName} downloaded successfully.");
+                    Console.WriteLine($"{releaseName} downloaded.");
                 }
                 else
                 {
-                    Utils.WriteLineConfirmation($"An error occurred while downloading {releaseName}.");
+                    Utils.WriteLineConfirm($"An error occurred while downloading {releaseName}.");
                 }
 
                 downloadReleaseResult.Name = releaseName;
@@ -240,7 +287,7 @@ namespace Fika_Installer
             return downloadReleaseResult;
         }
 
-        public static bool ExtractRelease(string releasePath, string outputDir)
+        private static bool ExtractRelease(string releasePath, string outputDir)
         {
             bool extractResult = false;
 

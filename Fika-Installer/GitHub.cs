@@ -1,6 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using System.Net;
-using System.Xml.XPath;
 
 namespace Fika_Installer
 {

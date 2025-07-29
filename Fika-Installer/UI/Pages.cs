@@ -1,6 +1,6 @@
 ﻿using Fika_Installer.Models;
 
-namespace Fika_Installer
+namespace Fika_Installer.UI
 {   
     public static class Pages
     {
@@ -25,6 +25,22 @@ namespace Fika_Installer
         public static void UpdateFikaHeadlessPage()
         {
             Page page = new(Installer.UpdateFikaHeadless);
+            page.Show();
+        }
+
+        public static void SetupHeadlessProfilePage(SptProfile sptProfile, string sptFolder)
+        {
+            void action() => Headless.SetupProfile(sptProfile, sptFolder);
+
+            Page page = new(action);
+            page.Show();
+        }
+
+        public static void SetupNewHeadlessProfilePage(string sptFolder)
+        {
+            void action() => Headless.SetupNewProfile(sptFolder);
+            
+            Page page = new(action);
             page.Show();
         }
     }

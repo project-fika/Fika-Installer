@@ -150,7 +150,7 @@ namespace Fika_Installer
             }
         }
 
-        public static void WriteLineConfirmation(string message)
+        public static void WriteLineConfirm(string message)
         {
             Console.WriteLine(message);
             Console.ReadKey(true);

@@ -1,4 +1,6 @@
-﻿namespace Fika_Installer.Models
+﻿using Fika_Installer.UI;
+
+namespace Fika_Installer.Models
 {
     public class Page(Action action)
     {

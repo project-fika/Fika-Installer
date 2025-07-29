@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fika_Installer
+namespace Fika_Installer.UI
 {
     public static class Header
     {
