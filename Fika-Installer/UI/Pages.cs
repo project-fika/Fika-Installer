@@ -30,7 +30,8 @@ namespace Fika_Installer.UI
 
         public static void SetupHeadlessProfilePage(SptProfile sptProfile, string sptFolder)
         {
-            void action() => Headless.SetupProfile(sptProfile, sptFolder);
+            Headless headless = new();
+            void action() => headless.SetupProfile(sptProfile, sptFolder);
 
             Page page = new(action);
             page.Show();
@@ -38,7 +39,8 @@ namespace Fika_Installer.UI
 
         public static void SetupNewHeadlessProfilePage(string sptFolder)
         {
-            void action() => Headless.SetupNewProfile(sptFolder);
+            Headless headless = new();
+            void action() => headless.SetupNewProfile(sptFolder);
             
             Page page = new(action);
             page.Show();

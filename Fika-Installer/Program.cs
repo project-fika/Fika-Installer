@@ -7,7 +7,10 @@ namespace Fika_Installer
         [STAThread]
         static void Main(string[] args)
         {
-            Menus.MainMenu();
+            while (true)
+            {
+                Menus.MainMenu();
+            }
         }
     }
 }

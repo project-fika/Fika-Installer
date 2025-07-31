@@ -90,6 +90,8 @@ namespace Fika_Installer
                 return;
             }
 
+            Menus.ProfileSelectionMenu(sptFolder);
+
             bool isSptInstalled = IsSptInstalled(fikaFolder);
 
             if (!isSptInstalled) 
@@ -148,8 +150,6 @@ namespace Fika_Installer
             }
 
             Utils.WriteLineConfirm("Fika Headless installed successfully. Press any key to configure the headless profile.");
-
-            Menus.ProfileSelectionMenu(sptFolder);
         }
 
         public static void UpdateFikaHeadless()
