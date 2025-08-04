@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using Timer = System.Threading.Timer;
 
 namespace Fika_Installer
 {
@@ -40,7 +41,6 @@ namespace Fika_Installer
             string fikaConfigPath = Path.Combine(fikaServerModPath, @"assets\configs\fika.jsonc");
 
             string fikaConfig = File.ReadAllText(fikaConfigPath);
-
             JObject fikaConfigJObject = JObject.Parse(fikaConfig);
 
             string sptProfilesPath = Path.Combine(sptFolder, @"user\profiles");
@@ -65,7 +65,7 @@ namespace Fika_Installer
 
             //TODO: ensure that SPT.Server is not already running
 
-            Console.WriteLine("Creating headless profile... this may take a few seconds.");
+            Console.WriteLine("Creating headless profile... this may take a while.");
 
             StartProcessAndRedirectOutput(sptServerPath, SptConsoleMessageHandler, TimeSpan.FromSeconds(30));
 
@@ -86,7 +86,7 @@ namespace Fika_Installer
             return headlessProfile;
         }
 
-        public void SptConsoleMessageHandler(Process process, string message, System.Threading.Timer cancelTimer)
+        public void SptConsoleMessageHandler(Process process, string message, Timer cancelTimer)
         {
             Match generatedLaunchScriptRegexMatch = HeadlessRegex.GeneratedLaunchScriptRegex().Match(message);
 
@@ -101,7 +101,7 @@ namespace Fika_Installer
         }
 
 
-        public void StartProcessAndRedirectOutput(string filePath, Action<Process, string, System.Threading.Timer> stdoutWithCancel, TimeSpan timeout)
+        public void StartProcessAndRedirectOutput(string filePath, Action<Process, string, Timer> stdoutWithCancel, TimeSpan timeout)
         {
             using (var cts = new CancellationTokenSource())
             {
@@ -119,7 +119,7 @@ namespace Fika_Installer
 
                 using (Process process = new Process { StartInfo = startInfo })
                 {
-                    System.Threading.Timer timeoutTimer = new(_ =>
+                    Timer timeoutTimer = new(_ =>
                     {
                         if (!process.HasExited)
                         {
