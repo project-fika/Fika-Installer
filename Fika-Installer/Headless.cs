@@ -15,27 +15,25 @@ namespace Fika_Installer
             string sptUserModsPath = Path.Combine(sptFolder, @"user\mods\");
             string fikaServerModPath = Path.Combine(sptUserModsPath, @"fika-server\");
             string fikaServerScriptsPath = Path.Combine(fikaServerModPath, @"assets\scripts\");
-            string headlessProfileStartScript = $"Start_headless_{sptProfile.ProfileId}";
+            string headlessProfileStartScript = $"Start_headless_{sptProfile.ProfileId}.ps1";
 
             string headlessProfileStartScriptPath = Path.Combine(fikaServerScriptsPath, headlessProfileStartScript);
 
             if (File.Exists(headlessProfileStartScriptPath))
             {
                 string fikaFolder = Constants.FikaDirectory;
-                File.Copy(headlessProfileStartScriptPath, fikaFolder, true);
-
-                string headlessProfileStartScriptName = Path.GetFileName(headlessProfileStartScriptPath);
-
-                Utils.WriteLineConfirm($"{headlessProfileStartScriptName} has been copied to the root of your Fika install!");
+                string headlessProfileStartScriptDestPath = Path.Combine(fikaFolder, headlessProfileStartScript);
+                File.Copy(headlessProfileStartScriptPath, headlessProfileStartScriptDestPath, true);
             }
         }
 
         public void SetupNewProfile(string sptFolder)
         {
-            CreateHeadlessProfile(sptFolder);
+            SptProfile headlessProfile = CreateHeadlessProfile(sptFolder);
+            SetupProfile(headlessProfile, sptFolder);
         }
 
-        public void CreateHeadlessProfile(string sptFolder)
+        public SptProfile CreateHeadlessProfile(string sptFolder)
         {
             string sptUserModsPath = Path.Combine(sptFolder, @"user\mods\");
             string fikaServerModPath = Path.Combine(sptUserModsPath, @"fika-server\");
@@ -45,8 +43,12 @@ namespace Fika_Installer
 
             JObject fikaConfigJObject = JObject.Parse(fikaConfig);
 
+            string sptProfilesPath = Path.Combine(sptFolder, @"user\profiles");
+            SptProfile[] sptProfiles = SptUtils.GetSptProfiles(sptProfilesPath, true);
+            int sptProfilesCount = sptProfiles.Length;
+
             int headlessProfilesAmount = (int)fikaConfigJObject["headless"]?["profiles"]?["amount"];
-            fikaConfigJObject["headless"]["profiles"]["amount"] = headlessProfilesAmount + 1;
+            fikaConfigJObject["headless"]["profiles"]["amount"] = sptProfilesCount + 1;
             
             //TODO : \r\n vs \n - is it a problem?
             using (var streamWriter = new StreamWriter(fikaConfigPath))
@@ -65,69 +67,90 @@ namespace Fika_Installer
 
             Console.WriteLine("Creating headless profile... this may take a few seconds.");
 
-            StartProcessAndRedirectOutput(sptServerPath, SptConsoleMessageHandler);
+            StartProcessAndRedirectOutput(sptServerPath, SptConsoleMessageHandler, TimeSpan.FromSeconds(30));
 
             if (string.IsNullOrEmpty(_headlessProfileId))
             {
                 Utils.WriteLineConfirm("An error occurred when creating the headless profile. Check the SPT server logs.");
             }
+
+            string headlessProfilePath = Path.Combine(sptProfilesPath, $@"{_headlessProfileId}.json");
+
+            SptProfile headlessProfile = new();
+
+            if (File.Exists(headlessProfilePath))
+            {
+                headlessProfile = SptUtils.GetSptProfileInfo(headlessProfilePath);
+            }
+
+            return headlessProfile;
         }
 
-        public void SptConsoleMessageHandler(Process process, string message)
+        public void SptConsoleMessageHandler(Process process, string message, System.Threading.Timer cancelTimer)
         {
             Match generatedLaunchScriptRegexMatch = HeadlessRegex.GeneratedLaunchScriptRegex().Match(message);
 
             if (generatedLaunchScriptRegexMatch.Success)
             {
                 _headlessProfileId = generatedLaunchScriptRegexMatch.Groups[1].Value;
+                cancelTimer.Dispose();
                 process.Kill();
-            }
-
-            Match serverIsRunningRegexMatch = HeadlessRegex.ServerIsRunning().Match(message);
-
-            if (serverIsRunningRegexMatch.Success)
-            {
-                // TODO: check if closing process this way can lead to issues
-                //process.Kill();
             }
 
             // TODO: regex to capture SPT errors and kill
         }
 
-        public void StartProcessAndRedirectOutput(string filePath, Action<Process, string> stdout)
+
+        public void StartProcessAndRedirectOutput(string filePath, Action<Process, string, System.Threading.Timer> stdoutWithCancel, TimeSpan timeout)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo
+            using (var cts = new CancellationTokenSource())
             {
-                FileName = filePath,
-                WorkingDirectory = Path.GetDirectoryName(filePath),
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
+                var token = cts.Token;
 
-            using (Process process = new Process { StartInfo = startInfo })
-            {
-                process.OutputDataReceived += (sender, e) =>
+                ProcessStartInfo startInfo = new ProcessStartInfo
                 {
-                    if (!string.IsNullOrEmpty(e.Data))
+                    FileName = filePath,
+                    WorkingDirectory = Path.GetDirectoryName(filePath),
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using (Process process = new Process { StartInfo = startInfo })
+                {
+                    System.Threading.Timer timeoutTimer = new(_ =>
                     {
-                        stdout(process, e.Data);
-                    }
-                };
+                        if (!process.HasExited)
+                        {
+                            process.Kill();
+                        }
+                    }, null, timeout, Timeout.InfiniteTimeSpan);
 
-                process.ErrorDataReceived += (sender, e) =>
-                {
-                    // TODO: does SPT even outputs in STDERR?
-                    process.Kill();
-                };
+                    process.OutputDataReceived += (sender, e) =>
+                    {
+                        if (!string.IsNullOrEmpty(e.Data))
+                        {
+                            stdoutWithCancel(process, e.Data, timeoutTimer);
+                        }
+                    };
 
-                process.Start();
+                    process.ErrorDataReceived += (sender, e) =>
+                    {
+                        if (!process.HasExited)
+                        {
+                            try { process.Kill(); } catch { }
+                        }
+                    };
 
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
+                    process.Start();
 
-                process.WaitForExit();
+                    process.BeginOutputReadLine();
+                    process.BeginErrorReadLine();
+
+                    process.WaitForExit();
+                    timeoutTimer.Dispose();
+                }
             }
         }
     }

@@ -29,23 +29,12 @@ namespace Fika_Installer
                 }
             }
 
-            string fikaReleaseUrl = Constants.FikaReleases["Fika.Core"];
+            string fikaReleaseUrl = Constants.FikaReleasesUrl["Fika.Core"];
             string fikaTempPath = Constants.FikaInstallerTemp;
 
-            DownloadReleaseResult downloadFikaResult = DownloadRelease(fikaReleaseUrl, fikaTempPath);
+            bool installResult = InstallRelease(fikaReleaseUrl, fikaTempPath);
 
-            if (!downloadFikaResult.Result)
-            {
-                return;
-            }
-
-            string fikaReleaseName = downloadFikaResult.Name;
-            string fikaReleaseZipFilePath = Path.Combine(fikaTempPath, fikaReleaseName);
-            string fikaDirectory = Constants.FikaDirectory;
-
-            bool extractFikaResult = ExtractRelease(fikaReleaseZipFilePath, fikaDirectory);
-
-            if (!extractFikaResult)
+            if (!installResult)
             {
                 return;
             }
@@ -55,23 +44,12 @@ namespace Fika_Installer
 
         public static void UpdateFika()
         {
-            string fikaReleaseUrl = Constants.FikaReleases["Fika.Core"];
+            string fikaReleaseUrl = Constants.FikaReleasesUrl["Fika.Core"];
             string fikaTempPath = Constants.FikaInstallerTemp;
 
-            DownloadReleaseResult downloadFikaResult = DownloadRelease(fikaReleaseUrl, fikaTempPath);
+            bool installResult = InstallRelease(fikaReleaseUrl, fikaTempPath);
 
-            if (!downloadFikaResult.Result)
-            {
-                return;
-            }
-
-            string fikaReleaseName = downloadFikaResult.Name;
-            string fikaReleaseZipFilePath = Path.Combine(fikaTempPath, fikaReleaseName);
-            string fikaDirectory = Constants.FikaDirectory;
-
-            bool extractFikaResult = ExtractRelease(fikaReleaseZipFilePath, fikaDirectory);
-
-            if (!extractFikaResult)
+            if (!installResult)
             {
                 return;
             }
@@ -104,23 +82,12 @@ namespace Fika_Installer
                 }
             }
 
-            string fikaHeadlessReleaseUrl = Constants.FikaReleases["Fika.Headless"];
+            string fikaHeadlessReleaseUrl = Constants.FikaReleasesUrl["Fika.Headless"];
             string fikaTempPath = Constants.FikaInstallerTemp;
-            
-            DownloadReleaseResult downloadHeadlessResult = DownloadRelease(fikaHeadlessReleaseUrl, fikaTempPath);
 
-            if (!downloadHeadlessResult.Result)
-            {
-                return;
-            }
-            
-            string fikaHeadlessReleaseName = downloadHeadlessResult.Name;
-            string fikaHeadlessReleaseZipFilePath = Path.Combine(fikaTempPath, fikaHeadlessReleaseName);
-            string fikaDirectory = Constants.FikaDirectory;
+            bool installHeadlessResult = InstallRelease(fikaHeadlessReleaseUrl, fikaTempPath);
 
-            bool extractHeadlessResult = ExtractRelease(fikaHeadlessReleaseZipFilePath, fikaDirectory);
-
-            if (!extractHeadlessResult)
+            if (!installHeadlessResult)
             {
                 return;
             }
@@ -129,21 +96,11 @@ namespace Fika_Installer
 
             if (!File.Exists(fikaCorePath))
             {
-                string fikaReleaseUrl = Constants.FikaReleases["Fika.Core"];
+                string fikaReleaseUrl = Constants.FikaReleasesUrl["Fika.Core"];
 
-                DownloadReleaseResult downloadFikaResult = DownloadRelease(fikaReleaseUrl, fikaTempPath);
+                bool installFikaResult = InstallRelease(fikaReleaseUrl, fikaTempPath);
 
-                if (!downloadFikaResult.Result)
-                {
-                    return;
-                }
-
-                string fikaReleaseName = downloadFikaResult.Name;
-                string fikaReleaseZipFilePath = Path.Combine(fikaTempPath, fikaReleaseName);
-
-                bool extractfikaResult = ExtractRelease(fikaReleaseZipFilePath, fikaDirectory);
-
-                if (!extractfikaResult)
+                if (!installFikaResult)
                 {
                     return;
                 }
@@ -154,7 +111,7 @@ namespace Fika_Installer
 
         public static void UpdateFikaHeadless()
         {
-            string fikaHeadlessReleaseUrl = Constants.FikaReleases["Fika.Headless"];
+            string fikaHeadlessReleaseUrl = Constants.FikaReleasesUrl["Fika.Headless"];
             string fikaTempPath = Constants.FikaInstallerTemp;
 
             DownloadReleaseResult downloadHeadlessResult = DownloadRelease(fikaHeadlessReleaseUrl, fikaTempPath);
@@ -225,6 +182,8 @@ namespace Fika_Installer
 
         private static bool CopySptFolder(string sptFolder, string fikaFolder)
         {
+            Console.WriteLine("Copying SPT folder...");
+            
             bool copySptResult = Utils.CopyFolderWithProgress(sptFolder, fikaFolder);
 
             if (copySptResult)
@@ -253,6 +212,29 @@ namespace Fika_Installer
             }
 
             return false;
+        }
+
+        public static bool InstallRelease(string url, string path)
+        {
+            DownloadReleaseResult downloadReleaseResult = DownloadRelease(url, path);
+
+            if (!downloadReleaseResult.Result)
+            {
+                return false;
+            }
+
+            string fikaReleaseName = downloadReleaseResult.Name;
+            string fikaReleaseZipFilePath = Path.Combine(path, fikaReleaseName);
+            string fikaDirectory = Constants.FikaDirectory;
+
+            bool extractFikaResult = ExtractRelease(fikaReleaseZipFilePath, fikaDirectory);
+
+            if (!extractFikaResult)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private static DownloadReleaseResult DownloadRelease(string releaseUrl, string outputDir)
