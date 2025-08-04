@@ -8,4 +8,4 @@ The goal is to make the tool as simple as possible with minimal user interaction
 
 ## Linux Support
 
-Linux support is not planned. However, only minimal code modifications should be required for Linux compatibility. Feel free to submit a PR for Linux support.
+Linux support is not planned. However, only minimal code modifications should be required for Linux compatibility. Feel free to submit a PR.
