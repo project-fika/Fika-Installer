@@ -36,31 +36,33 @@ namespace Fika_Installer.Models
         {
             MenuResult menuResult = new("InvalidEntry", ConsoleKey.D0, false);
 
-            Console.Clear();
-            Header.Show();
-
-            if (!string.IsNullOrEmpty(Message))
+            while (!menuResult.ValidEntry)
             {
-                Console.WriteLine(Message);
-            }
-            
-            foreach (MenuChoice choice in Choices)
-            {
-                string text = choice.Text;
-                ConsoleKey key = choice.Key;
+                Console.Clear();
+                Header.Show();
 
-                Console.WriteLine($"[{(char)key}] {text}");
-            }
-
-            ConsoleKeyInfo inputKey = Console.ReadKey(true);
-
-            foreach (MenuChoice choice in Choices)
-            {
-                if (inputKey.Key == choice.Key)
+                if (!string.IsNullOrEmpty(Message))
                 {
-                    string id = choice.Id;
-                    menuResult = new(id, inputKey.Key, true);
-                    return menuResult;
+                    Console.WriteLine(Message);
+                }
+
+                foreach (MenuChoice choice in Choices)
+                {
+                    string text = choice.Text;
+                    ConsoleKey key = choice.Key;
+
+                    Console.WriteLine($"[{(char)key}] {text}");
+                }
+
+                ConsoleKeyInfo inputKey = Console.ReadKey(true);
+
+                foreach (MenuChoice choice in Choices)
+                {
+                    if (inputKey.Key == choice.Key)
+                    {
+                        string id = choice.Id;
+                        menuResult = new(id, inputKey.Key, true);
+                    }
                 }
             }
 
