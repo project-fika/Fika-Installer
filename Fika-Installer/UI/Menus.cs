@@ -39,23 +39,20 @@ namespace Fika_Installer.UI
             Menu mainMenu = new(menuChoices);
             MenuResult menuResult = mainMenu.Show();
 
-            if (menuResult.ValidEntry)
+            switch (menuResult.Id)
             {
-                switch (menuResult.Id)
-                {
-                    case "InstallFika":
-                        Pages.InstallFikaPage();
-                        break;
-                    case "UpdateFika":
-                        Pages.UpdateFikaPage(); 
-                        break;
-                    case "InstallFikaHeadless":
-                        Pages.InstallFikaHeadlessPage();
-                        break;
-                    case "UpdateFikaHeadless":
-                        Pages.UpdateFikaHeadlessPage();
-                        break;
-                }
+                case "InstallFika":
+                    Pages.InstallFikaPage();
+                    break;
+                case "UpdateFika":
+                    Pages.UpdateFikaPage(); 
+                    break;
+                case "InstallFikaHeadless":
+                    Pages.InstallFikaHeadlessPage();
+                    break;
+                case "UpdateFikaHeadless":
+                    Pages.UpdateFikaHeadlessPage();
+                    break;
             }
         }
 
@@ -72,7 +69,7 @@ namespace Fika_Installer.UI
                 string menuMessage = "Please choose the headless profile to use for your Fika Headless:";
 
                 int keyNumber = 1;
-                int keyNumberAsciiBegin = 48;
+                int keyNumberAsciiBegin = 48; // Number 1 ascii code
 
                 foreach (SptProfile sptHeadlessProfile in sptHeadlessProfiles)
                 {
@@ -84,6 +81,8 @@ namespace Fika_Installer.UI
 
                     keyNumber++;
                 }
+
+                // TODO: handle when there is more than 9 headless profiles...
 
                 ConsoleKey createNewProfileMenuKey = (ConsoleKey)(keyNumber + keyNumberAsciiBegin);
                 MenuChoice createNewProfileMenuChoice = new("CreateNewHeadlessProfile", "Create new headless profile", createNewProfileMenuKey);
