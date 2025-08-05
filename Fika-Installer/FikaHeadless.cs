@@ -50,32 +50,20 @@ namespace Fika_Installer
 
             string fikaConfigPath = Path.Combine(sptFolder, @"user\mods\fika-server\assets\configs\fika.jsonc");
 
-            string fikaConfig = File.ReadAllText(fikaConfigPath);
-            JObject fikaConfigJObject = JObject.Parse(fikaConfig);
+            JObject fikaConfig = JsonUtils.ReadJson(fikaConfigPath);
 
             string sptProfilesPath = Path.Combine(sptFolder, @"user\profiles");
-            SptProfile[] sptProfiles = SptUtils.GetSptProfiles(sptProfilesPath, true);
-            int sptProfilesCount = sptProfiles.Length;
+            int sptProfilesCount = SptUtils.GetSptProfiles(sptProfilesPath, true).Length;
 
-            int headlessProfilesAmount = (int)fikaConfigJObject["headless"]["profiles"]["amount"];
-            fikaConfigJObject["headless"]["profiles"]["amount"] = sptProfilesCount + 1;
-            
-            //TODO : \r\n vs \n - is it a problem?
-            using (var streamWriter = new StreamWriter(fikaConfigPath))
-            using (var jsonWriter = new JsonTextWriter(streamWriter))
-            {
-                jsonWriter.Formatting = Formatting.Indented;
-                jsonWriter.IndentChar = '\t';
-                jsonWriter.Indentation = 1;
+            int headlessProfilesAmount = (int)fikaConfig["headless"]["profiles"]["amount"];
+            fikaConfig["headless"]["profiles"]["amount"] = sptProfilesCount + 1;
 
-                fikaConfigJObject.WriteTo(jsonWriter);
-            }
-
-            string sptServerPath = Path.Combine(sptFolder, "SPT.Server.exe");
+            JsonUtils.WriteJson(fikaConfig, fikaConfigPath);
 
             Console.WriteLine("Creating headless profile... this may take a while.");
 
-            StartProcessAndRedirectOutput(sptServerPath, SptConsoleMessageHandler, TimeSpan.FromSeconds(30));
+            string sptServerPath = Path.Combine(sptFolder, "SPT.Server.exe");
+            StartProcessAndRedirectOutput(sptServerPath, SptConsoleMessageHandler, TimeSpan.FromMinutes(1)); // TODO: is 1 minute too short?
 
             if (string.IsNullOrEmpty(_headlessProfileId))
             {

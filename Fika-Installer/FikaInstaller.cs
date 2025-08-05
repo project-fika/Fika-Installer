@@ -2,6 +2,7 @@
 using Fika_Installer.Models.UI;
 using Fika_Installer.UI;
 using Fika_Installer.Utils;
+using Newtonsoft.Json.Linq;
 
 namespace Fika_Installer
 {   
@@ -30,12 +31,21 @@ namespace Fika_Installer
                     return;
                 }
 
-                bool copySptFolderResult = CopySptFolder(sptFolder, fikaFolder);
+                List<string> excludeFiles =
+                [
+                    "Logs",
+                    "cache",
+                    "config",
+                ];
+
+                bool copySptFolderResult = CopySptFolder(sptFolder, fikaFolder, excludeFiles);
 
                 if (!copySptFolderResult)
                 {
                     return;
                 }
+
+                ConfigureSptLauncherConfig(_fikaDirectory);
             }
 
             bool installResult = InstallRelease(_fikaReleaseUrl, _fikaDirectory);
@@ -95,7 +105,15 @@ namespace Fika_Installer
 
                 if (installType == "HardCopy")
                 {
-                    bool copySptFolderResult = CopySptFolder(sptFolder, fikaFolder, true);
+
+                    List<string> excludeFiles =
+                    [
+                        "Logs",
+                        "cache",
+                        "config",
+                    ];
+
+                    bool copySptFolderResult = CopySptFolder(sptFolder, fikaFolder, excludeFiles);
 
                     if (!copySptFolderResult)
                     {
@@ -196,29 +214,13 @@ namespace Fika_Installer
             return sptFolder;
         }
 
-        private bool CopySptFolder(string sptFolder, string fikaFolder, bool excludeSptFiles = false)
+        private bool CopySptFolder(string sptFolder, string fikaFolder, List<string> excludeFiles)
         {
             // TODO: exclude SPT.Server.exe for headless to avoid confusion?
             
             Console.WriteLine("Copying SPT folder...");
-
-            List<string> excludedFiles = [];
-
-            if (excludeSptFiles)
-            {
-                excludedFiles =
-                [
-                    "SPT.Launcher.exe",
-                    "SPT.Server.exe",
-                    "SPTInstaller.exe",
-                    "SPT_Data",
-                    "user",
-                    "EscapeFromTarkov_Data",
-                    "Logs",
-                ];
-            }
             
-            bool copySptResult = FileUtils.CopyFolderWithProgress(sptFolder, fikaFolder, excludedFiles);
+            bool copySptResult = FileUtils.CopyFolderWithProgress(sptFolder, fikaFolder, excludeFiles);
 
             if (copySptResult)
             {
@@ -330,15 +332,37 @@ namespace Fika_Installer
 
             try
             {
+                List<string> excludeFiles =
+                [
+                    "SPT.Launcher.exe",
+                    "SPT.Server.exe",
+                    "SPTInstaller.exe",
+                    "SPT_Data",
+                    "user",
+                    "EscapeFromTarkov_Data",
+                    "Logs",
+                ];
+
                 Directory.CreateSymbolicLink(escapeFromTarkovDataFikaDirPath, escapeFromTarkovDataPath);
-                CopySptFolder(fromPath, toPath, true);
+                CopySptFolder(fromPath, toPath, excludeFiles);
             }
             catch (Exception ex)
             {
                 ConUtils.WriteError("An error occurred when creating the symlink.");
             }
+        }
 
+        public void ConfigureSptLauncherConfig(string fikaDirectory)
+        {
+            string launcherConfigPath = Path.Combine(fikaDirectory, @"user\launcher\config.json");
 
+            JObject launcherConfig = JsonUtils.ReadJson(launcherConfigPath);
+
+            launcherConfig["IsDevMode"] = true;
+            launcherConfig["GamePath"] = fikaDirectory;
+            launcherConfig["Server"]["Url"] = "https://127.0.0.1:6969";
+
+            JsonUtils.WriteJson(launcherConfig, launcherConfigPath);
         }
     }
 }
