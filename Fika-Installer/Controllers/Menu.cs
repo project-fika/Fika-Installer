@@ -1,21 +1,8 @@
-﻿using Fika_Installer.UI;
+﻿using Fika_Installer.Models.UI;
+using Fika_Installer.UI;
 
-namespace Fika_Installer.Models
+namespace Fika_Installer.Controllers
 {
-    public class MenuResult(string id, ConsoleKey key, bool validEntry)
-    {
-        public string Id = id;
-        public ConsoleKey Key = key;
-        public bool ValidEntry = validEntry;
-    }
-    
-    public class MenuChoice(string id, string text, ConsoleKey key)
-    {
-        public string Id = id;
-        public string Text = text;
-        public ConsoleKey Key = key;
-    }
-
     public class Menu
     {
         public string Message;

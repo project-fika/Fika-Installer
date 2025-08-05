@@ -1,4 +1,4 @@
-﻿namespace Fika_Installer
+﻿namespace Fika_Installer.UI
 {
     public class ProgressBar
     {

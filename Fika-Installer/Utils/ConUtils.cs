@@ -1,0 +1,50 @@
+﻿namespace Fika_Installer.Utils
+{
+    public static class ConUtils
+    {
+        public static void WriteSuccess(string message, bool confirm = false)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            
+            if (confirm)
+            {
+                WriteConfirm(message);
+            }
+            else
+            {
+                Console.WriteLine(message);
+            }
+
+            Console.ResetColor();
+        }
+
+        public static void WriteError(string message, bool confirm = false)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            
+            if (confirm)
+            {
+                WriteConfirm(message);
+            }
+            else
+            {
+                Console.WriteLine(message);
+            }
+                
+            Console.ResetColor();
+        }
+
+        public static void WriteConfirm(string message)
+        {
+            Console.WriteLine(message);
+            Console.ReadKey(true);
+        }
+
+        public static void WriteLine(int top, string message)
+        {
+            Console.SetCursorPosition(0, top);
+            Console.Write(message);
+            Console.SetCursorPosition(0, top + 1);
+        }
+    }
+}

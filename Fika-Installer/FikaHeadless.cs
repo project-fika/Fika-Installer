@@ -1,4 +1,5 @@
 ﻿using Fika_Installer.Models;
+using Fika_Installer.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
@@ -7,7 +8,7 @@ using Timer = System.Threading.Timer;
 
 namespace Fika_Installer
 {
-    public class Headless
+    public class FikaHeadless
     {
         private string? _headlessProfileId;
         
@@ -36,8 +37,16 @@ namespace Fika_Installer
 
         public SptProfile CreateHeadlessProfile(string sptFolder)
         {
-            string sptUserModsPath = Path.Combine(sptFolder, @"user\mods\");
-            string fikaServerModPath = Path.Combine(sptUserModsPath, @"fika-server\");
+            int cursorTop = Console.CursorTop;
+
+            while (Process.GetProcessesByName("SPT.Server").Length != 0)
+            {
+                ConUtils.WriteLine(cursorTop, "SPT Server is currently running. Please close it to continue the installation.");
+                Thread.Sleep(1000);
+            }
+
+            string sptUserModsPath = Path.Combine(sptFolder, @"user\mods");
+            string fikaServerModPath = Path.Combine(sptUserModsPath, @"fika-server");
             string fikaConfigPath = Path.Combine(fikaServerModPath, @"assets\configs\fika.jsonc");
 
             string fikaConfig = File.ReadAllText(fikaConfigPath);
@@ -47,7 +56,7 @@ namespace Fika_Installer
             SptProfile[] sptProfiles = SptUtils.GetSptProfiles(sptProfilesPath, true);
             int sptProfilesCount = sptProfiles.Length;
 
-            int headlessProfilesAmount = (int)fikaConfigJObject["headless"]?["profiles"]?["amount"];
+            int headlessProfilesAmount = (int)fikaConfigJObject["headless"]["profiles"]["amount"];
             fikaConfigJObject["headless"]["profiles"]["amount"] = sptProfilesCount + 1;
             
             //TODO : \r\n vs \n - is it a problem?
@@ -63,15 +72,13 @@ namespace Fika_Installer
 
             string sptServerPath = Path.Combine(sptFolder, "SPT.Server.exe");
 
-            //TODO: ensure that SPT.Server is not already running
-
             Console.WriteLine("Creating headless profile... this may take a while.");
 
             StartProcessAndRedirectOutput(sptServerPath, SptConsoleMessageHandler, TimeSpan.FromSeconds(30));
 
             if (string.IsNullOrEmpty(_headlessProfileId))
             {
-                Utils.WriteLineConfirm("An error occurred when creating the headless profile. Check the SPT server logs.");
+                ConUtils.WriteError("An error occurred when creating the headless profile. Check the SPT server logs.", true);
             }
 
             string headlessProfilePath = Path.Combine(sptProfilesPath, $@"{_headlessProfileId}.json");
@@ -101,7 +108,7 @@ namespace Fika_Installer
         }
 
 
-        public void StartProcessAndRedirectOutput(string filePath, Action<Process, string, Timer> stdoutWithCancel, TimeSpan timeout)
+        public void StartProcessAndRedirectOutput(string filePath, Action<Process, string, Timer> stdOut, TimeSpan timeout)
         {
             using (var cts = new CancellationTokenSource())
             {
@@ -131,7 +138,7 @@ namespace Fika_Installer
                     {
                         if (!string.IsNullOrEmpty(e.Data))
                         {
-                            stdoutWithCancel(process, e.Data, timeoutTimer);
+                            stdOut(process, e.Data, timeoutTimer);
                         }
                     };
 

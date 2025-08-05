@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Fika_Installer.UI
+﻿namespace Fika_Installer.UI
 {
     public static class Header
     {

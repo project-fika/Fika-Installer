@@ -6,8 +6,5 @@ namespace Fika_Installer
     {
         [GeneratedRegex(@"Start_headless_([^.]+)", RegexOptions.IgnoreCase)]
         public static partial Regex GeneratedLaunchScriptRegex();
-
-        [GeneratedRegex(@"Server is running", RegexOptions.IgnoreCase)]
-        public static partial Regex ServerIsRunning();
     }
 }

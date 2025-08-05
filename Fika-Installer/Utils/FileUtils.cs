@@ -1,8 +1,9 @@
 ﻿using System.IO.Compression;
+using ProgressBar = Fika_Installer.UI.ProgressBar;
 
-namespace Fika_Installer
+namespace Fika_Installer.Utils
 {
-    public static class Utils
+    public static class FileUtils
     {        
         public static string BrowseFolder(string description)
         {
@@ -148,12 +149,6 @@ namespace Fika_Installer
             {
                 Console.WriteLine(ex.Message);
             }
-        }
-
-        public static void WriteLineConfirm(string message)
-        {
-            Console.WriteLine(message);
-            Console.ReadKey(true);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Fika_Installer.Models;
+﻿using Fika_Installer.Controllers;
+using Fika_Installer.Models;
 
 namespace Fika_Installer.UI
 {   
@@ -6,31 +7,31 @@ namespace Fika_Installer.UI
     {
         public static void InstallFikaPage()
         {
-            Page page = new(Installer.InstallFika);
+            Page page = new(FikaInstaller.InstallFika);
             page.Show();
         }
 
         public static void UpdateFikaPage()
         {
-            Page page = new(Installer.UpdateFika);
+            Page page = new(FikaInstaller.UpdateFika);
             page.Show();
         }
 
         public static void InstallFikaHeadlessPage()
         {
-            Page page = new(Installer.InstallFikaHeadless);
+            Page page = new(FikaInstaller.InstallFikaHeadless);
             page.Show();
         }
 
         public static void UpdateFikaHeadlessPage()
         {
-            Page page = new(Installer.UpdateFikaHeadless);
+            Page page = new(FikaInstaller.UpdateFikaHeadless);
             page.Show();
         }
 
         public static void SetupHeadlessProfilePage(SptProfile sptProfile, string sptFolder)
         {
-            Headless headless = new();
+            FikaHeadless headless = new();
             void action() => headless.SetupProfile(sptProfile, sptFolder);
 
             Page page = new(action);
@@ -39,7 +40,7 @@ namespace Fika_Installer.UI
 
         public static void SetupNewHeadlessProfilePage(string sptFolder)
         {
-            Headless headless = new();
+            FikaHeadless headless = new();
             void action() => headless.SetupNewProfile(sptFolder);
             
             Page page = new(action);
