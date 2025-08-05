@@ -49,6 +49,8 @@ namespace Fika_Installer.Controllers
                     {
                         string id = choice.Id;
                         menuResult = new(id, inputKey.Key, true);
+
+                        Header.Show(); // clears the menu
                     }
                 }
             }

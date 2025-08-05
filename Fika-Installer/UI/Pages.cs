@@ -3,45 +3,50 @@ using Fika_Installer.Models;
 
 namespace Fika_Installer.UI
 {   
-    public static class Pages
+    public class Pages
     {
-        public static void InstallFikaPage()
+        private AppController _appController;
+
+        public Pages(AppController appController)
         {
-            Page page = new(FikaInstaller.InstallFika);
+            _appController = appController;
+        }
+        
+        public void InstallFikaPage()
+        {
+            Page page = new(_appController.FikaInstaller.InstallFika);
             page.Show();
         }
 
-        public static void UpdateFikaPage()
+        public void UpdateFikaPage()
         {
-            Page page = new(FikaInstaller.UpdateFika);
+            Page page = new(_appController.FikaInstaller.UpdateFika);
             page.Show();
         }
 
-        public static void InstallFikaHeadlessPage()
+        public void InstallFikaHeadlessPage()
         {
-            Page page = new(FikaInstaller.InstallFikaHeadless);
+            Page page = new(_appController.FikaInstaller.InstallFikaHeadless);
             page.Show();
         }
 
-        public static void UpdateFikaHeadlessPage()
+        public void UpdateFikaHeadlessPage()
         {
-            Page page = new(FikaInstaller.UpdateFikaHeadless);
+            Page page = new(_appController.FikaInstaller.UpdateFikaHeadless);
             page.Show();
         }
 
-        public static void SetupHeadlessProfilePage(SptProfile sptProfile, string sptFolder)
+        public void SetupHeadlessProfilePage(SptProfile sptProfile, string sptFolder)
         {
-            FikaHeadless headless = new();
-            void action() => headless.SetupProfile(sptProfile, sptFolder);
+            void action() => _appController.FikaHeadless.SetupProfile(sptProfile, sptFolder);
 
             Page page = new(action);
             page.Show();
         }
 
-        public static void SetupNewHeadlessProfilePage(string sptFolder)
+        public void SetupNewHeadlessProfilePage(string sptFolder)
         {
-            FikaHeadless headless = new();
-            void action() => headless.SetupNewProfile(sptFolder);
+            void action() => _appController.FikaHeadless.SetupNewProfile(sptFolder);
             
             Page page = new(action);
             page.Show();

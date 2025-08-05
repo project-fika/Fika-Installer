@@ -11,20 +11,23 @@ namespace Fika_Installer
     public class FikaHeadless
     {
         private string? _headlessProfileId;
+        private string _fikaDirectory;
+        
+        public FikaHeadless()
+        {
+            _fikaDirectory = Constants.FikaDirectory;
+        }
         
         public void SetupProfile(SptProfile sptProfile, string sptFolder)
         {
-            string sptUserModsPath = Path.Combine(sptFolder, @"user\mods\");
-            string fikaServerModPath = Path.Combine(sptUserModsPath, @"fika-server\");
-            string fikaServerScriptsPath = Path.Combine(fikaServerModPath, @"assets\scripts\");
+            string fikaServerScriptsPath = Path.Combine(sptFolder, @"user\mods\fika-server\assets\scripts");
             string headlessProfileStartScript = $"Start_headless_{sptProfile.ProfileId}.ps1";
 
             string headlessProfileStartScriptPath = Path.Combine(fikaServerScriptsPath, headlessProfileStartScript);
 
             if (File.Exists(headlessProfileStartScriptPath))
             {
-                string fikaFolder = Constants.FikaDirectory;
-                string headlessProfileStartScriptDestPath = Path.Combine(fikaFolder, headlessProfileStartScript);
+                string headlessProfileStartScriptDestPath = Path.Combine(_fikaDirectory, headlessProfileStartScript);
                 File.Copy(headlessProfileStartScriptPath, headlessProfileStartScriptDestPath, true);
             }
         }
@@ -45,9 +48,7 @@ namespace Fika_Installer
                 Thread.Sleep(1000);
             }
 
-            string sptUserModsPath = Path.Combine(sptFolder, @"user\mods");
-            string fikaServerModPath = Path.Combine(sptUserModsPath, @"fika-server");
-            string fikaConfigPath = Path.Combine(fikaServerModPath, @"assets\configs\fika.jsonc");
+            string fikaConfigPath = Path.Combine(sptFolder, @"user\mods\fika-server\assets\configs\fika.jsonc");
 
             string fikaConfig = File.ReadAllText(fikaConfigPath);
             JObject fikaConfigJObject = JObject.Parse(fikaConfig);
@@ -81,7 +82,7 @@ namespace Fika_Installer
                 ConUtils.WriteError("An error occurred when creating the headless profile. Check the SPT server logs.", true);
             }
 
-            string headlessProfilePath = Path.Combine(sptProfilesPath, $@"{_headlessProfileId}.json");
+            string headlessProfilePath = Path.Combine(sptProfilesPath, $"{_headlessProfileId}.json");
 
             SptProfile headlessProfile = new();
 

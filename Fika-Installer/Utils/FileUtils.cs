@@ -22,7 +22,7 @@ namespace Fika_Installer.Utils
             return string.Empty;
         }
 
-        public static bool CopyFolderWithProgress(string sourcePath, string destinationPath)
+        public static bool CopyFolderWithProgress(string sourcePath, string destinationPath, List<string> exclusions)
         {
             bool result = false;
 
@@ -37,20 +37,31 @@ namespace Fika_Installer.Utils
                 foreach (string filePath in allFiles)
                 {
                     string relativePath = Path.GetRelativePath(sourcePath, filePath);
+                    string fileName = Path.GetFileName(filePath);
+
+                    if (exclusions.Any(ex => string.Equals(fileName, ex, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        continue;
+                    }
+
+                    string[] foldersInPath = relativePath.Split(Path.DirectorySeparatorChar);
+
+                    if (foldersInPath.Any(folder => exclusions.Contains(folder, StringComparer.OrdinalIgnoreCase)))
+                    {
+                        continue;
+                    }
+
                     string destFile = Path.Combine(destinationPath, relativePath);
                     string destDir = Path.GetDirectoryName(destFile);
+
+                    string message = $"Copying: {fileName}";
+                    double progress = (double)filesCopied / totalFiles;
+                    progressBar.Draw(message, progress);
 
                     if (!Directory.Exists(destDir))
                     {
                         Directory.CreateDirectory(destDir);
                     }
-
-                    string fileName = Path.GetFileName(filePath);
-
-                    string message = $"Copying: {fileName}";
-                    double progress = (double)filesCopied / totalFiles;
-
-                    progressBar.Draw(message, progress);
 
                     File.Copy(filePath, destFile, overwrite: true);
                     filesCopied++;
@@ -69,6 +80,7 @@ namespace Fika_Installer.Utils
 
             return result;
         }
+
 
         public static bool DownloadFileWithProgress(string downloadUrl, string outputPath)
         {

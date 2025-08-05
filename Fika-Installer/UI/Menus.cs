@@ -5,9 +5,16 @@ using Fika_Installer.Utils;
 
 namespace Fika_Installer.UI
 {
-    public static class Menus
-    {                
-        public static void MainMenu()
+    public class Menus
+    {
+        private AppController _appController;
+
+        public Menus(AppController uiController)
+        {
+            _appController = uiController;
+        }
+
+        public void MainMenu()
         {            
             List<MenuChoice> menuChoices = [];
 
@@ -45,21 +52,21 @@ namespace Fika_Installer.UI
             switch (menuResult.Id)
             {
                 case "InstallFika":
-                    Pages.InstallFikaPage();
+                    _appController.Pages.InstallFikaPage();
                     break;
                 case "UpdateFika":
-                    Pages.UpdateFikaPage(); 
+                    _appController.Pages.UpdateFikaPage(); 
                     break;
                 case "InstallFikaHeadless":
-                    Pages.InstallFikaHeadlessPage();
+                    _appController.Pages.InstallFikaHeadlessPage();
                     break;
                 case "UpdateFikaHeadless":
-                    Pages.UpdateFikaHeadlessPage();
+                    _appController.Pages.UpdateFikaHeadlessPage();
                     break;
             }
         }
 
-        public static void ProfileSelectionMenu(string sptFolder)
+        public void ProfileSelectionMenu(string sptFolder)
         {
             List<MenuChoice> menuChoices = [];
             
@@ -98,7 +105,7 @@ namespace Fika_Installer.UI
 
                 if (selectionId == "CreateNewHeadlessProfile")
                 {
-                    Pages.SetupNewHeadlessProfilePage(sptFolder);
+                    _appController.Pages.SetupNewHeadlessProfilePage(sptFolder);
                 }
                 else
                 {
@@ -106,15 +113,31 @@ namespace Fika_Installer.UI
                     {
                         if (selectionId == sptHeadlessProfile.ProfileId)
                         {
-                            Pages.SetupHeadlessProfilePage(sptHeadlessProfile, sptFolder);
+                            _appController.Pages.SetupHeadlessProfilePage(sptHeadlessProfile, sptFolder);
                         }
                     }
                 }
             }
             else
             {
-                Pages.SetupNewHeadlessProfilePage(sptFolder);
+                _appController.Pages.SetupNewHeadlessProfilePage(sptFolder);
             }
+        }
+
+        public string InstallationTypeMenu()
+        {
+            List<MenuChoice> menuChoices = [];
+
+            MenuChoice hardCopyChoice = new("HardCopy", "Hard Copy of SPT folder", ConsoleKey.D1);
+            MenuChoice symlinkChoice = new("Symlink", "Symlink of SPT folder", ConsoleKey.D2);
+
+            menuChoices.Add(hardCopyChoice);
+            menuChoices.Add(symlinkChoice);
+
+            Menu menu = new("Please choose the headless installation type:", menuChoices);
+            MenuResult menuResult = menu.Show();
+
+            return menuResult.Id;
         }
     }
 }
