@@ -17,7 +17,7 @@ namespace Fika_Installer
             _fikaDirectory = Constants.FikaDirectory;
         }
         
-        public void SetupProfile(SptProfile sptProfile, string sptFolder)
+        public void CopyProfileScript(SptProfile sptProfile, string sptFolder)
         {
             string fikaServerScriptsPath = Path.Combine(sptFolder, @"user\mods\fika-server\assets\scripts");
             string headlessProfileStartScript = $"Start_headless_{sptProfile.ProfileId}.ps1";
@@ -40,7 +40,7 @@ namespace Fika_Installer
                 return;
             }
 
-            SetupProfile(headlessProfile, sptFolder);
+            CopyProfileScript(headlessProfile, sptFolder);
         }
 
         public SptProfile CreateHeadlessProfile(string sptFolder)

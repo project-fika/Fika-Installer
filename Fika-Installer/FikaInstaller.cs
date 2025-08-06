@@ -254,9 +254,7 @@ namespace Fika_Installer
         }
 
         private bool CopySptFolder(string sptFolder, string fikaFolder, List<string> excludeFiles)
-        {
-            // TODO: exclude SPT.Server.exe for headless to avoid confusion?
-            
+        {            
             Console.WriteLine("Copying SPT folder...");
             
             bool copySptResult = FileUtils.CopyFolderWithProgress(sptFolder, fikaFolder, excludeFiles);

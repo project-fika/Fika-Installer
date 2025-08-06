@@ -38,7 +38,7 @@ namespace Fika_Installer.UI
 
         public void SetupHeadlessProfilePage(SptProfile sptProfile, string sptFolder)
         {
-            void action() => _appController.FikaHeadless.SetupProfile(sptProfile, sptFolder);
+            void action() => _appController.FikaHeadless.CopyProfileScript(sptProfile, sptFolder);
 
             Page page = new(action);
             page.Show();
