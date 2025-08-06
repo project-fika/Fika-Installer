@@ -95,7 +95,6 @@ namespace Fika_Installer
             // TODO: regex to capture SPT errors and kill
         }
 
-
         public void StartProcessAndRedirectOutput(string filePath, Action<Process, string, Timer> stdOut, TimeSpan timeout)
         {
             using (var cts = new CancellationTokenSource())

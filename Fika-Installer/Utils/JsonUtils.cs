@@ -8,6 +8,7 @@ namespace Fika_Installer.Utils
         public static JObject ReadJson(string jsonPath)
         {
             JObject jObject = new();
+
             try
             {
                 string launcherConfig = File.ReadAllText(jsonPath);
