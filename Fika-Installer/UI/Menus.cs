@@ -32,19 +32,8 @@ namespace Fika_Installer.UI
                 menuChoices.Add(installFikaChoice);
             }
 
-            string fikaHeadlessPath = Constants.FikaHeadlessPath;
-            bool fikaHeadlessDetected = File.Exists(fikaHeadlessPath);
-
-            if (fikaHeadlessDetected)
-            {
-                MenuChoice updateFikaChoice = new("UpdateFikaHeadless", "Update Fika Headless", ConsoleKey.D2);
-                menuChoices.Add(updateFikaChoice);
-            }
-            else
-            {
-                MenuChoice installFikaHeadlessChoice = new("InstallFikaHeadless","Install Fika Headless", ConsoleKey.D2);
-                menuChoices.Add(installFikaHeadlessChoice);
-            }
+            MenuChoice advancedChoice = new("AdvancedOptions", "Advanced options", ConsoleKey.D2);
+            menuChoices.Add(advancedChoice);
 
             Menu mainMenu = new(menuChoices);
             MenuResult menuResult = mainMenu.Show();
@@ -57,12 +46,52 @@ namespace Fika_Installer.UI
                 case "UpdateFika":
                     _appController.Pages.UpdateFikaPage(); 
                     break;
+                case "AdvancedOptions":
+                    AdvancedOptionsMenu();
+                    break;
+            }
+        }
+
+        public void AdvancedOptionsMenu()
+        {
+            List<MenuChoice> menuChoices = [];
+
+            string fikaHeadlessPath = Constants.FikaHeadlessPath;
+            bool fikaHeadlessDetected = File.Exists(fikaHeadlessPath);
+
+            MenuChoice installFikaInCurrentFolder = new("InstallFikaInCurrentFolder", "Install Fika in current folder", ConsoleKey.D1);
+            menuChoices.Add(installFikaInCurrentFolder);
+
+            if (fikaHeadlessDetected)
+            {
+                MenuChoice updateFikaChoice = new("UpdateFikaHeadless", "Update Fika Headless", ConsoleKey.D2);
+                menuChoices.Add(updateFikaChoice);
+            }
+            else
+            {
+                MenuChoice installFikaHeadlessChoice = new("InstallFikaHeadless", "Install Fika Headless", ConsoleKey.D2);
+                menuChoices.Add(installFikaHeadlessChoice);
+            }
+
+            MenuChoice backChoice = new("Back", "Back", ConsoleKey.D3);
+            menuChoices.Add(backChoice);
+
+            Menu advancedMenu = new(menuChoices);
+            MenuResult menuResult = advancedMenu.Show();
+
+            switch (menuResult.Id)
+            {
                 case "InstallFikaHeadless":
                     _appController.Pages.InstallFikaHeadlessPage();
                     break;
                 case "UpdateFikaHeadless":
                     _appController.Pages.UpdateFikaHeadlessPage();
                     break;
+                case "InstallFikaInCurrentFolder":
+                    _appController.Pages.InstallFikaPage(true);
+                    break;
+                case "Back":
+                    return;
             }
         }
 

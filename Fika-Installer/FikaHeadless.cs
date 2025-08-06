@@ -14,7 +14,7 @@ namespace Fika_Installer
         
         public FikaHeadless()
         {
-            _fikaDirectory = Constants.FikaDirectory;
+            _fikaDirectory = Constants.InstallerDirectory;
         }
         
         public void CopyProfileScript(SptProfile sptProfile, string sptFolder)

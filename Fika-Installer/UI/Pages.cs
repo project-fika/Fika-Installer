@@ -12,9 +12,11 @@ namespace Fika_Installer.UI
             _appController = appController;
         }
         
-        public void InstallFikaPage()
+        public void InstallFikaPage(bool installInCurrentFolder = false)
         {
-            Page page = new(_appController.FikaInstaller.InstallFika);
+            void action() => _appController.FikaInstaller.InstallFika(installInCurrentFolder);
+
+            Page page = new(action);
             page.Show();
         }
 

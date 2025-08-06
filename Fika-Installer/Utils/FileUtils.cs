@@ -1,4 +1,5 @@
-﻿using System.IO.Compression;
+﻿using System.Diagnostics;
+using System.IO.Compression;
 using ProgressBar = Fika_Installer.UI.ProgressBar;
 
 namespace Fika_Installer.Utils
@@ -155,6 +156,42 @@ namespace Fika_Installer.Utils
             {
                 Console.WriteLine(ex.Message);
             }
+        }
+
+        public static bool CreateFolderSymlinkElevate(string fromPath, string toPath)
+        {           
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = Environment.ProcessPath,
+                WorkingDirectory = Directory.GetCurrentDirectory(),
+                Arguments = $"-symlink \"{fromPath}\" \"{toPath}\"",
+                Verb = "runas",
+                UseShellExecute = true,
+                WindowStyle = ProcessWindowStyle.Minimized
+            };
+
+            Process process = new();
+            process.StartInfo = startInfo;
+            process.Start();
+
+            process.WaitForExit();
+
+            return process.ExitCode == 0;
+        }
+
+        public static bool CreateFolderSymlink(string fromPath, string toPath)
+        {
+            try
+            {
+                Directory.CreateSymbolicLink(toPath, fromPath);
+            }
+            catch (Exception ex)
+            {
+                ConUtils.WriteError(ex.Message);
+                return false;
+            }
+
+            return true;
         }
     }
 }
