@@ -6,8 +6,10 @@
         
         static void Main(string[] args)
         {
-            AppController uiController = new AppController();
-            uiController.Start();
+            Console.Title = Constants.FikaInstallerVersionString;
+
+            AppController appController = new AppController();
+            appController.Start();
         }
     }
 }
