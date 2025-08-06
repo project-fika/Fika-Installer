@@ -13,7 +13,7 @@ The goal is to make the tool as simple as possible with minimal user interaction
 ## Usage
 * Place the Fika-Installer executable in a new directory of your choice. This is the location where Fika will be installed.
 * Run the Fika-Installer executable.
-* Choose wether to install a new Fika instance or a Fika Headless instance. NOTE: Installing Fika-Headless requires you to have the Fika-Installer executable in the same machine where your SPT server with Fika-Server is installed.
+* Choose whether to install a new Fika instance or a Fika Headless instance. NOTE: Installing Fika-Headless requires you to have the Fika-Installer executable in the same machine where your SPT server with Fika-Server is installed.
 * Follow the instructions.
 * Enjoy.
 
