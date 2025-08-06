@@ -12,11 +12,11 @@ The goal is to make the tool as simple as possible with minimal user interaction
 * Updates an existing Fika / Fika Headless instance.
 
 ## Usage
-* Place the Fika-Installer executable in a new directory of your choice. This is the location where Fika will be installed.
+* Place the Fika-Installer executable in your SPT folder *or* in a new folder outside of SPT folder (not required).
 * Run the Fika-Installer executable.
-* Choose whether to install a new Fika instance or a Fika Headless instance. NOTE: Installing Fika-Headless requires you to have the Fika-Installer executable in the same machine where your SPT server with Fika-Server is installed.
-* Follow the instructions.
-* Enjoy.
+* Choose whether to install a new Fika instance or a new Fika Headless instance. NOTE: Installing Fika-Headless requires you to have the Fika-Installer executable in the same machine where your SPT server with Fika-Server is installed.
+* If you run the Fika-Installer from a fresh new folder, you will be prompted to browse for the SPT folder. The SPT and game files will be copied or symlinked to your directory based on your installation choice.
+* Once the files are copied and Fika is downloaded, you may close the installer and enjoy Fika!
 
 ## Linux Support
 Linux support is not planned. However, only minimal code modifications should be required for Linux compatibility. Feel free to submit a PR.
