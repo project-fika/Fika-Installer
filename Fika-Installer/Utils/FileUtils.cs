@@ -135,12 +135,11 @@ namespace Fika_Installer.Utils
             }
             catch (Exception ex)
             {
+                progressBar.Dispose();
                 Console.WriteLine(ex.Message);
             }
-            finally
-            {
-                progressBar.Dispose();
-            }
+
+            progressBar.Dispose();
 
             return result;
         }
