@@ -34,11 +34,18 @@ namespace Fika_Installer
         public void SetupNewProfile(string sptFolder)
         {
             SptProfile headlessProfile = CreateHeadlessProfile(sptFolder);
+
+            if (string.IsNullOrEmpty(headlessProfile.ProfileId))
+            {
+                return;
+            }
+
             SetupProfile(headlessProfile, sptFolder);
         }
 
         public SptProfile CreateHeadlessProfile(string sptFolder)
         {
+            SptProfile headlessProfile = new();
             int cursorTop = Console.CursorTop;
 
             while (Process.GetProcessesByName("SPT.Server").Length != 0)
@@ -59,7 +66,7 @@ namespace Fika_Installer
 
             JsonUtils.WriteJson(fikaConfig, fikaConfigPath);
 
-            Console.WriteLine("Creating headless profile... this may take a while.");
+            Console.WriteLine("Creating headless profile... Please wait. This may take a moment.");
 
             string sptServerPath = Path.Combine(sptFolder, "SPT.Server.exe");
             StartProcessAndRedirectOutput(sptServerPath, SptConsoleMessageHandler, TimeSpan.FromMinutes(1)); // TODO: is 1 minute too short?
@@ -67,11 +74,10 @@ namespace Fika_Installer
             if (string.IsNullOrEmpty(_headlessProfileId))
             {
                 ConUtils.WriteError("An error occurred when creating the headless profile. Check the SPT server logs.", true);
+                return headlessProfile;
             }
 
             string headlessProfilePath = Path.Combine(sptProfilesPath, $"{_headlessProfileId}.json");
-
-            SptProfile headlessProfile = new();
 
             if (File.Exists(headlessProfilePath))
             {
