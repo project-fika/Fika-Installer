@@ -3,6 +3,7 @@ using Fika_Installer.Models.UI;
 using Fika_Installer.UI;
 using Fika_Installer.Utils;
 using Newtonsoft.Json.Linq;
+using System.IO;
 
 namespace Fika_Installer
 {   
@@ -18,9 +19,7 @@ namespace Fika_Installer
 
         public void InstallFika()
         {
-            string fikaFolder = Constants.FikaDirectory;
-
-            bool isSptInstalled = IsSptInstalled(fikaFolder);
+            bool isSptInstalled = IsSptInstalled(_fikaDirectory);
 
             if (!isSptInstalled)
             {
@@ -31,16 +30,11 @@ namespace Fika_Installer
                     return;
                 }
 
-                List<string> excludeFiles =
-                [
-                    "Logs",
-                    "cache",
-                    "config",
-                ];
+                InstallType installType = _appController.Menus.InstallationTypeMenu();
 
-                bool copySptFolderResult = CopySptFolder(sptFolder, fikaFolder, excludeFiles);
+                bool installSptResult = InstallSpt(installType, sptFolder, _fikaDirectory);
 
-                if (!copySptFolderResult)
+                if (!installSptResult)
                 {
                     return;
                 }
@@ -86,8 +80,6 @@ namespace Fika_Installer
 
         public void InstallFikaHeadless()
         {
-            string fikaFolder = Constants.FikaDirectory;
-
             string sptFolder = BrowseSptFolderAndValidate();
 
             if (string.IsNullOrEmpty(sptFolder))
@@ -95,35 +87,27 @@ namespace Fika_Installer
                 return;
             }
 
+            bool isFikaServerInstalled = IsFikaServerInstalled(sptFolder);
+
+            if (!isFikaServerInstalled)
+            {
+                ConUtils.WriteError("Fika-Server must be installed in your SPT folder before setting up the headless!", true);
+                return;
+            }
+
             _appController.Menus.ProfileSelectionMenu(sptFolder);
 
-            bool isSptInstalled = IsSptInstalled(fikaFolder);
+            bool isSptInstalled = IsSptInstalled(_fikaDirectory);
 
             if (!isSptInstalled)
             {
-                string installType = _appController.Menus.InstallationTypeMenu();
+                InstallType installType = _appController.Menus.InstallationTypeMenu();
 
-                if (installType == "HardCopy")
+                bool installSptResult = InstallSpt(installType, sptFolder, _fikaDirectory, true);
+
+                if (!installSptResult)
                 {
-
-                    List<string> excludeFiles =
-                    [
-                        "Logs",
-                        "cache",
-                        "config",
-                    ];
-
-                    bool copySptFolderResult = CopySptFolder(sptFolder, fikaFolder, excludeFiles);
-
-                    if (!copySptFolderResult)
-                    {
-                        return;
-                    }
-                }
-
-                if (installType == "Symlink")
-                {
-                    CopySptFolderWithSymlinks(sptFolder, _fikaDirectory);
+                    return;
                 }
             }
 
@@ -192,6 +176,11 @@ namespace Fika_Installer
 
         private string BrowseSptFolderAndValidate()
         {
+            Console.WriteLine("You will be prompted to browse for your SPT folder when pressing 'ENTER'.\r\n");
+            Console.WriteLine("For Fika install: make sure it is a new SPT installation with no mods installed.");
+            Console.WriteLine("For Fika Headless install: make sure to browse for your SPT server with Fika-Server installed.\r\n");
+            ConUtils.WriteConfirm("Press ENTER to continue.");
+            
             string sptFolder = FileUtils.BrowseFolder("Please select your SPT installation folder.");
 
             if (string.IsNullOrEmpty(sptFolder))
@@ -201,17 +190,67 @@ namespace Fika_Installer
 
             bool sptValidationResult = ValidateSptFolder(sptFolder);
 
-            if (sptValidationResult)
-            {
-                Console.WriteLine($"Found valid installation of SPT: {sptFolder}");
-            }
-            else
+            if (!sptValidationResult)
             {
                 ConUtils.WriteError("An error occurred during validation of SPT folder.", true);
                 return string.Empty;
             }
 
             return sptFolder;
+        }
+
+        private bool InstallSpt(InstallType installType, string sptFolder, string fikaFolder, bool headless = false)
+        {
+            List<string> excludeFiles = [];
+
+            if (headless)
+            {
+                excludeFiles =
+                [
+                    "SPT.Launcher.exe",
+                    "SPT.Server.exe",
+                    "SPTInstaller.exe",
+                    "SPT_Data",
+                    "user",
+                ];
+            }
+
+            if (installType == InstallType.HardCopy)
+            {
+                bool copySptFolderResult = CopySptFolder(sptFolder, fikaFolder, excludeFiles);
+
+                if (!copySptFolderResult)
+                {
+                    return false;
+                }
+            }
+
+            if (installType == InstallType.Symlink)
+            {
+                string escapeFromTarkovDataPath = Path.Combine(sptFolder, "EscapeFromTarkov_Data");
+                string escapeFromTarkovDataFikaPath = Path.Combine(fikaFolder, "EscapeFromTarkov_Data");
+
+                try
+                {
+                    Directory.CreateSymbolicLink(escapeFromTarkovDataFikaPath, escapeFromTarkovDataPath);
+                }
+                catch (Exception ex)
+                {
+                    ConUtils.WriteError("An error occurred when creating the symlink.", true);
+                    return false;
+                }
+
+                excludeFiles.Add("EscapeFromTarkov_Data");
+                
+                bool copySptFolderResult = CopySptFolder(sptFolder, fikaFolder, excludeFiles);
+
+                if (!copySptFolderResult)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private bool CopySptFolder(string sptFolder, string fikaFolder, List<string> excludeFiles)
@@ -232,6 +271,18 @@ namespace Fika_Installer
             }
 
             return copySptResult;
+        }
+
+        private bool IsFikaServerInstalled(string sptFolder)
+        {
+            string fikaServerPath = Path.Combine(sptFolder, @"user\mods\fika-server");
+
+            if (Directory.Exists(fikaServerPath))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private bool IsSptInstalled(string path)
@@ -323,33 +374,6 @@ namespace Fika_Installer
             }
 
             return extractResult;
-        }
-
-        public void CopySptFolderWithSymlinks(string fromPath, string toPath)
-        {
-            string escapeFromTarkovDataPath = Path.Combine(fromPath, "EscapeFromTarkov_Data");
-            string escapeFromTarkovDataFikaDirPath = Path.Combine(toPath, "EscapeFromTarkov_Data");
-
-            try
-            {
-                List<string> excludeFiles =
-                [
-                    "SPT.Launcher.exe",
-                    "SPT.Server.exe",
-                    "SPTInstaller.exe",
-                    "SPT_Data",
-                    "user",
-                    "EscapeFromTarkov_Data",
-                    "Logs",
-                ];
-
-                Directory.CreateSymbolicLink(escapeFromTarkovDataFikaDirPath, escapeFromTarkovDataPath);
-                CopySptFolder(fromPath, toPath, excludeFiles);
-            }
-            catch (Exception ex)
-            {
-                ConUtils.WriteError("An error occurred when creating the symlink.");
-            }
         }
 
         public void ConfigureSptLauncherConfig(string fikaDirectory)

@@ -1,10 +1,5 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fika_Installer.Utils
 {
@@ -12,8 +7,16 @@ namespace Fika_Installer.Utils
     {
         public static JObject ReadJson(string jsonPath)
         {
-            string launcherConfig = File.ReadAllText(jsonPath);
-            JObject jObject = JObject.Parse(launcherConfig);
+            JObject jObject = new();
+            try
+            {
+                string launcherConfig = File.ReadAllText(jsonPath);
+                jObject = JObject.Parse(launcherConfig);
+            }
+            catch 
+            {
+                ConUtils.WriteError($"An error occurred while reading: {jsonPath}");
+            }
 
             return jObject;
         }

@@ -124,7 +124,7 @@ namespace Fika_Installer.UI
             }
         }
 
-        public string InstallationTypeMenu()
+        public InstallType InstallationTypeMenu()
         {
             List<MenuChoice> menuChoices = [];
 
@@ -134,10 +134,15 @@ namespace Fika_Installer.UI
             menuChoices.Add(hardCopyChoice);
             menuChoices.Add(symlinkChoice);
 
-            Menu menu = new("Please choose the headless installation type:", menuChoices);
+            Menu menu = new("Please choose the installation type. This will define how your Escape From Tarkov / SPT folder will be copied.", menuChoices);
             MenuResult menuResult = menu.Show();
 
-            return menuResult.Id;
+            if (Enum.TryParse(menuResult.Id, out InstallType installType))
+            {
+                return installType;
+            }
+
+            return InstallType.HardCopy;
         }
     }
 }

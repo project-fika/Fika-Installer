@@ -1,6 +1,5 @@
 ﻿using Fika_Installer.Models;
 using Fika_Installer.Utils;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 using System.Text.RegularExpressions;

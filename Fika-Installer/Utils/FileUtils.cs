@@ -26,8 +26,18 @@ namespace Fika_Installer.Utils
         {
             bool result = false;
 
-            string[] allFiles = Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories);
-            int totalFiles = allFiles.Length;
+            var allFiles = Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories)
+                .Where(file =>
+                {
+                    string relativePath = Path.GetRelativePath(sourcePath, file);
+
+                    return !exclusions.Any(ex =>
+                        relativePath == ex ||
+                        relativePath.StartsWith(ex + Path.DirectorySeparatorChar));
+                })
+                .ToList();
+
+            int totalFiles = allFiles.Count;
             int filesCopied = 0;
 
             ProgressBar progressBar = new();
@@ -38,19 +48,6 @@ namespace Fika_Installer.Utils
                 {
                     string relativePath = Path.GetRelativePath(sourcePath, filePath);
                     string fileName = Path.GetFileName(filePath);
-
-                    if (exclusions.Any(ex => string.Equals(fileName, ex, StringComparison.OrdinalIgnoreCase)))
-                    {
-                        continue;
-                    }
-
-                    string[] foldersInPath = relativePath.Split(Path.DirectorySeparatorChar);
-
-                    if (foldersInPath.Any(folder => exclusions.Contains(folder, StringComparer.OrdinalIgnoreCase)))
-                    {
-                        continue;
-                    }
-
                     string destFile = Path.Combine(destinationPath, relativePath);
                     string destDir = Path.GetDirectoryName(destFile);
 
@@ -71,16 +68,14 @@ namespace Fika_Installer.Utils
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-            }
-            finally
-            {
                 progressBar.Dispose();
+                ConUtils.WriteError($"An error occurred while copying the folder: {ex.Message}", true);
             }
+
+            progressBar.Dispose();
 
             return result;
         }
-
 
         public static bool DownloadFileWithProgress(string downloadUrl, string outputPath)
         {

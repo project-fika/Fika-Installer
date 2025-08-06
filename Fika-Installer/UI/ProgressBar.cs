@@ -6,6 +6,7 @@
         private int _barWidth;
         private int _messageCursorTopPos;
         private int _progressBarCursorTopPos;
+        private bool _isDisposed = false;
 
         public ProgressBar(string message = "", int barWidth = 50)
         {
@@ -37,6 +38,13 @@
 
         public void Draw(string message, double ratio)
         {
+            int consoleWidth = Console.BufferWidth;
+
+            if (message.Length >= consoleWidth)
+            {
+                message = message.Substring(0, consoleWidth - 1);
+            }
+
             int oldMessageLength = _message.Length;
             int newMessageLength = message.Length;
             int lengthToRemove = oldMessageLength - newMessageLength;
@@ -45,9 +53,10 @@
             {
                 Erase(newMessageLength, _messageCursorTopPos, lengthToRemove);
             }
-            
+
             Console.SetCursorPosition(0, _messageCursorTopPos);
-            Console.Write($"\r{message}");
+            Console.Write(message);
+
             Console.SetCursorPosition(0, _progressBarCursorTopPos);
 
             _message = message;
@@ -55,8 +64,28 @@
             Draw(ratio);
         }
 
+        private void Erase(int left, int top, int length)
+        {
+            int consoleWidth = Console.BufferWidth;
+
+            // Prevent setting cursor outside of bounds
+            if (left >= consoleWidth)
+                return;
+
+            length = Math.Min(length, consoleWidth - left);
+
+            Console.SetCursorPosition(left, top);
+            Console.Write(new string(' ', length));
+            Console.SetCursorPosition(0, Console.CursorTop);
+        }
+
         public void Dispose()
         {
+            if (_isDisposed)
+            {
+                return;
+            }
+            
             Erase(0, _messageCursorTopPos, _message.Length);
 
             int messageLength = _message.Length; // Message + space
@@ -68,14 +97,8 @@
 
             Console.SetCursorPosition(0, _messageCursorTopPos);
             Console.CursorVisible = true;
-        }
 
-        private void Erase(int left, int top, int length)
-        {
-            Console.SetCursorPosition(left, top);
-            string empty = new(' ', length);
-            Console.Write(empty);
-            Console.SetCursorPosition(0, Console.CursorTop);
+            _isDisposed = true;
         }
     }
 }
