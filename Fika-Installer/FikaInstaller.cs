@@ -1,165 +1,26 @@
 ﻿using Fika_Installer.Models;
-using Fika_Installer.Models.UI;
-using Fika_Installer.UI;
 using Fika_Installer.Utils;
 using Newtonsoft.Json.Linq;
-using System.IO;
 
 namespace Fika_Installer
-{   
-    public class FikaInstaller(AppController appController)
+{
+    public class FikaInstaller
     {
-        private AppController _appController = appController;
-
-        private string _fikaReleaseUrl = Constants.FikaReleasesUrl["Fika.Core"];
-        private string _fikaHeadlessReleaseUrl = Constants.FikaReleasesUrl["Fika.Headless"];
-        private string _fikaServerReleaseUrl = Constants.FikaReleasesUrl["Fika.Server"];
-        private string _installerDirectory = Constants.InstallerDirectory;
-
-        public void InstallFika(bool installInCurrentFolder = false)
+        public string InstallDir { get; set; }
+        public string SptFolder { get; set; }
+        
+        public FikaInstaller(string installDir)
         {
-            string sptFolder = _installerDirectory;
-            string fikaInstallDir = _installerDirectory;
-
-            bool isSptInstalled = IsSptInstalled(_installerDirectory);
-
-            if (!isSptInstalled)
-            {
-                sptFolder = BrowseSptFolderAndValidate();
-
-                if (string.IsNullOrEmpty(sptFolder))
-                {
-                    return;
-                }
-
-                if (installInCurrentFolder)
-                {
-                    InstallType installType = _appController.Menus.InstallationTypeMenu();
-                    bool installSptResult = InstallSpt(installType, sptFolder, _installerDirectory);
-
-                    if (!installSptResult)
-                    {
-                        return;
-                    }
-
-                    ConfigureSptLauncherConfig(fikaInstallDir);
-                }
-                else
-                {
-                    fikaInstallDir = sptFolder;
-                }
-            }
-
-            bool installResult = InstallRelease(_fikaReleaseUrl, fikaInstallDir);
-
-            if (!installResult)
-            {
-                return;
-            }
-
-            bool installFikaServerResult = InstallRelease(_fikaServerReleaseUrl, fikaInstallDir);
-
-            if (!installFikaServerResult)
-            {
-                return;
-            }
-
-            ConUtils.WriteSuccess("Fika installed successfully!", true);
+            InstallDir = installDir;
+            SptFolder = installDir;
         }
-
-        public void UpdateFika()
+        
+        public FikaInstaller(string installDir, string sptFolder)
         {
-            bool installResult = InstallRelease(_fikaReleaseUrl, _installerDirectory);
-
-            if (!installResult)
-            {
-                return;
-            }
-
-            bool installFikaServerResult = InstallRelease(_fikaServerReleaseUrl, _installerDirectory);
-
-            if (!installFikaServerResult)
-            {
-                return;
-            }
-
-            ConUtils.WriteSuccess("Fika updated successfully!", true);
+            InstallDir = installDir;
+            SptFolder = sptFolder;
         }
-
-        public void InstallFikaHeadless()
-        {
-            string sptFolder = _installerDirectory;
-
-            bool isSptInstalled = IsSptInstalled(_installerDirectory);
-
-            if (!isSptInstalled)
-            {
-                sptFolder = BrowseSptFolderAndValidate();
-
-                if (string.IsNullOrEmpty(sptFolder))
-                {
-                    return;
-                }
-            }
-
-            bool isFikaServerInstalled = IsFikaServerInstalled(sptFolder);
-
-            if (!isFikaServerInstalled)
-            {
-                ConUtils.WriteError("Fika-Server must be installed in your SPT folder before setting up the headless.", true);
-                return;
-            }
-
-            _appController.Menus.ProfileSelectionMenu(sptFolder);
-
-            if (!isSptInstalled)
-            {
-                InstallType installType = _appController.Menus.InstallationTypeMenu();
-
-                bool installSptResult = InstallSpt(installType, sptFolder, _installerDirectory, true);
-
-                if (!installSptResult)
-                {
-                    return;
-                }
-            }
-
-            bool installHeadlessResult = InstallRelease(_fikaHeadlessReleaseUrl, _installerDirectory);
-
-            if (!installHeadlessResult)
-            {
-                return;
-            }
-
-            bool installFikaResult = InstallRelease(_fikaReleaseUrl, _installerDirectory);
-
-            if (!installFikaResult)
-            {
-                return;
-            }
-
-            ConUtils.WriteSuccess("Fika Headless installed successfully!", true);
-        }
-
-        public void UpdateFikaHeadless()
-        {
-            bool installHeadlessResult = InstallRelease(_fikaHeadlessReleaseUrl, _installerDirectory);
-
-            if (!installHeadlessResult)
-            {
-                return;
-            }
-
-            bool installFikaResult = InstallRelease(_fikaReleaseUrl, _installerDirectory);
-
-            if (!installFikaResult)
-            {
-                return;
-            }
-
-            ConUtils.WriteSuccess("Fika Headless updated successfully.", true);
-        }
-
+        
         private bool ValidateSptFolder(string sptFolder)
         {
             string sptServerPath = Path.Combine(sptFolder, "SPT.Server.exe");
@@ -182,10 +43,10 @@ namespace Fika_Installer
             return true;
         }
 
-        private string BrowseSptFolderAndValidate()
+        public string BrowseSptFolderAndValidate()
         {
             ConUtils.WriteConfirm("SPT not detected. Press ENTER to browse for your SPT folder.");
-            
+
             string sptFolder = FileUtils.BrowseFolder("Please select your SPT installation folder.");
 
             if (string.IsNullOrEmpty(sptFolder))
@@ -204,7 +65,7 @@ namespace Fika_Installer
             return sptFolder;
         }
 
-        private bool InstallSpt(InstallType installType, string sptFolder, string fikaFolder, bool headless = false)
+        public bool InstallSpt(InstallMethod installType, bool headless = false)
         {
             List<string> excludeFiles = [];
 
@@ -220,9 +81,9 @@ namespace Fika_Installer
                 ];
             }
 
-            if (installType == InstallType.HardCopy)
+            if (installType == InstallMethod.HardCopy)
             {
-                bool copySptFolderResult = CopySptFolder(sptFolder, fikaFolder, excludeFiles);
+                bool copySptFolderResult = CopySptFolder(SptFolder, InstallDir, excludeFiles);
 
                 if (!copySptFolderResult)
                 {
@@ -230,10 +91,10 @@ namespace Fika_Installer
                 }
             }
 
-            if (installType == InstallType.Symlink)
+            if (installType == InstallMethod.Symlink)
             {
-                string escapeFromTarkovDataPath = Path.Combine(sptFolder, "EscapeFromTarkov_Data");
-                string escapeFromTarkovDataFikaPath = Path.Combine(fikaFolder, "EscapeFromTarkov_Data");
+                string escapeFromTarkovDataPath = Path.Combine(SptFolder, "EscapeFromTarkov_Data");
+                string escapeFromTarkovDataFikaPath = Path.Combine(InstallDir, "EscapeFromTarkov_Data");
 
                 //Directory.CreateSymbolicLink(escapeFromTarkovDataFikaPath, escapeFromTarkovDataPath);
                 bool createSymlinkResult = FileUtils.CreateFolderSymlinkElevate(escapeFromTarkovDataPath, escapeFromTarkovDataFikaPath);
@@ -244,8 +105,8 @@ namespace Fika_Installer
                 }
 
                 excludeFiles.Add("EscapeFromTarkov_Data");
-                
-                bool copySptFolderResult = CopySptFolder(sptFolder, fikaFolder, excludeFiles);
+
+                bool copySptFolderResult = CopySptFolder(SptFolder, InstallDir, excludeFiles);
 
                 if (!copySptFolderResult)
                 {
@@ -257,9 +118,9 @@ namespace Fika_Installer
         }
 
         private bool CopySptFolder(string sptFolder, string fikaFolder, List<string> excludeFiles)
-        {            
+        {
             Console.WriteLine("Copying SPT folder...");
-            
+
             bool copySptResult = FileUtils.CopyFolderWithProgress(sptFolder, fikaFolder, excludeFiles);
 
             if (copySptResult)
@@ -274,9 +135,9 @@ namespace Fika_Installer
             return copySptResult;
         }
 
-        private bool IsFikaServerInstalled(string sptFolder)
+        public bool IsFikaServerInstalled()
         {
-            string fikaServerPath = Path.Combine(sptFolder, @"user\mods\fika-server");
+            string fikaServerPath = Path.Combine(SptFolder, @"user\mods\fika-server");
 
             if (Directory.Exists(fikaServerPath))
             {
@@ -286,10 +147,10 @@ namespace Fika_Installer
             return false;
         }
 
-        private bool IsSptInstalled(string path)
+        public bool IsSptInstalled()
         {
-            string sptServerPath = Path.Combine(path, "SPT.Server.exe");
-            string sptLauncherPath = Path.Combine(path, "SPT.Launcher.exe");
+            string sptServerPath = Path.Combine(InstallDir, "SPT.Server.exe");
+            string sptLauncherPath = Path.Combine(InstallDir, "SPT.Launcher.exe");
 
             bool sptServerFound = File.Exists(sptServerPath);
             bool sptLauncherFound = File.Exists(sptLauncherPath);
@@ -302,10 +163,10 @@ namespace Fika_Installer
             return false;
         }
 
-        public bool InstallRelease(string url, string destinationPath)
+        public bool InstallRelease(string url)
         {
-            string tempFolder = Path.Combine(destinationPath, "FikaInstallerTemp");
-            
+            string tempFolder = Path.Combine(InstallDir, "FikaInstallerTemp");
+
             DownloadReleaseResult downloadReleaseResult = DownloadRelease(url, tempFolder);
 
             if (!downloadReleaseResult.Result)
@@ -316,7 +177,7 @@ namespace Fika_Installer
             string releaseName = downloadReleaseResult.Name;
             string releaseZipFilePath = Path.Combine(tempFolder, releaseName);
 
-            bool extractResult = ExtractRelease(releaseZipFilePath, destinationPath);
+            bool extractResult = ExtractRelease(releaseZipFilePath, InstallDir);
 
             if (!extractResult)
             {
@@ -371,9 +232,9 @@ namespace Fika_Installer
 
                 extractResult = true;
             }
-            catch (Exception ex)  
+            catch (Exception ex)
             {
-                ConUtils.WriteError($"An error occurred when extracting the ZIP archive." , true);
+                ConUtils.WriteError($"An error occurred when extracting the ZIP archive.", true);
             }
 
             return extractResult;

@@ -1,4 +1,6 @@
-﻿using Fika_Installer.Utils;
+﻿using Fika_Installer.Models.UI;
+using Fika_Installer.UI;
+using Fika_Installer.Utils;
 
 namespace Fika_Installer
 {
@@ -7,15 +9,25 @@ namespace Fika_Installer
         [STAThread]
         static void Main(string[] args)
         {
+            Console.Title = Constants.FikaInstallerVersionString;
+
             if (args.Length > 0)
             {
                 ProcessArgs(args);
             }
 
-            Console.Title = Constants.FikaInstallerVersionString;
+            string fikaCoreReleaseUrl = Constants.FikaReleaseUrls["Fika.Core"];
+            string fikaServerReleaseUrl = Constants.FikaReleaseUrls["Fika.Server"];
+            string fikaHeadlessReleaseUrl = Constants.FikaReleaseUrls["Fika.Headless"];
+            string installerDirectory = Constants.InstallerDirectory;
 
-            AppController appController = new AppController();
-            appController.Start();
+            MenuFactory menuFactory = new MenuFactory(fikaCoreReleaseUrl, fikaServerReleaseUrl, fikaHeadlessReleaseUrl, installerDirectory);
+
+            while (true)
+            {
+                Menu mainMenu = menuFactory.CreateMainMenu();
+                mainMenu.Show();
+            }
         }
 
         static void ProcessArgs(string[] args)

@@ -1,0 +1,102 @@
+﻿using Fika_Installer.Models;
+using Fika_Installer.Models.UI;
+using Fika_Installer.Utils;
+
+namespace Fika_Installer.UI.Pages
+{
+    public class InstallFikaHeadlessPage : Page
+    {
+        private MenuFactory _menuFactory;
+        private string _installDir;
+        private string _sptFolder;
+        private string _fikaCoreReleaseUrl;
+        private string _fikaHeadlessReleaseUrl;
+        
+        public InstallFikaHeadlessPage(MenuFactory menuFactory, string installDir, string sptFolder, string fikaCoreReleaseUrl, string fikaHeadlessReleaseUrl)
+        {
+            _menuFactory = menuFactory;
+            _installDir = installDir;
+            _sptFolder = sptFolder;
+            _fikaCoreReleaseUrl = fikaCoreReleaseUrl;
+            _fikaHeadlessReleaseUrl = fikaHeadlessReleaseUrl;
+        }
+        
+        public override void OnShow()
+        {
+            FikaInstaller fikaInstaller = new(_installDir, _sptFolder);
+
+            bool isSptInstalled = fikaInstaller.IsSptInstalled();
+
+            if (!isSptInstalled)
+            {
+                _sptFolder = fikaInstaller.BrowseSptFolderAndValidate();
+
+                if (string.IsNullOrEmpty(_sptFolder))
+                {
+                    return;
+                }
+
+                fikaInstaller.SptFolder = _sptFolder;
+            }
+
+            bool isFikaServerInstalled = fikaInstaller.IsFikaServerInstalled();
+
+            if (!isFikaServerInstalled)
+            {
+                ConUtils.WriteError("Fika-Server must be installed in the SPT folder before installing Fika-Headless.", true);
+                return;
+            }
+
+            FikaHeadless fikaHeadless = new FikaHeadless(_installDir, _sptFolder);
+
+            List<SptProfile> sptProfileIds = fikaHeadless.SptProfiles;
+
+            Menu profileSelectionMenu = _menuFactory.CreateProfileSelectionMenu(sptProfileIds);
+            MenuChoice profileSelectionChoice = profileSelectionMenu.Show();
+
+            if (profileSelectionChoice.Id == "createNewHeadlessProfile")
+            {
+                fikaHeadless.CreateHeadlessProfileAndCopyScript();
+            }
+            else
+            {
+                string selectedProfileId = profileSelectionChoice.Text;
+                fikaHeadless.CopyProfileScript(selectedProfileId);
+            }
+
+            if (!isSptInstalled)
+            {
+                Menu installMethodMenu = _menuFactory.CreateInstallMethodMenu();
+                MenuChoice installTypeChoice = installMethodMenu.Show();
+
+                string selectedInstallType = installTypeChoice.Text;
+                
+                if (Enum.TryParse(selectedInstallType, out InstallMethod installType))
+                {
+                    bool installSptResult = fikaInstaller.InstallSpt(installType, true);
+
+                    if (!installSptResult)
+                    {
+                        return;
+                    }
+                }
+            }
+
+            bool installHeadlessResult = fikaInstaller.InstallRelease(_fikaHeadlessReleaseUrl);
+
+            if (!installHeadlessResult)
+            {
+                return;
+            }
+
+            bool installFikaResult = fikaInstaller.InstallRelease(_fikaCoreReleaseUrl);
+
+            if (!installFikaResult)
+            {
+                return;
+            }
+
+            ConUtils.WriteSuccess("Fika Headless installed successfully!", true);
+        }
+    }
+}
