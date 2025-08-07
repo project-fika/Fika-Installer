@@ -5,18 +5,22 @@ A work-in-progress console application for installing Fika, Fika-Server, and Fik
 The goal is to make the tool as simple as possible with minimal user interaction. No bloated features, no complex GUI, and no configuration files - just execute and install. It is not a launcher nor a configuration tool, and never will be.
 
 ## Features
-* Prepares a Fika instance by hard copying or symlinking the SPT directory.
-* Downloads the latest version of Fika.Core, Fika.Server and Fika.Headless.
-* Creates or uses an existing headless profile and copies the script.
-* Configures the SPT launcher path to the Fika instance location.
-* Updates an existing Fika / Fika Headless instance.
+* Install the latest version of Fika (Fika-Core and Fika-Server).
+* Install/update Fika Headless with profile management (create or use an existing headless profile).
+* Update Fika or Fika-Headless.
+* Symlink SPT folder to your Fika/Fika Headless folder to save disk space.
 
 ## Usage
-* Place the Fika-Installer executable in your SPT folder *or* in a new folder outside of SPT folder (not required).
+* Place the Fika-Installer executable in your SPT folder.
 * Run the Fika-Installer executable.
-* Choose whether to install a new Fika instance or a new Fika Headless instance. NOTE: Installing Fika-Headless requires you to have the Fika-Installer executable in the same machine where your SPT server with Fika-Server is installed.
-* If you run the Fika-Installer from a fresh new folder, you will be prompted to browse for the SPT folder. The SPT and game files will be copied or symlinked to your directory based on your installation choice.
-* Once the files are copied and Fika is downloaded, you may close the installer and enjoy Fika!
+* Choose "Install Fika". Browse to your SPT folder if you are prompted to do so.
+* Wait for installation to finish.
+* Enjoy Fika!
+
+## Advanced usage
+There is an "Advanced options" menu with a few additional features:
+* "Install Fika in current folder" allows you to install Fika-Core and Fika-Server in the directory where Fika-Installed is located. The SPT files will be copied or symlinked.
+* "Install Fika Headless" allows you to install Fika-Core and Fika-Headless in the directory where Fika-Installer is located. The SPT files will be copied or symlinked.
 
 ## Linux Support
 Linux support is not planned. However, only minimal code modifications should be required for Linux compatibility. Feel free to submit a PR.
