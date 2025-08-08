@@ -30,7 +30,7 @@ namespace Fika_Installer.UI.Pages
                     return;
                 }
 
-                fikaInstaller.SptFolder = sptFolder;
+                fikaInstaller.InstallDir = sptFolder;
             }
 
             bool installResult = fikaInstaller.InstallRelease(_fikaCoreReleaseUrl);

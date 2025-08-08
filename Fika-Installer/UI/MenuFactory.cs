@@ -94,7 +94,7 @@ namespace Fika_Installer.UI
             MenuChoice createNewHeadlessProfile = new MenuChoice("Create a new headless profile", "createNewHeadlessProfile");
             choices.Add(createNewHeadlessProfile);
 
-            Menu profileSelectionMenu = new Menu("Please choose the headless profile to use for your headless client: ", choices);
+            Menu profileSelectionMenu = new Menu("Please choose the headless profile to use for your headless client:", choices);
             return profileSelectionMenu;
         }
 
