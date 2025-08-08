@@ -158,29 +158,14 @@ namespace Fika_Installer.Utils
             }
         }
 
-        public static bool CreateFolderSymlinkElevate(string fromPath, string toPath)
+        public static bool CreateFolderSymlink(string fromPath, string toPath, bool elevate = false)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo
+            if (elevate)
             {
-                FileName = Environment.ProcessPath,
-                WorkingDirectory = Directory.GetCurrentDirectory(),
-                Arguments = $"-symlink \"{fromPath}\" \"{toPath}\"",
-                Verb = "runas",
-                UseShellExecute = true,
-                WindowStyle = ProcessWindowStyle.Minimized
-            };
-
-            Process process = new();
-            process.StartInfo = startInfo;
-            process.Start();
-
-            process.WaitForExit();
-
-            return process.ExitCode == 0;
-        }
-
-        public static bool CreateFolderSymlink(string fromPath, string toPath)
-        {
+                bool symlinkElevateResult = ProcUtils.ExecuteSelfElevate($"-symlink \"{fromPath}\" \"{toPath}\"");
+                return symlinkElevateResult;
+            }
+            
             try
             {
                 Directory.CreateSymbolicLink(toPath, fromPath);

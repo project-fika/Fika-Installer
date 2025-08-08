@@ -41,6 +41,8 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
+            fikaInstaller.ApplyFirewallRules();
+
             ConUtils.WriteSuccess("Fika installed successfully!", true);
         }
     }

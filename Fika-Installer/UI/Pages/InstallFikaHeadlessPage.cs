@@ -98,6 +98,8 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
+            fikaInstaller.ApplyFirewallRules();
+
             ConUtils.WriteSuccess("Fika Headless installed successfully!", true);
         }
     }

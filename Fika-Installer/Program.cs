@@ -1,6 +1,6 @@
-﻿using Fika_Installer.Models.UI;
-using Fika_Installer.UI;
+﻿using Fika_Installer.UI;
 using Fika_Installer.Utils;
+using System.Reflection;
 
 namespace Fika_Installer
 {
@@ -47,6 +47,14 @@ namespace Fika_Installer
                 }
 
                 Environment.Exit(exitCode);
+            }
+
+            if (args.Length == 2 && args[0] == "-firewall")
+            {
+                string firewallScripPath = args[1];
+                FwUtils.ExecuteFirewallScript(firewallScripPath);
+
+                Environment.Exit(0);
             }
         }
     }

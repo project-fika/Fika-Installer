@@ -8,17 +8,21 @@ namespace Fika_Installer
     {
         public string InstallDir { get; set; }
         public string SptFolder { get; set; }
+
+        public string TempDir { get; set; }
         
         public FikaInstaller(string installDir)
         {
             InstallDir = installDir;
             SptFolder = installDir;
+            TempDir = Path.Combine(InstallDir, "FikaInstallerTemp");
         }
         
         public FikaInstaller(string installDir, string sptFolder)
         {
             InstallDir = installDir;
             SptFolder = sptFolder;
+            TempDir = Path.Combine(InstallDir, "FikaInstallerTemp");
         }
         
         private bool ValidateSptFolder(string sptFolder)
@@ -98,8 +102,7 @@ namespace Fika_Installer
                 string escapeFromTarkovDataPath = Path.Combine(SptFolder, "EscapeFromTarkov_Data");
                 string escapeFromTarkovDataFikaPath = Path.Combine(InstallDir, "EscapeFromTarkov_Data");
 
-                //Directory.CreateSymbolicLink(escapeFromTarkovDataFikaPath, escapeFromTarkovDataPath);
-                bool createSymlinkResult = FileUtils.CreateFolderSymlinkElevate(escapeFromTarkovDataPath, escapeFromTarkovDataFikaPath);
+                bool createSymlinkResult = FileUtils.CreateFolderSymlink(escapeFromTarkovDataPath, escapeFromTarkovDataFikaPath, true);
 
                 if (!createSymlinkResult)
                 {
@@ -167,9 +170,8 @@ namespace Fika_Installer
 
         public bool InstallRelease(string url)
         {
-            string tempFolder = Path.Combine(InstallDir, "FikaInstallerTemp");
 
-            DownloadReleaseResult downloadReleaseResult = DownloadRelease(url, tempFolder);
+            DownloadReleaseResult downloadReleaseResult = DownloadRelease(url, TempDir);
 
             if (!downloadReleaseResult.Result)
             {
@@ -177,7 +179,7 @@ namespace Fika_Installer
             }
 
             string releaseName = downloadReleaseResult.Name;
-            string releaseZipFilePath = Path.Combine(tempFolder, releaseName);
+            string releaseZipFilePath = Path.Combine(TempDir, releaseName);
 
             bool extractResult = ExtractRelease(releaseZipFilePath, InstallDir);
 
@@ -240,6 +242,21 @@ namespace Fika_Installer
             }
 
             return extractResult;
+        }
+
+        public void ApplyFirewallRules()
+        {
+            if (!Directory.Exists(TempDir))
+            {
+                Directory.CreateDirectory(TempDir);
+            }
+
+            string firewallScriptPath = Path.Combine(TempDir, @"FikaFirewall.ps1");
+
+            Console.WriteLine("Applying Fika firewall rules...");
+
+            FwUtils.BuildFirewallScript(InstallDir, TempDir);
+            FwUtils.ExecuteFirewallScript(firewallScriptPath, true);
         }
 
         public void ConfigureSptLauncherConfig()
