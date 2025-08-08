@@ -12,13 +12,13 @@ namespace Fika_Installer.UI
         private string _installDir;
         private string _sptFolder;
 
-        public MenuFactory(string fikaCoreReleaseUrl, string fikaServerReleaseUrl, string fikaHeadlessReleaseUrl, string installerDirectory)
+        public MenuFactory(string installerDirectory, string fikaCoreReleaseUrl, string fikaServerReleaseUrl, string fikaHeadlessReleaseUrl)
         {
+            _installDir = installerDirectory;
+            _sptFolder = installerDirectory;
             _fikaCoreReleaseUrl = fikaCoreReleaseUrl;
             _fikaServerReleaseUrl = fikaServerReleaseUrl;
             _fikaHeadlessReleaseUrl = fikaHeadlessReleaseUrl;
-            _installDir = installerDirectory;
-            _sptFolder = installerDirectory;
         }
 
         public Menu CreateMainMenu()

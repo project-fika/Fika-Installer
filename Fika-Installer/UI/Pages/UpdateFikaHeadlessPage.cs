@@ -18,7 +18,7 @@ namespace Fika_Installer.UI.Pages
 
         public override void Draw()
         {
-            FikaInstaller fikaInstaller = new(_installDir);
+            FikaInstaller fikaInstaller = new(_installDir, _installDir);
 
             bool installHeadlessResult = fikaInstaller.InstallRelease(_fikaHeadlessReleaseUrl);
 

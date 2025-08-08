@@ -20,7 +20,7 @@ namespace Fika_Installer
             string fikaHeadlessReleaseUrl = Constants.FikaReleaseUrls["Fika.Headless"];
             string installerDirectory = Constants.InstallerDirectory;
 
-            MenuFactory menuFactory = new MenuFactory(fikaCoreReleaseUrl, fikaServerReleaseUrl, fikaHeadlessReleaseUrl, installerDirectory);
+            MenuFactory menuFactory = new MenuFactory(installerDirectory, fikaCoreReleaseUrl, fikaServerReleaseUrl, fikaHeadlessReleaseUrl);
 
             while (true)
             {

@@ -6,23 +6,15 @@ namespace Fika_Installer
 {
     public class FikaInstaller
     {
-        public string InstallDir { get; set; }
-        public string SptFolder { get; set; }
-
-        public string TempDir { get; set; }
-
-        public FikaInstaller(string installDir)
-        {
-            InstallDir = installDir;
-            SptFolder = installDir;
-            TempDir = Path.Combine(InstallDir, "FikaInstallerTemp");
-        }
+        private string _installDir;
+        private string _sptFolder;
+        private string _tempDir;
 
         public FikaInstaller(string installDir, string sptFolder)
         {
-            InstallDir = installDir;
-            SptFolder = sptFolder;
-            TempDir = Path.Combine(InstallDir, "FikaInstallerTemp");
+            _installDir = installDir;
+            _sptFolder = sptFolder;
+            _tempDir = Path.Combine(_installDir, "FikaInstallerTemp");
         }
 
         private bool ValidateSptFolder(string sptFolder)
@@ -66,7 +58,7 @@ namespace Fika_Installer
                 return string.Empty;
             }
 
-            SptFolder = sptFolder;
+            _sptFolder = sptFolder;
 
             return sptFolder;
         }
@@ -89,7 +81,7 @@ namespace Fika_Installer
 
             if (installType == InstallMethod.HardCopy)
             {
-                bool copySptFolderResult = CopySptFolder(SptFolder, InstallDir, excludeFiles);
+                bool copySptFolderResult = CopySptFolder(_sptFolder, _installDir, excludeFiles);
 
                 if (!copySptFolderResult)
                 {
@@ -99,8 +91,8 @@ namespace Fika_Installer
 
             if (installType == InstallMethod.Symlink)
             {
-                string escapeFromTarkovDataPath = Path.Combine(SptFolder, "EscapeFromTarkov_Data");
-                string escapeFromTarkovDataFikaPath = Path.Combine(InstallDir, "EscapeFromTarkov_Data");
+                string escapeFromTarkovDataPath = Path.Combine(_sptFolder, "EscapeFromTarkov_Data");
+                string escapeFromTarkovDataFikaPath = Path.Combine(_installDir, "EscapeFromTarkov_Data");
 
                 bool createSymlinkResult = FileUtils.CreateFolderSymlink(escapeFromTarkovDataPath, escapeFromTarkovDataFikaPath, true);
 
@@ -111,7 +103,7 @@ namespace Fika_Installer
 
                 excludeFiles.Add("EscapeFromTarkov_Data");
 
-                bool copySptFolderResult = CopySptFolder(SptFolder, InstallDir, excludeFiles);
+                bool copySptFolderResult = CopySptFolder(_sptFolder, _installDir, excludeFiles);
 
                 if (!copySptFolderResult)
                 {
@@ -142,7 +134,7 @@ namespace Fika_Installer
 
         public bool IsFikaServerInstalled()
         {
-            string fikaServerPath = Path.Combine(SptFolder, @"user\mods\fika-server");
+            string fikaServerPath = Path.Combine(_sptFolder, @"user\mods\fika-server");
 
             if (Directory.Exists(fikaServerPath))
             {
@@ -154,8 +146,8 @@ namespace Fika_Installer
 
         public bool IsSptInstalled()
         {
-            string sptServerPath = Path.Combine(InstallDir, "SPT.Server.exe");
-            string sptLauncherPath = Path.Combine(InstallDir, "SPT.Launcher.exe");
+            string sptServerPath = Path.Combine(_installDir, "SPT.Server.exe");
+            string sptLauncherPath = Path.Combine(_installDir, "SPT.Launcher.exe");
 
             bool sptServerFound = File.Exists(sptServerPath);
             bool sptLauncherFound = File.Exists(sptLauncherPath);
@@ -171,7 +163,7 @@ namespace Fika_Installer
         public bool InstallRelease(string url)
         {
 
-            DownloadReleaseResult downloadReleaseResult = DownloadRelease(url, TempDir);
+            DownloadReleaseResult downloadReleaseResult = DownloadRelease(url, _tempDir);
 
             if (!downloadReleaseResult.Result)
             {
@@ -179,9 +171,9 @@ namespace Fika_Installer
             }
 
             string releaseName = downloadReleaseResult.Name;
-            string releaseZipFilePath = Path.Combine(TempDir, releaseName);
+            string releaseZipFilePath = Path.Combine(_tempDir, releaseName);
 
-            bool extractResult = ExtractRelease(releaseZipFilePath, InstallDir);
+            bool extractResult = ExtractRelease(releaseZipFilePath, _installDir);
 
             if (!extractResult)
             {
@@ -246,27 +238,27 @@ namespace Fika_Installer
 
         public void ApplyFirewallRules()
         {
-            if (!Directory.Exists(TempDir))
+            if (!Directory.Exists(_tempDir))
             {
-                Directory.CreateDirectory(TempDir);
+                Directory.CreateDirectory(_tempDir);
             }
 
-            string firewallScriptPath = Path.Combine(TempDir, @"FikaFirewall.ps1");
+            string firewallScriptPath = Path.Combine(_tempDir, @"FikaFirewall.ps1");
 
             Console.WriteLine("Applying Fika firewall rules...");
 
-            FwUtils.BuildFirewallScript(InstallDir, TempDir);
+            FwUtils.BuildFirewallScript(_installDir, _tempDir);
             FwUtils.ExecuteFirewallScript(firewallScriptPath, true);
         }
 
         public void ConfigureSptLauncherConfig()
         {
-            string launcherConfigPath = Path.Combine(InstallDir, @"user\launcher\config.json");
+            string launcherConfigPath = Path.Combine(_installDir, @"user\launcher\config.json");
 
             JObject launcherConfig = JsonUtils.ReadJson(launcherConfigPath);
 
             launcherConfig["IsDevMode"] = true;
-            launcherConfig["GamePath"] = InstallDir;
+            launcherConfig["GamePath"] = _installDir;
             launcherConfig["Server"]["Url"] = "https://127.0.0.1:6969";
 
             JsonUtils.WriteJson(launcherConfig, launcherConfigPath);
