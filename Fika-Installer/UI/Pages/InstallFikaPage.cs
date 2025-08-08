@@ -15,7 +15,7 @@ namespace Fika_Installer.UI.Pages
             _fikaServerReleaseUrl = fikaServerReleaseUrl;
         }
         
-        public override void OnShow()
+        public override void Draw()
         {
             FikaInstaller fikaInstaller = new(_installDir);
 
@@ -23,14 +23,8 @@ namespace Fika_Installer.UI.Pages
 
             if (!isSptInstalled)
             {
-                string sptFolder = fikaInstaller.BrowseSptFolderAndValidate();
-
-                if (string.IsNullOrEmpty(sptFolder))
-                {
-                    return;
-                }
-
-                fikaInstaller.InstallDir = sptFolder;
+                ConUtils.WriteError("SPT not found. Please place Fika-Installer inside your SPT directory.", true);
+                return;
             }
 
             bool installResult = fikaInstaller.InstallRelease(_fikaCoreReleaseUrl);

@@ -57,7 +57,9 @@ namespace Fika_Installer.UI
             string fikaHeadlessPath = Path.Combine(_installDir, @"BepInEx\plugins\Fika.Headless.dll");
             bool fikaHeadlessDetected = File.Exists(fikaHeadlessPath);
 
-            MenuChoice installFikaInCurrentFolder = new("Install Fika in current folder", () => { });
+            InstallFikaCurrentDirPage installFikaCurrentDirPage = new(this, _installDir, _sptFolder, _fikaCoreReleaseUrl, _fikaServerReleaseUrl);
+
+            MenuChoice installFikaInCurrentFolder = new("Install Fika in current folder", installFikaCurrentDirPage);
             choices.Add(installFikaInCurrentFolder);
 
             if (fikaHeadlessDetected)

@@ -15,7 +15,7 @@ namespace Fika_Installer.UI.Pages
             _fikaServerReleaseUrl = fikaServerReleaseUrl;
         }
 
-        public override void OnShow()
+        public override void Draw()
         {
             FikaInstaller fikaInstaller = new(_installDir);
 

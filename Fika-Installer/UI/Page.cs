@@ -5,9 +5,9 @@
         public void Show()
         {
             Header.Show();
-            OnShow();
+            Draw();
         }
         
-        public abstract void OnShow();
+        public abstract void Draw();
     }
 }

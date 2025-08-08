@@ -21,7 +21,7 @@ namespace Fika_Installer.UI.Pages
             _fikaServerReleaseUrl = fikaServerReleaseUrl;
         }
 
-        public override void OnShow()
+        public override void Draw()
         {
             FikaInstaller fikaInstaller = new(_installDir, _sptFolder);
 
@@ -36,11 +36,6 @@ namespace Fika_Installer.UI.Pages
                     return;
                 }
 
-                fikaInstaller.SptFolder = _sptFolder;
-            }
-
-            if (!isSptInstalled)
-            {
                 Menu installMethodMenu = _menuFactory.CreateInstallMethodMenu();
                 MenuChoice installTypeChoice = installMethodMenu.Show();
 
@@ -48,12 +43,14 @@ namespace Fika_Installer.UI.Pages
 
                 if (Enum.TryParse(selectedInstallType, out InstallMethod installType))
                 {
-                    bool installSptResult = fikaInstaller.InstallSpt(installType, true);
+                    bool installSptResult = fikaInstaller.InstallSpt(installType);
 
                     if (!installSptResult)
                     {
                         return;
                     }
+
+                    fikaInstaller.ConfigureSptLauncherConfig();
                 }
             }
 

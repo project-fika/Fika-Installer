@@ -21,7 +21,7 @@ namespace Fika_Installer.UI.Pages
             _fikaHeadlessReleaseUrl = fikaHeadlessReleaseUrl;
         }
         
-        public override void OnShow()
+        public override void Draw()
         {
             FikaInstaller fikaInstaller = new(_installDir, _sptFolder);
 
@@ -35,8 +35,6 @@ namespace Fika_Installer.UI.Pages
                 {
                     return;
                 }
-
-                fikaInstaller.SptFolder = _sptFolder;
             }
 
             bool isFikaServerInstalled = fikaInstaller.IsFikaServerInstalled();
@@ -54,24 +52,28 @@ namespace Fika_Installer.UI.Pages
             Menu profileSelectionMenu = _menuFactory.CreateProfileSelectionMenu(sptProfileIds);
             MenuChoice profileSelectionChoice = profileSelectionMenu.Show();
 
+            string headlessProfileId = "";
+
             if (profileSelectionChoice.Id == "createNewHeadlessProfile")
             {
-                fikaHeadless.CreateHeadlessProfileAndCopyScript();
+                SptProfile headlessProfile = fikaHeadless.CreateHeadlessProfile();
+                headlessProfileId = headlessProfile.ProfileId;
             }
             else
             {
-                string selectedProfileId = profileSelectionChoice.Text;
-                fikaHeadless.CopyProfileScript(selectedProfileId);
+                headlessProfileId = profileSelectionChoice.Text;
             }
+
+            fikaHeadless.CopyProfileScript(headlessProfileId);
 
             if (!isSptInstalled)
             {
                 Menu installMethodMenu = _menuFactory.CreateInstallMethodMenu();
-                MenuChoice installTypeChoice = installMethodMenu.Show();
+                MenuChoice installMethodMenuChoice = installMethodMenu.Show();
 
-                string selectedInstallType = installTypeChoice.Text;
+                string selectedInstallMethod = installMethodMenuChoice.Text;
                 
-                if (Enum.TryParse(selectedInstallType, out InstallMethod installType))
+                if (Enum.TryParse(selectedInstallMethod, out InstallMethod installType))
                 {
                     bool installSptResult = fikaInstaller.InstallSpt(installType, true);
 

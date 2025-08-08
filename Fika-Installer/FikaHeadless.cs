@@ -40,7 +40,7 @@ namespace Fika_Installer
                 {
                     foreach (string profilePath in profilesPaths)
                     {
-                        SptProfile sptProfile = ReadSptProfileJson(profilePath);
+                        SptProfile sptProfile = GetSptProfileFromJson(profilePath);
 
                         if (headlessProfilesOnly)
                         {
@@ -60,7 +60,7 @@ namespace Fika_Installer
             return sptProfiles;
         }
 
-        public SptProfile ReadSptProfileJson(string sptProfilePath)
+        public SptProfile GetSptProfileFromJson(string sptProfilePath)
         {
             SptProfile sptProfile = new();
 
@@ -79,7 +79,7 @@ namespace Fika_Installer
             return sptProfile;
         }
 
-        public void CopyProfileScript(string profileId)
+        public bool CopyProfileScript(string profileId)
         {
             string headlessProfileStartScript = $"Start_headless_{profileId}.ps1";
 
@@ -90,18 +90,13 @@ namespace Fika_Installer
                 string headlessProfileStartScriptDestPath = Path.Combine(_fikaDirectory, headlessProfileStartScript);
                 File.Copy(headlessProfileStartScriptPath, headlessProfileStartScriptDestPath, true);
             }
-        }
-
-        public void CreateHeadlessProfileAndCopyScript()
-        {
-            SptProfile headlessProfile = CreateHeadlessProfile();
-
-            if (string.IsNullOrEmpty(headlessProfile.ProfileId))
+            else
             {
-                return;
+                ConUtils.WriteError($"Couldn't find {headlessProfileStartScript}!", true);
+                return false;
             }
 
-            CopyProfileScript(headlessProfile.ProfileId);
+            return true;
         }
 
         public SptProfile CreateHeadlessProfile()
@@ -142,7 +137,7 @@ namespace Fika_Installer
 
             if (File.Exists(headlessProfilePath))
             {
-                headlessProfile = ReadSptProfileJson(headlessProfilePath);
+                headlessProfile = GetSptProfileFromJson(headlessProfilePath);
             }
 
             return headlessProfile;

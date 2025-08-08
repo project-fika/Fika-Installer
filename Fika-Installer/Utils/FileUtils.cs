@@ -159,7 +159,7 @@ namespace Fika_Installer.Utils
         }
 
         public static bool CreateFolderSymlinkElevate(string fromPath, string toPath)
-        {           
+        {
             ProcessStartInfo startInfo = new ProcessStartInfo
             {
                 FileName = Environment.ProcessPath,

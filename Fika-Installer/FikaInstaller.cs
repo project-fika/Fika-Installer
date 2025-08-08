@@ -62,6 +62,8 @@ namespace Fika_Installer
                 return string.Empty;
             }
 
+            SptFolder = sptFolder;
+
             return sptFolder;
         }
 
@@ -240,14 +242,14 @@ namespace Fika_Installer
             return extractResult;
         }
 
-        public void ConfigureSptLauncherConfig(string fikaDirectory)
+        public void ConfigureSptLauncherConfig()
         {
-            string launcherConfigPath = Path.Combine(fikaDirectory, @"user\launcher\config.json");
+            string launcherConfigPath = Path.Combine(InstallDir, @"user\launcher\config.json");
 
             JObject launcherConfig = JsonUtils.ReadJson(launcherConfigPath);
 
             launcherConfig["IsDevMode"] = true;
-            launcherConfig["GamePath"] = fikaDirectory;
+            launcherConfig["GamePath"] = InstallDir;
             launcherConfig["Server"]["Url"] = "https://127.0.0.1:6969";
 
             JsonUtils.WriteJson(launcherConfig, launcherConfigPath);
