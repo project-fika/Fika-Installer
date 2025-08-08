@@ -13,9 +13,9 @@
             Password = "";
         }
 
-        public SptProfile(string sessionID, string name, string password)
+        public SptProfile(string profileId, string name, string password)
         {
-            ProfileId = sessionID;
+            ProfileId = profileId;
             Name = name;
             Password = password;
         }
