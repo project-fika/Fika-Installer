@@ -11,7 +11,7 @@ namespace Fika_Installer.UI.Pages
         private string _sptFolder;
         private string _fikaCoreReleaseUrl;
         private string _fikaHeadlessReleaseUrl;
-        
+
         public InstallFikaHeadlessPage(MenuFactory menuFactory, string installDir, string sptFolder, string fikaCoreReleaseUrl, string fikaHeadlessReleaseUrl)
         {
             _menuFactory = menuFactory;
@@ -20,7 +20,7 @@ namespace Fika_Installer.UI.Pages
             _fikaCoreReleaseUrl = fikaCoreReleaseUrl;
             _fikaHeadlessReleaseUrl = fikaHeadlessReleaseUrl;
         }
-        
+
         public override void Draw()
         {
             FikaInstaller fikaInstaller = new(_installDir, _sptFolder);
@@ -72,7 +72,7 @@ namespace Fika_Installer.UI.Pages
                 MenuChoice installMethodMenuChoice = installMethodMenu.Show();
 
                 string selectedInstallMethod = installMethodMenuChoice.Text;
-                
+
                 if (Enum.TryParse(selectedInstallMethod, out InstallMethod installType))
                 {
                     bool installSptResult = fikaInstaller.InstallSpt(installType, true);

@@ -9,7 +9,7 @@ namespace Fika_Installer
     }
 
     public static class GitHub
-    {       
+    {
         public static GitHubAsset[] FetchGitHubAssets(string releaseUrl)
         {
             List<GitHubAsset> githubAssets = [];
@@ -39,7 +39,7 @@ namespace Fika_Installer
                     }
                 }
             }
-            catch 
+            catch
             {
 
             }

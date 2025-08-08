@@ -1,11 +1,10 @@
-﻿using System.Diagnostics;
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using ProgressBar = Fika_Installer.UI.ProgressBar;
 
 namespace Fika_Installer.Utils
 {
     public static class FileUtils
-    {        
+    {
         public static string BrowseFolder(string description)
         {
             using (var dialog = new FolderBrowserDialog())
@@ -165,7 +164,7 @@ namespace Fika_Installer.Utils
                 bool symlinkElevateResult = ProcUtils.ExecuteSelfElevate($"-symlink \"{fromPath}\" \"{toPath}\"");
                 return symlinkElevateResult;
             }
-            
+
             try
             {
                 Directory.CreateSymbolicLink(toPath, fromPath);

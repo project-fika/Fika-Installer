@@ -7,14 +7,14 @@ namespace Fika_Installer.UI.Pages
         private string _installDir;
         private string _fikaCoreReleaseUrl;
         private string _fikaServerReleaseUrl;
-        
+
         public InstallFikaPage(string installDir, string fikaCoreReleaseUrl, string fikaServerReleaseUrl)
         {
             _installDir = installDir;
             _fikaCoreReleaseUrl = fikaCoreReleaseUrl;
             _fikaServerReleaseUrl = fikaServerReleaseUrl;
         }
-        
+
         public override void Draw()
         {
             FikaInstaller fikaInstaller = new(_installDir);

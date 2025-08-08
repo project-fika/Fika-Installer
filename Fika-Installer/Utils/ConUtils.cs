@@ -5,7 +5,7 @@
         public static void WriteSuccess(string message, bool confirm = false)
         {
             Console.ForegroundColor = ConsoleColor.Green;
-            
+
             if (confirm)
             {
                 WriteConfirm(message);
@@ -21,7 +21,7 @@
         public static void WriteError(string message, bool confirm = false)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            
+
             if (confirm)
             {
                 WriteConfirm(message);
@@ -30,7 +30,7 @@
             {
                 Console.WriteLine(message);
             }
-                
+
             Console.ResetColor();
         }
 

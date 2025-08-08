@@ -1,6 +1,5 @@
 ﻿using Fika_Installer.UI;
 using Fika_Installer.Utils;
-using System.Reflection;
 
 namespace Fika_Installer
 {

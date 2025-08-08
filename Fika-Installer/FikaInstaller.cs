@@ -10,21 +10,21 @@ namespace Fika_Installer
         public string SptFolder { get; set; }
 
         public string TempDir { get; set; }
-        
+
         public FikaInstaller(string installDir)
         {
             InstallDir = installDir;
             SptFolder = installDir;
             TempDir = Path.Combine(InstallDir, "FikaInstallerTemp");
         }
-        
+
         public FikaInstaller(string installDir, string sptFolder)
         {
             InstallDir = installDir;
             SptFolder = sptFolder;
             TempDir = Path.Combine(InstallDir, "FikaInstallerTemp");
         }
-        
+
         private bool ValidateSptFolder(string sptFolder)
         {
             string sptServerPath = Path.Combine(sptFolder, "SPT.Server.exe");

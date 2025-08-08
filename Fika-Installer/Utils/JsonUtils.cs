@@ -14,7 +14,7 @@ namespace Fika_Installer.Utils
                 string launcherConfig = File.ReadAllText(jsonPath);
                 jObject = JObject.Parse(launcherConfig);
             }
-            catch 
+            catch
             {
                 ConUtils.WriteError($"An error occurred while reading: {jsonPath}");
             }

@@ -20,7 +20,7 @@ namespace Fika_Installer.UI
             _installDir = installerDirectory;
             _sptFolder = installerDirectory;
         }
-        
+
         public Menu CreateMainMenu()
         {
             List<MenuChoice> choices = [];
@@ -31,7 +31,7 @@ namespace Fika_Installer.UI
             if (fikaDetected)
             {
                 UpdateFikaPage updateFikaPage = new UpdateFikaPage(_installDir, _fikaCoreReleaseUrl, _fikaServerReleaseUrl);
-                
+
                 MenuChoice updateFikaChoice = new("Update Fika", updateFikaPage);
                 choices.Add(updateFikaChoice);
             }
@@ -71,7 +71,7 @@ namespace Fika_Installer.UI
             else
             {
                 InstallFikaHeadlessPage installFikaHeadlessPage = new(this, _installDir, _sptFolder, _fikaCoreReleaseUrl, _fikaHeadlessReleaseUrl);
-                
+
                 MenuChoice installFikaHeadlessChoice = new("Install Fika Headless", installFikaHeadlessPage);
                 choices.Add(installFikaHeadlessChoice);
             }

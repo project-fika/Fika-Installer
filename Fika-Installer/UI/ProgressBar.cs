@@ -85,7 +85,7 @@
             {
                 return;
             }
-            
+
             Erase(0, _messageCursorTopPos, _message.Length);
 
             int messageLength = _message.Length; // Message + space

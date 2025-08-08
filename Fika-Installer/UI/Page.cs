@@ -7,7 +7,7 @@
             Header.Show();
             Draw();
         }
-        
+
         public abstract void Draw();
     }
 }

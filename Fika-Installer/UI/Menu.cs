@@ -54,7 +54,7 @@ namespace Fika_Installer.UI
 
                         ClearMenu(_totalLines);
                         choice.Execute();
-                        
+
                         return choice;
                     }
                 }

@@ -10,13 +10,13 @@ namespace Fika_Installer
     public class FikaHeadless
     {
         public List<SptProfile> SptProfiles;
-        
+
         private string? _headlessProfileId;
         private string _fikaDirectory;
         private string _sptFolder;
         private string _sptProfilesFolder;
         private string _fikaScriptsFolder;
-        
+
         public FikaHeadless(string installDir, string sptFolder)
         {
             _fikaDirectory = installDir;

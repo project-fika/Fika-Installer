@@ -1,7 +1,4 @@
-﻿using System.Reflection;
-using System.Reflection.Metadata.Ecma335;
-
-namespace Fika_Installer.Utils
+﻿namespace Fika_Installer.Utils
 {
     public static class FwUtils
     {
