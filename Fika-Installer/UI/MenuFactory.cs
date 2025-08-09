@@ -79,7 +79,7 @@ namespace Fika_Installer.UI
             MenuChoice backChoice = new("Back", () => { });
             choices.Add(backChoice);
 
-            Menu advancedOptionsMenu = new Menu(choices);
+            Menu advancedOptionsMenu = new(choices);
             return advancedOptionsMenu;
         }
 
@@ -89,7 +89,7 @@ namespace Fika_Installer.UI
 
             foreach (SptProfile profile in sptProfiles)
             {
-                MenuChoice menuChoice = new MenuChoice(profile.ProfileId);
+                MenuChoice menuChoice = new(profile.ProfileId);
                 choices.Add(menuChoice);
             }
 
