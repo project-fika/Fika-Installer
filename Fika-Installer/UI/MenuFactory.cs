@@ -30,14 +30,14 @@ namespace Fika_Installer.UI
 
             if (fikaDetected)
             {
-                UpdateFikaPage updateFikaPage = new UpdateFikaPage(_installDir, _fikaCoreReleaseUrl, _fikaServerReleaseUrl);
+                UpdateFikaPage updateFikaPage = new(_installDir, _fikaCoreReleaseUrl, _fikaServerReleaseUrl);
 
                 MenuChoice updateFikaChoice = new("Update Fika", updateFikaPage);
                 choices.Add(updateFikaChoice);
             }
             else
             {
-                InstallFikaPage installFikaPage = new InstallFikaPage(_installDir, _fikaCoreReleaseUrl, _fikaServerReleaseUrl);
+                InstallFikaPage installFikaPage = new(_installDir, _fikaCoreReleaseUrl, _fikaServerReleaseUrl);
 
                 MenuChoice installFikaChoice = new("Install Fika", installFikaPage);
                 choices.Add(installFikaChoice);
@@ -93,10 +93,10 @@ namespace Fika_Installer.UI
                 choices.Add(menuChoice);
             }
 
-            MenuChoice createNewHeadlessProfile = new MenuChoice("Create a new headless profile", "createNewHeadlessProfile");
+            MenuChoice createNewHeadlessProfile = new("Create a new headless profile", "createNewHeadlessProfile");
             choices.Add(createNewHeadlessProfile);
 
-            Menu profileSelectionMenu = new Menu("Please choose the headless profile to use for your headless client:", choices);
+            Menu profileSelectionMenu = new("Please choose the headless profile to use for your headless client:", choices);
             return profileSelectionMenu;
         }
 

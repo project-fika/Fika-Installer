@@ -157,21 +157,15 @@ namespace Fika_Installer.Utils
             }
         }
 
-        public static bool CreateFolderSymlink(string fromPath, string toPath, bool elevate = false)
+        public static bool CreateFolderSymlink(string fromPath, string toPath)
         {
-            if (elevate)
-            {
-                bool symlinkElevateResult = ProcUtils.ExecuteSelfElevate($"-symlink \"{fromPath}\" \"{toPath}\"");
-                return symlinkElevateResult;
-            }
-
             try
             {
                 Directory.CreateSymbolicLink(toPath, fromPath);
             }
             catch (Exception ex)
             {
-                ConUtils.WriteError(ex.Message);
+                ConUtils.WriteError($"An error occurred when creating the symlink: {ex.Message}");
                 return false;
             }
 

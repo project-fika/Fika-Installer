@@ -45,21 +45,15 @@ foreach ($r in $rules) {{
             File.WriteAllText(psScriptPath, psScript);
         }
 
-        public static void ExecuteFirewallScript(string scriptPath, bool elevate = false)
+        public static void ExecuteFirewallScript(string scriptPath)
         {
             if (!File.Exists(scriptPath))
             {
                 return;
             }
 
-            if (elevate)
-            {
-                ProcUtils.ExecuteSelfElevate($"-firewall \"{scriptPath}\"");
-                return;
-            }
-
             string args = $"-NoProfile -ExecutionPolicy Bypass -File \"{scriptPath}\"";
-            ProcUtils.Execute($"PowerShell.exe", args);
+            ProcUtils.ExecuteSilent($"Powershell.exe", args);
         }
     }
 }

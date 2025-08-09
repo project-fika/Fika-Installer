@@ -94,7 +94,7 @@ namespace Fika_Installer
                 string escapeFromTarkovDataPath = Path.Combine(_sptFolder, "EscapeFromTarkov_Data");
                 string escapeFromTarkovDataFikaPath = Path.Combine(_installDir, "EscapeFromTarkov_Data");
 
-                bool createSymlinkResult = FileUtils.CreateFolderSymlink(escapeFromTarkovDataPath, escapeFromTarkovDataFikaPath, true);
+                bool createSymlinkResult = FileUtils.CreateFolderSymlink(escapeFromTarkovDataPath, escapeFromTarkovDataFikaPath);
 
                 if (!createSymlinkResult)
                 {
@@ -248,7 +248,7 @@ namespace Fika_Installer
             Console.WriteLine("Applying Fika firewall rules...");
 
             FwUtils.BuildFirewallScript(_installDir, _tempDir);
-            FwUtils.ExecuteFirewallScript(firewallScriptPath, true);
+            FwUtils.ExecuteFirewallScript(firewallScriptPath);
         }
 
         public void ConfigureSptLauncherConfig()

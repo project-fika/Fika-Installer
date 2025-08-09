@@ -1,13 +1,9 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Fika_Installer.Models;
+using Fika_Installer.Utils;
+using Newtonsoft.Json.Linq;
 
 namespace Fika_Installer
 {
-    public class GitHubAsset(string name, string url)
-    {
-        public string Name { get; set; } = name;
-        public string Url { get; set; } = url;
-    }
-
     public static class GitHub
     {
         public static GitHubAsset[] FetchGitHubAssets(string releaseUrl)
@@ -39,9 +35,9 @@ namespace Fika_Installer
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-
+                ConUtils.WriteError($"An error occurred when fetching GitHub assets: {ex.Message}", true);
             }
 
             return [.. githubAssets];
