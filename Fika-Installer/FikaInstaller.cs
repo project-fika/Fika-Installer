@@ -238,17 +238,9 @@ namespace Fika_Installer
 
         public void ApplyFirewallRules()
         {
-            if (!Directory.Exists(_tempDir))
-            {
-                Directory.CreateDirectory(_tempDir);
-            }
-
-            string firewallScriptPath = Path.Combine(_tempDir, @"FikaFirewall.ps1");
-
             Console.WriteLine("Applying Fika firewall rules...");
 
-            FwUtils.BuildFirewallScript(_installDir, _tempDir);
-            FwUtils.ExecuteFirewallScript(firewallScriptPath);
+            FwUtils.ApplyFirewallRules(_installDir);
         }
 
         public void ConfigureSptLauncherConfig()

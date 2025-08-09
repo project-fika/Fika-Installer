@@ -2,58 +2,19 @@
 {
     public static class FwUtils
     {
-        public static void BuildFirewallScript(string installDir, string tempDir)
+        public static void ApplyFirewallRules(string installDir)
         {
-            string escapeFromTarkovPath = Path.Combine(installDir, "EscapeFromTarkov.exe");
+            string powershellCmd = $"-NoProfile -ExecutionPolicy Bypass";
+
             string sptServerPath = Path.Combine(installDir, "SPT.Server.exe");
+            string sptFirewallRuleCmd = $"New-NetFirewallRule -DisplayName 'Fika (SPT) - TCP 6969' -Direction Inbound -Protocol TCP -LocalPort 6969 -Program \"{sptServerPath}\" -Action Allow -Enabled True";
+            
+            ProcUtils.ExecuteSilent("powershell.exe", $"{powershellCmd} -Command \"{sptFirewallRuleCmd}\"");
 
-            string psScript = @$"
-$ErrorActionPreference = 'Stop'
+            string escapeFromTarkovPath = Path.Combine(installDir, "EscapeFromTarkov.exe");
+            string escapeFromTarkovFirewallRuleCmd = $"New-NetFirewallRule -DisplayName 'Fika (Core) - UDP 25565' -Direction Inbound -Protocol UDP -LocalPort 25565 -Program \"{escapeFromTarkovPath}\" -Action Allow -Enabled True";
 
-$rules = @(
-    @{{
-        Name     = 'Fika (SPT) - TCP 6969 (Inbound)'
-        Protocol = 'TCP'
-        Port     = 6969
-        Program  = '{sptServerPath}'
-    }},
-    @{{
-        Name     = 'Fika (Core) - UDP 25565 (Inbound)'
-        Protocol = 'UDP'
-        Port     = 25565
-        Program  = '{escapeFromTarkovPath}'
-    }}
-)
-
-foreach ($r in $rules) {{
-    if (Get-NetFirewallRule -DisplayName $r.Name -ErrorAction SilentlyContinue) {{
-        Remove-NetFirewallRule -DisplayName $r.Name
-    }}
-
-    New-NetFirewallRule `
-        -DisplayName  $r.Name `
-        -Direction    Inbound `
-        -Action       Allow `
-        -Protocol     $r.Protocol `
-        -LocalPort    $r.Port `
-        -Profile      Any `
-        -Program      $r.Program `
-        -Enabled      True | Out-Null
-}}
-";
-            string psScriptPath = Path.Combine(tempDir, "FikaFirewall.ps1");
-            File.WriteAllText(psScriptPath, psScript);
-        }
-
-        public static void ExecuteFirewallScript(string scriptPath)
-        {
-            if (!File.Exists(scriptPath))
-            {
-                return;
-            }
-
-            string args = $"-NoProfile -ExecutionPolicy Bypass -File \"{scriptPath}\"";
-            ProcUtils.ExecuteSilent($"Powershell.exe", args);
+            ProcUtils.ExecuteSilent("powershell.exe", $"{powershellCmd} -Command \"{escapeFromTarkovFirewallRuleCmd}\"");
         }
     }
 }
