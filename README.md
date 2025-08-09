@@ -19,7 +19,7 @@ The goal is to make the tool as simple as possible with minimal user interaction
 
 ## Advanced usage
 There is an "Advanced options" menu with a few additional features:
-* "Install Fika in current folder" allows you to install Fika-Core and Fika-Server in the directory where Fika-Installed is located. The SPT files will be copied or symlinked.
+* "Install Fika in current folder" allows you to install Fika-Core and Fika-Server in the directory where Fika-Installer is located. The SPT files will be copied or symlinked.
 * "Install Fika Headless" allows you to install Fika-Core and Fika-Headless in the directory where Fika-Installer is located. The SPT files will be copied or symlinked.
 
 ## Linux Support
