@@ -6,7 +6,7 @@ The goal is to make the tool as simple as possible with minimal user interaction
 
 ## Features
 * Install the latest version of Fika (Fika-Core and Fika-Server).
-* Install/update Fika Headless with profile management (create or use an existing headless profile).
+* Install Fika Headless with profile management (create or use an existing headless profile).
 * Update Fika or Fika-Headless.
 * Symlink SPT folder to your Fika/Fika Headless folder to save disk space.
 
