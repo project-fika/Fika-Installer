@@ -13,7 +13,7 @@ The goal is to make the tool as simple as possible with minimal user interaction
 ## Usage
 * Place the Fika-Installer executable in your SPT folder.
 * Run the Fika-Installer executable.
-* Choose "Install Fika". Browse to your SPT folder if you are prompted to do so.
+* Choose "Install Fika".
 * Wait for installation to finish.
 * Enjoy Fika!
 
