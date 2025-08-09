@@ -22,5 +22,8 @@ There is an "Advanced options" menu with a few additional features:
 * "Install Fika in current folder" allows you to install Fika-Core and Fika-Server in the directory where Fika-Installer is located. The SPT files will be copied or symlinked.
 * "Install Fika Headless" allows you to install Fika-Core and Fika-Headless in the directory where Fika-Installer is located. The SPT files will be copied or symlinked.
 
+## Admin requirement
+Fika-Installer requires admin elevation for firewall configuration and symlinking. Fika-Installer does not perform any other modifications to your system.
+
 ## Linux Support
 Linux support is not planned. However, only minimal code modifications should be required for Linux compatibility. Feel free to submit a PR.
