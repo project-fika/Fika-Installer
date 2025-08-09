@@ -236,11 +236,15 @@ namespace Fika_Installer
             return extractResult;
         }
 
-        public void ApplyFirewallRules()
+        public void ApplyFirewallRules(string installDir, string sptFolder)
         {
             Console.WriteLine("Applying Fika firewall rules...");
 
-            FwUtils.ApplyFirewallRules(_installDir);
+            string sptServerPath = Path.Combine(sptFolder, "SPT.Server.exe");
+            FwUtils.CreateFirewallRule("Fika (SPT) - TCP 6969", "Inbound", "TCP", "6969", sptServerPath);
+
+            string escapeFromTarkovPath = Path.Combine(installDir, "EscapeFromTarkov.exe");
+            FwUtils.CreateFirewallRule("Fika (Core) - UDP 25565", "Inbound", "UDP", "25565", escapeFromTarkovPath);
         }
 
         public void ConfigureSptLauncherConfig()
