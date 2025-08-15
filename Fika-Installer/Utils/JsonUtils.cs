@@ -11,8 +11,8 @@ namespace Fika_Installer.Utils
 
             try
             {
-                string launcherConfig = File.ReadAllText(jsonPath);
-                jObject = JObject.Parse(launcherConfig);
+                string jsonContent = File.ReadAllText(jsonPath);
+                jObject = JObject.Parse(jsonContent);
             }
             catch
             {

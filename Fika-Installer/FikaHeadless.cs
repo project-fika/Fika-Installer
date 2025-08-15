@@ -102,11 +102,17 @@ namespace Fika_Installer
         public SptProfile CreateHeadlessProfile()
         {
             SptProfile headlessProfile = new();
-            int cursorTop = Console.CursorTop;
 
-            while (Process.GetProcessesByName("SPT.Server").Length != 0)
+            bool sptServerRunning = Process.GetProcessesByName("SPT.Server").Length != 0;
+
+            if (sptServerRunning)
             {
-                ConUtils.WriteLine(cursorTop, "SPT Server is currently running. Please close it to continue the installation.");
+                Console.WriteLine("SPT Server is currently running. Please close it to continue the installation.");
+            }
+
+            while (sptServerRunning)
+            {
+                sptServerRunning = Process.GetProcessesByName("SPT.Server").Length != 0;
                 Thread.Sleep(1000);
             }
 
@@ -125,6 +131,7 @@ namespace Fika_Installer
             Console.WriteLine("Creating headless profile... Please wait. This may take a moment.");
 
             string sptServerPath = Path.Combine(_sptFolder, "SPT.Server.exe");
+
             StartProcessAndRedirectOutput(sptServerPath, SptConsoleMessageHandler, TimeSpan.FromMinutes(1)); // TODO: is 1 minute too short?
 
             if (string.IsNullOrEmpty(_headlessProfileId))
@@ -143,21 +150,20 @@ namespace Fika_Installer
             return headlessProfile;
         }
 
-        public void SptConsoleMessageHandler(Process process, string message, Timer cancelTimer)
+        public void SptConsoleMessageHandler(Process process, string message)
         {
             Match generatedLaunchScriptRegexMatch = HeadlessRegex.GeneratedLaunchScriptRegex().Match(message);
 
             if (generatedLaunchScriptRegexMatch.Success)
             {
                 _headlessProfileId = generatedLaunchScriptRegexMatch.Groups[1].Value;
-                cancelTimer.Dispose();
                 process.Kill();
             }
 
             // TODO: regex to capture SPT errors and kill
         }
 
-        public void StartProcessAndRedirectOutput(string filePath, Action<Process, string, Timer> stdOut, TimeSpan timeout)
+        public void StartProcessAndRedirectOutput(string filePath, Action<Process, string> stdOut, TimeSpan timeout)
         {
             using (var cts = new CancellationTokenSource())
             {
@@ -187,7 +193,7 @@ namespace Fika_Installer
                     {
                         if (!string.IsNullOrEmpty(e.Data))
                         {
-                            stdOut(process, e.Data, timeoutTimer);
+                            stdOut(process, e.Data);
                         }
                     };
 

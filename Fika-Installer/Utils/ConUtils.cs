@@ -40,11 +40,11 @@
             Console.ReadKey(true);
         }
 
-        public static void WriteLine(int top, string message)
+        public static void WriteCurrentLine(string message)
         {
+            int top = Console.GetCursorPosition().Top;
             Console.SetCursorPosition(0, top);
             Console.Write(message);
-            Console.SetCursorPosition(0, top + 1);
         }
     }
 }
