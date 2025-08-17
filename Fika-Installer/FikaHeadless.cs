@@ -9,7 +9,7 @@ namespace Fika_Installer
 {
     public class FikaHeadless
     {
-        public List<SptProfile> SptProfiles;
+        public List<SptProfile> SptProfiles { get; }
 
         private string? _headlessProfileId;
         private string _fikaDirectory;
@@ -120,8 +120,7 @@ namespace Fika_Installer
 
             JObject fikaConfig = JsonUtils.ReadJson(fikaConfigPath);
 
-            string sptProfilesPath = Path.Combine(_sptFolder, @"user\profiles");
-            int sptProfilesCount = GetSptProfiles(true).Count;
+            int sptProfilesCount = SptProfiles.Count;
 
             int headlessProfilesAmount = (int)fikaConfig["headless"]["profiles"]["amount"];
             fikaConfig["headless"]["profiles"]["amount"] = sptProfilesCount + 1;
@@ -140,7 +139,7 @@ namespace Fika_Installer
                 return headlessProfile;
             }
 
-            string headlessProfilePath = Path.Combine(sptProfilesPath, $"{_headlessProfileId}.json");
+            string headlessProfilePath = Path.Combine(_sptProfilesFolder, $"{_headlessProfileId}.json");
 
             if (File.Exists(headlessProfilePath))
             {
@@ -160,59 +159,59 @@ namespace Fika_Installer
                 process.Kill();
             }
 
-            // TODO: regex to capture SPT errors and kill
+            Match sptErrorRegexMatch = HeadlessRegex.SptErrorRegex().Match(message);
+
+            if (sptErrorRegexMatch.Success)
+            {
+                process.Kill();
+            }
         }
 
         public void StartProcessAndRedirectOutput(string filePath, Action<Process, string> stdOut, TimeSpan timeout)
         {
-            using (var cts = new CancellationTokenSource())
+            ProcessStartInfo startInfo = new ProcessStartInfo
             {
-                var token = cts.Token;
+                FileName = filePath,
+                WorkingDirectory = Path.GetDirectoryName(filePath),
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
 
-                ProcessStartInfo startInfo = new ProcessStartInfo
+            using (Process process = new Process { StartInfo = startInfo })
+            {
+                Timer timeoutTimer = new(_ =>
                 {
-                    FileName = filePath,
-                    WorkingDirectory = Path.GetDirectoryName(filePath),
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
+                    if (!process.HasExited)
+                    {
+                        process.Kill();
+                    }
+                }, null, timeout, Timeout.InfiniteTimeSpan);
+
+                process.OutputDataReceived += (sender, e) =>
+                {
+                    if (!string.IsNullOrEmpty(e.Data))
+                    {
+                        stdOut(process, e.Data);
+                    }
                 };
 
-                using (Process process = new Process { StartInfo = startInfo })
+                process.ErrorDataReceived += (sender, e) =>
                 {
-                    Timer timeoutTimer = new(_ =>
+                    if (!process.HasExited)
                     {
-                        if (!process.HasExited)
-                        {
-                            process.Kill();
-                        }
-                    }, null, timeout, Timeout.InfiniteTimeSpan);
+                        try { process.Kill(); } catch { }
+                    }
+                };
 
-                    process.OutputDataReceived += (sender, e) =>
-                    {
-                        if (!string.IsNullOrEmpty(e.Data))
-                        {
-                            stdOut(process, e.Data);
-                        }
-                    };
+                process.Start();
 
-                    process.ErrorDataReceived += (sender, e) =>
-                    {
-                        if (!process.HasExited)
-                        {
-                            try { process.Kill(); } catch { }
-                        }
-                    };
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
 
-                    process.Start();
-
-                    process.BeginOutputReadLine();
-                    process.BeginErrorReadLine();
-
-                    process.WaitForExit();
-                    timeoutTimer.Dispose();
-                }
+                process.WaitForExit();
+                timeoutTimer.Dispose();
             }
         }
     }

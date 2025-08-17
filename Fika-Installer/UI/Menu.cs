@@ -8,6 +8,7 @@ namespace Fika_Installer.UI
         public List<MenuChoice> Choices { get; }
 
         private int _totalLines = 0;
+        private int _paginationIndex = 0;
 
         public Menu(List<MenuChoice> choices)
         {
@@ -24,6 +25,9 @@ namespace Fika_Installer.UI
         {
             while (true)
             {
+                bool paging = Choices.Count > 9;
+                int pageSize = paging ? 8 : 9;
+                
                 Header.Show();
 
                 if (!string.IsNullOrEmpty(Message))
@@ -33,10 +37,20 @@ namespace Fika_Installer.UI
                     _totalLines += 2;
                 }
 
-                for (int i = 0; i < Choices.Count; i++)
+                int remaining = Choices.Count - _paginationIndex;
+                int pageChoiceCount = Math.Min(pageSize, remaining);
+                int nextChoiceNumber = pageChoiceCount + 1;
+
+                for (int i = 0; i < pageChoiceCount; i++)
                 {
-                    string choiceText = Choices[i].Text;
+                    string choiceText = Choices[_paginationIndex + i].Text;
                     Console.WriteLine($"[{i + 1}] {choiceText}");
+                    _totalLines++;
+                }
+
+                if (paging)
+                {
+                    Console.WriteLine($"[{nextChoiceNumber}] Next");
                     _totalLines++;
                 }
 
@@ -46,32 +60,53 @@ namespace Fika_Installer.UI
 
                 if (int.TryParse(keyPressed, out int choiceNumber))
                 {
-                    if (choiceNumber >= 1 && choiceNumber <= Choices.Count)
+                    if (paging)
                     {
-                        int choiceIndex = choiceNumber - 1;
+                        if (choiceNumber == nextChoiceNumber)
+                        {
+                            ClearMenu();
 
+                            _paginationIndex += pageChoiceCount;
+
+                            if (_paginationIndex >= Choices.Count)
+                            {
+                                _paginationIndex = 0;
+                            }
+
+                            continue;
+                        }
+                    }
+
+                    if (choiceNumber >= 1 && choiceNumber <= pageChoiceCount)
+                    {
+                        ClearMenu();
+
+                        int choiceIndex = _paginationIndex + choiceNumber - 1;
                         MenuChoice choice = Choices[choiceIndex];
 
-                        ClearMenu(_totalLines);
                         choice.Execute();
 
                         return choice;
                     }
                 }
+
+                ClearMenu();
             }
         }
 
-        private void ClearMenu(int lines)
+        private void ClearMenu()
         {
             int currentLine = Console.CursorTop;
 
-            for (int i = 0; i < lines; i++)
+            for (int i = 0; i < _totalLines; i++)
             {
                 Console.SetCursorPosition(0, currentLine - i - 1);
                 Console.Write(new string(' ', Console.WindowWidth));
             }
 
-            Console.SetCursorPosition(0, currentLine - lines);
+            Console.SetCursorPosition(0, currentLine - _totalLines);
+
+            _totalLines = 0;
         }
     }
 }

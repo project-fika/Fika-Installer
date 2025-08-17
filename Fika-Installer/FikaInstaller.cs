@@ -79,9 +79,11 @@ namespace Fika_Installer
                 ];
             }
 
+            Console.WriteLine("Copying SPT folder...");
+
             if (installType == InstallMethod.HardCopy)
             {
-                bool copySptFolderResult = CopySptFolder(_sptFolder, _installDir, excludeFiles);
+                bool copySptFolderResult = FileUtils.CopyFolderWithProgress(_sptFolder, _installDir, excludeFiles);
 
                 if (!copySptFolderResult)
                 {
@@ -91,45 +93,30 @@ namespace Fika_Installer
 
             if (installType == InstallMethod.Symlink)
             {
+                excludeFiles.Add("EscapeFromTarkov_Data");
+
+                bool copySptFolderResult = FileUtils.CopyFolderWithProgress(_sptFolder, _installDir, excludeFiles);
+
+                if (!copySptFolderResult)
+                {
+                    return false;
+                }
+
                 string escapeFromTarkovDataPath = Path.Combine(_sptFolder, "EscapeFromTarkov_Data");
                 string escapeFromTarkovDataFikaPath = Path.Combine(_installDir, "EscapeFromTarkov_Data");
+
+                Console.WriteLine("Creating symlink...");
 
                 bool createSymlinkResult = FileUtils.CreateFolderSymlink(escapeFromTarkovDataPath, escapeFromTarkovDataFikaPath);
 
                 if (!createSymlinkResult)
                 {
                     ConUtils.WriteError($"An error occurred when creating the symlink.", true);
-                }
-
-                excludeFiles.Add("EscapeFromTarkov_Data");
-
-                bool copySptFolderResult = CopySptFolder(_sptFolder, _installDir, excludeFiles);
-
-                if (!copySptFolderResult)
-                {
                     return false;
                 }
             }
 
             return true;
-        }
-
-        private bool CopySptFolder(string sptFolder, string fikaFolder, List<string> excludeFiles)
-        {
-            Console.WriteLine("Copying SPT folder...");
-
-            bool copySptResult = FileUtils.CopyFolderWithProgress(sptFolder, fikaFolder, excludeFiles);
-
-            if (copySptResult)
-            {
-                Console.WriteLine("SPT folder copied successfully.");
-            }
-            else
-            {
-                ConUtils.WriteError("An error occurred during copy of SPT folder.", true);
-            }
-
-            return copySptResult;
         }
 
         public bool IsFikaServerInstalled()
@@ -162,7 +149,6 @@ namespace Fika_Installer
 
         public bool InstallRelease(string url)
         {
-
             DownloadReleaseResult downloadReleaseResult = DownloadRelease(url, _tempDir);
 
             if (!downloadReleaseResult.Result)
@@ -195,14 +181,12 @@ namespace Fika_Installer
                 string releaseName = githubAssets[0].Name;
                 string assetUrl = githubAssets[0].Url;
 
+                Console.WriteLine($"Downloading {releaseName}...");
+
                 string outputPath = Path.Combine(outputDir, releaseName);
                 bool downloadResult = FileUtils.DownloadFileWithProgress(assetUrl, outputPath);
 
-                if (downloadResult)
-                {
-                    Console.WriteLine($"{releaseName} downloaded.");
-                }
-                else
+                if (!downloadResult)
                 {
                     ConUtils.WriteError($"An error occurred while downloading {releaseName}.", true);
                 }

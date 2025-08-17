@@ -6,5 +6,8 @@ namespace Fika_Installer
     {
         [GeneratedRegex(@"Start_headless_([^.]+)", RegexOptions.IgnoreCase)]
         public static partial Regex GeneratedLaunchScriptRegex();
+
+        [GeneratedRegex(@"error", RegexOptions.IgnoreCase)]
+        public static partial Regex SptErrorRegex();
     }
 }

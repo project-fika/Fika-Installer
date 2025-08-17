@@ -64,7 +64,17 @@ namespace Fika_Installer.UI.Pages
                 headlessProfileId = profileSelectionChoice.Text;
             }
 
-            fikaHeadless.CopyProfileScript(headlessProfileId);
+            if (string.IsNullOrEmpty(headlessProfileId))
+            {
+                return;
+            }
+
+            bool copyProfileScriptResult = fikaHeadless.CopyProfileScript(headlessProfileId);
+
+            if (!copyProfileScriptResult)
+            {
+                return;
+            }
 
             if (!isSptInstalled)
             {
