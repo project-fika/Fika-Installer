@@ -79,28 +79,9 @@ namespace Fika_Installer
                 ];
             }
 
-            Console.WriteLine("Copying SPT folder...");
-
-            if (installType == InstallMethod.HardCopy)
-            {
-                bool copySptFolderResult = FileUtils.CopyFolderWithProgress(_sptFolder, _installDir, excludeFiles);
-
-                if (!copySptFolderResult)
-                {
-                    return false;
-                }
-            }
-
             if (installType == InstallMethod.Symlink)
             {
                 excludeFiles.Add("EscapeFromTarkov_Data");
-
-                bool copySptFolderResult = FileUtils.CopyFolderWithProgress(_sptFolder, _installDir, excludeFiles);
-
-                if (!copySptFolderResult)
-                {
-                    return false;
-                }
 
                 string escapeFromTarkovDataPath = Path.Combine(_sptFolder, "EscapeFromTarkov_Data");
                 string escapeFromTarkovDataFikaPath = Path.Combine(_installDir, "EscapeFromTarkov_Data");
@@ -114,6 +95,15 @@ namespace Fika_Installer
                     ConUtils.WriteError($"An error occurred when creating the symlink.", true);
                     return false;
                 }
+            }
+
+            Console.WriteLine("Copying SPT folder...");
+
+            bool copySptFolderResult = FileUtils.CopyFolderWithProgress(_sptFolder, _installDir, excludeFiles);
+
+            if (!copySptFolderResult)
+            {
+                return false;
             }
 
             return true;
