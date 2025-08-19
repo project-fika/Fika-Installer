@@ -37,7 +37,9 @@ namespace Fika_Installer.UI.Pages
                 }
             }
 
-            bool isFikaServerInstalled = fikaInstaller.IsFikaServerInstalled();
+            FikaHeadless fikaHeadless = new FikaHeadless(_installDir, _sptFolder);
+
+            bool isFikaServerInstalled = fikaHeadless.IsFikaServerInstalled();
 
             if (!isFikaServerInstalled)
             {
@@ -45,7 +47,13 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            FikaHeadless fikaHeadless = new FikaHeadless(_installDir, _sptFolder);
+            bool isFikaServerConfigFound = fikaHeadless.IsFikaConfigFound();
+
+            if (!isFikaServerConfigFound)
+            {
+                ConUtils.WriteError("Please run SPT.Server.exe at least once before installing Fika-Headless.", true);
+                return;
+            }
 
             List<SptProfile> sptProfileIds = fikaHeadless.SptProfiles;
 
@@ -56,7 +64,13 @@ namespace Fika_Installer.UI.Pages
 
             if (profileSelectionChoice.Id == "createNewHeadlessProfile")
             {
-                SptProfile headlessProfile = fikaHeadless.CreateHeadlessProfile();
+                SptProfile? headlessProfile = fikaHeadless.CreateHeadlessProfile();
+
+                if (headlessProfile == null)
+                {
+                    return;
+                }
+
                 headlessProfileId = headlessProfile.ProfileId;
             }
             else

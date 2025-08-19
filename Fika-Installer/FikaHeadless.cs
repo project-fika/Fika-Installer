@@ -14,16 +14,20 @@ namespace Fika_Installer
         private string? _headlessProfileId;
         private string _fikaDirectory;
         private string _sptFolder;
+        private string _fikaServerModPath;
+        private string _fikaServerScriptsFolder;
+        private string _fikaServerConfigPath;
         private string _sptProfilesFolder;
-        private string _fikaScriptsFolder;
 
         public FikaHeadless(string installDir, string sptFolder)
         {
             _fikaDirectory = installDir;
             _sptFolder = sptFolder;
 
+            _fikaServerModPath = Path.Combine(_sptFolder, @"user\mods\fika-server");
+            _fikaServerScriptsFolder = Path.Combine(_fikaServerModPath, @"assets\scripts");
+            _fikaServerConfigPath = Path.Combine(_fikaServerModPath, @"assets\configs\fika.jsonc");
             _sptProfilesFolder = Path.Combine(_sptFolder, @"user\profiles");
-            _fikaScriptsFolder = Path.Combine(_sptFolder, @"user\mods\fika-server\assets\scripts");
 
             SptProfiles = GetSptProfiles(true);
         }
@@ -40,18 +44,21 @@ namespace Fika_Installer
                 {
                     foreach (string profilePath in profilesPaths)
                     {
-                        SptProfile sptProfile = GetSptProfileFromJson(profilePath);
+                        SptProfile? sptProfile = GetSptProfileFromJson(profilePath);
 
-                        if (headlessProfilesOnly)
+                        if (sptProfile != null)
                         {
-                            if (sptProfile.Password == "fika-headless")
+                            if (headlessProfilesOnly)
+                            {
+                                if (sptProfile.Password == "fika-headless")
+                                {
+                                    sptProfiles.Add(sptProfile);
+                                }
+                            }
+                            else
                             {
                                 sptProfiles.Add(sptProfile);
                             }
-                        }
-                        else
-                        {
-                            sptProfiles.Add(sptProfile);
                         }
                     }
                 }
@@ -60,30 +67,41 @@ namespace Fika_Installer
             return sptProfiles;
         }
 
-        public SptProfile GetSptProfileFromJson(string sptProfilePath)
+        public SptProfile? GetSptProfileFromJson(string sptProfilePath)
         {
-            SptProfile sptProfile = new();
-
-            string profileJsonContent = File.ReadAllText(sptProfilePath);
-            JObject profileJObject = JObject.Parse(profileJsonContent);
-
-            string? profileId = profileJObject["info"]?["id"]?.ToString();
-            string? username = profileJObject["info"]?["username"]?.ToString();
-            string? password = profileJObject["info"]?["password"]?.ToString();
-
-            if (profileId != null && username != null && password != null)
+            if (File.Exists(sptProfilePath))
             {
-                sptProfile = new(profileId, username, password);
+                try
+                {
+                    string profileJsonContent = File.ReadAllText(sptProfilePath);
+                    JObject profileJObject = JObject.Parse(profileJsonContent);
+
+                    string? profileId = profileJObject["info"]?["id"]?.ToString();
+                    string? username = profileJObject["info"]?["username"]?.ToString();
+                    string? password = profileJObject["info"]?["password"]?.ToString();
+
+                    if (profileId != null && username != null && password != null)
+                    {
+                        SptProfile sptProfile = new(profileId, username, password);
+
+                        return sptProfile;
+
+                    }
+                }
+                catch(Exception ex)
+                {
+                    ConUtils.WriteError($"Failed to read profile: {sptProfilePath}");
+                }
             }
 
-            return sptProfile;
+            return null;
         }
 
         public bool CopyProfileScript(string profileId)
         {
             string headlessProfileStartScript = $"Start_headless_{profileId}.ps1";
 
-            string headlessProfileStartScriptPath = Path.Combine(_fikaScriptsFolder, headlessProfileStartScript);
+            string headlessProfileStartScriptPath = Path.Combine(_fikaServerScriptsFolder, headlessProfileStartScript);
 
             if (File.Exists(headlessProfileStartScriptPath))
             {
@@ -99,10 +117,8 @@ namespace Fika_Installer
             return true;
         }
 
-        public SptProfile CreateHeadlessProfile()
+        public SptProfile? CreateHeadlessProfile()
         {
-            SptProfile headlessProfile = new();
-
             bool sptServerRunning = Process.GetProcessesByName("SPT.Server").Length != 0;
 
             if (sptServerRunning)
@@ -116,16 +132,24 @@ namespace Fika_Installer
                 Thread.Sleep(1000);
             }
 
-            string fikaConfigPath = Path.Combine(_sptFolder, @"user\mods\fika-server\assets\configs\fika.jsonc");
+            JObject? fikaConfig = JsonUtils.ReadJson(_fikaServerConfigPath);
 
-            JObject fikaConfig = JsonUtils.ReadJson(fikaConfigPath);
+            if (fikaConfig == null)
+            {
+                return null;
+            }
 
             int sptProfilesCount = SptProfiles.Count;
 
             int headlessProfilesAmount = (int)fikaConfig["headless"]["profiles"]["amount"];
             fikaConfig["headless"]["profiles"]["amount"] = sptProfilesCount + 1;
 
-            JsonUtils.WriteJson(fikaConfig, fikaConfigPath);
+            bool writeFikaConfigResult = JsonUtils.WriteJson(fikaConfig, _fikaServerConfigPath);
+
+            if (!writeFikaConfigResult)
+            {
+                return null;
+            }
 
             Console.WriteLine("Creating headless profile... Please wait. This may take a moment.");
 
@@ -136,15 +160,17 @@ namespace Fika_Installer
             if (string.IsNullOrEmpty(_headlessProfileId))
             {
                 ConUtils.WriteError("An error occurred when creating the headless profile. Check the SPT server logs.", true);
-                return headlessProfile;
+                return null;
             }
 
             string headlessProfilePath = Path.Combine(_sptProfilesFolder, $"{_headlessProfileId}.json");
 
-            if (File.Exists(headlessProfilePath))
+            if (!File.Exists(headlessProfilePath))
             {
-                headlessProfile = GetSptProfileFromJson(headlessProfilePath);
+                return null;
             }
+
+            SptProfile? headlessProfile = GetSptProfileFromJson(headlessProfilePath);
 
             return headlessProfile;
         }
@@ -213,6 +239,27 @@ namespace Fika_Installer
                 process.WaitForExit();
                 timeoutTimer.Dispose();
             }
+        }
+
+        public bool IsFikaServerInstalled()
+        {
+            if (Directory.Exists(_fikaServerModPath))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool IsFikaConfigFound()
+        {
+
+            if (File.Exists(_fikaServerConfigPath))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

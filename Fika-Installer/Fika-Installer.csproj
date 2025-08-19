@@ -8,9 +8,9 @@
     <Nullable>enable</Nullable>
 	<UseWindowsForms>true</UseWindowsForms>
 	<ApplicationManifest>app.manifest</ApplicationManifest>
-	<AssemblyVersion>1.0.2</AssemblyVersion>
-	<FileVersion>1.0.2</FileVersion>
-	<InformationalVersion>1.0.2</InformationalVersion>
+	<AssemblyVersion>1.0.3</AssemblyVersion>
+	<FileVersion>1.0.3</FileVersion>
+	<InformationalVersion>1.0.3</InformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>

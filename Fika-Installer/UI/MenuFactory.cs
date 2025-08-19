@@ -11,6 +11,8 @@ namespace Fika_Installer.UI
         private string _fikaHeadlessReleaseUrl;
         private string _installDir;
         private string _sptFolder;
+        private string _fikaCorePath;
+        private string _fikaHeadlessPath;
 
         public MenuFactory(string installerDirectory, string fikaCoreReleaseUrl, string fikaServerReleaseUrl, string fikaHeadlessReleaseUrl)
         {
@@ -19,14 +21,16 @@ namespace Fika_Installer.UI
             _fikaCoreReleaseUrl = fikaCoreReleaseUrl;
             _fikaServerReleaseUrl = fikaServerReleaseUrl;
             _fikaHeadlessReleaseUrl = fikaHeadlessReleaseUrl;
+
+            _fikaCorePath = Path.Combine(_installDir, @"BepInEx\plugins\Fika.Core.dll");
+            _fikaHeadlessPath = Path.Combine(_installDir, @"BepInEx\plugins\Fika.Headless.dll");
         }
 
         public Menu CreateMainMenu()
         {
             List<MenuChoice> choices = [];
 
-            string fikaCorePath = Path.Combine(_installDir, @"BepInEx\plugins\Fika.Core.dll");
-            bool fikaDetected = File.Exists(fikaCorePath);
+            bool fikaDetected = File.Exists(_fikaCorePath);
 
             if (fikaDetected)
             {
@@ -54,13 +58,7 @@ namespace Fika_Installer.UI
         {
             List<MenuChoice> choices = [];
 
-            string fikaHeadlessPath = Path.Combine(_installDir, @"BepInEx\plugins\Fika.Headless.dll");
-            bool fikaHeadlessDetected = File.Exists(fikaHeadlessPath);
-
-            InstallFikaCurrentDirPage installFikaCurrentDirPage = new(this, _installDir, _sptFolder, _fikaCoreReleaseUrl, _fikaServerReleaseUrl);
-
-            MenuChoice installFikaInCurrentFolder = new("Install Fika in current folder", installFikaCurrentDirPage);
-            choices.Add(installFikaInCurrentFolder);
+            bool fikaHeadlessDetected = File.Exists(_fikaHeadlessPath);
 
             if (fikaHeadlessDetected)
             {
@@ -74,6 +72,16 @@ namespace Fika_Installer.UI
 
                 MenuChoice installFikaHeadlessChoice = new("Install Fika Headless", installFikaHeadlessPage);
                 choices.Add(installFikaHeadlessChoice);
+            }
+
+            bool fikaCoreDetected = File.Exists(_fikaCorePath);
+
+            if (!fikaCoreDetected)
+            {
+                InstallFikaCurrentDirPage installFikaCurrentDirPage = new(this, _installDir, _sptFolder, _fikaCoreReleaseUrl, _fikaServerReleaseUrl);
+
+                MenuChoice installFikaInCurrentFolder = new("Install Fika in current folder", installFikaCurrentDirPage);
+                choices.Add(installFikaInCurrentFolder);
             }
 
             MenuChoice backChoice = new("Back", () => { });

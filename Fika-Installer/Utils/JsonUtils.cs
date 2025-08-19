@@ -5,9 +5,9 @@ namespace Fika_Installer.Utils
 {
     public static class JsonUtils
     {
-        public static JObject ReadJson(string jsonPath)
+        public static JObject? ReadJson(string jsonPath)
         {
-            JObject jObject = new();
+            JObject jObject;
 
             try
             {
@@ -17,6 +17,7 @@ namespace Fika_Installer.Utils
             catch
             {
                 ConUtils.WriteError($"An error occurred while reading: {jsonPath}");
+                return null;
             }
 
             return jObject;

@@ -109,18 +109,6 @@ namespace Fika_Installer
             return true;
         }
 
-        public bool IsFikaServerInstalled()
-        {
-            string fikaServerPath = Path.Combine(_sptFolder, @"user\mods\fika-server");
-
-            if (Directory.Exists(fikaServerPath))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
         public bool IsSptInstalled()
         {
             string sptServerPath = Path.Combine(_installDir, "SPT.Server.exe");
