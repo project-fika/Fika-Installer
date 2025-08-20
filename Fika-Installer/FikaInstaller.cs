@@ -65,18 +65,18 @@ namespace Fika_Installer
 
         public bool InstallSpt(InstallMethod installType, bool headless = false)
         {
-            List<string> excludeFiles = [];
+            List<string> excludeFiles = ["FikaInstallerTemp"];
 
             if (headless)
             {
-                excludeFiles =
+                excludeFiles.AddRange(
                 [
                     "SPT.Launcher.exe",
                     "SPT.Server.exe",
                     "SPTInstaller.exe",
                     "SPT_Data",
                     "user",
-                ];
+                ]);
             }
 
             if (installType == InstallMethod.Symlink)
