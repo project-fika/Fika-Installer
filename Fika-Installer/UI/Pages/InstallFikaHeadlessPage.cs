@@ -46,14 +46,6 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            bool isFikaServerConfigFound = fikaHeadless.IsFikaConfigFound();
-
-            if (!isFikaServerConfigFound)
-            {
-                ConUtils.WriteError("Please run SPT.Server.exe at least once before installing Fika-Headless.", true);
-                return;
-            }
-
             List<SptProfile> sptProfileIds = fikaHeadless.SptProfiles;
 
             Menu profileSelectionMenu = _menuFactory.CreateProfileSelectionMenu(sptProfileIds);
@@ -67,6 +59,7 @@ namespace Fika_Installer.UI.Pages
 
                 if (headlessProfile == null)
                 {
+                    ConUtils.WriteError("An error occurred while creating the headless profile. Please check SPT Server logs.", true);
                     return;
                 }
 

@@ -3,7 +3,7 @@ using Fika_Installer.Utils;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using Timer = System.Threading.Timer;
+
 
 namespace Fika_Installer
 {
@@ -14,6 +14,7 @@ namespace Fika_Installer
         private string? _headlessProfileId;
         private string _fikaDirectory;
         private string _sptFolder;
+        private string _sptServerPath;
         private string _fikaServerModPath;
         private string _fikaServerScriptsFolder;
         private string _fikaServerConfigPath;
@@ -24,6 +25,7 @@ namespace Fika_Installer
             _fikaDirectory = installDir;
             _sptFolder = sptFolder;
 
+            _sptServerPath = Path.Combine(_sptFolder, "SPT.Server.exe");
             _fikaServerModPath = Path.Combine(_sptFolder, @"user\mods\fika-server");
             _fikaServerScriptsFolder = Path.Combine(_fikaServerModPath, @"assets\scripts");
             _fikaServerConfigPath = Path.Combine(_fikaServerModPath, @"assets\configs\fika.jsonc");
@@ -132,6 +134,32 @@ namespace Fika_Installer
                 Thread.Sleep(1000);
             }
 
+            if (!IsFikaConfigFound())
+            {
+                Console.WriteLine("Generating Fika config file... This may take a moment.");
+
+                SptServerHandler createFikaConfigSptServer = new(_sptServerPath);
+                createFikaConfigSptServer.AddMatchAction(new MatchAction(
+                    @"Server is running",
+                    (process, match) =>
+                    {
+                        process.Kill();
+                    }));
+
+                createFikaConfigSptServer.KillAfter = TimeSpan.FromMinutes(2);
+                createFikaConfigSptServer.Start();
+
+                if (!createFikaConfigSptServer.Success)
+                {
+                    return null;
+                }
+
+                if (!IsFikaConfigFound())
+                {
+                    return null;
+                }
+            }
+
             JObject? fikaConfig = JsonUtils.ReadJson(_fikaServerConfigPath);
 
             if (fikaConfig == null)
@@ -151,15 +179,27 @@ namespace Fika_Installer
                 return null;
             }
 
-            Console.WriteLine("Creating headless profile... Please wait. This may take a moment.");
+            Console.WriteLine("Creating headless profile... This may take a moment.");
 
-            string sptServerPath = Path.Combine(_sptFolder, "SPT.Server.exe");
+            SptServerHandler createHeadlessProfileSptServer = new(_sptServerPath);
+            createHeadlessProfileSptServer.AddMatchAction(new MatchAction(
+                @"Start_headless_([^.]+)",
+                (process, match) =>
+                {
+                    _headlessProfileId = match.Groups[1].Value;
+                    process.Kill();
+                }));
 
-            StartProcessAndRedirectOutput(sptServerPath, SptConsoleMessageHandler, TimeSpan.FromMinutes(1)); // TODO: is 1 minute too short?
+            createHeadlessProfileSptServer.KillAfter = TimeSpan.FromMinutes(2);
+            createHeadlessProfileSptServer.Start();
+
+            if (!createHeadlessProfileSptServer.Success)
+            {
+                return null;
+            }
 
             if (string.IsNullOrEmpty(_headlessProfileId))
             {
-                ConUtils.WriteError("An error occurred when creating the headless profile. Check the SPT server logs.", true);
                 return null;
             }
 
@@ -173,72 +213,6 @@ namespace Fika_Installer
             SptProfile? headlessProfile = GetSptProfileFromJson(headlessProfilePath);
 
             return headlessProfile;
-        }
-
-        public void SptConsoleMessageHandler(Process process, string message)
-        {
-            Match generatedLaunchScriptRegexMatch = HeadlessRegex.GeneratedLaunchScriptRegex().Match(message);
-
-            if (generatedLaunchScriptRegexMatch.Success)
-            {
-                _headlessProfileId = generatedLaunchScriptRegexMatch.Groups[1].Value;
-                process.Kill();
-            }
-
-            Match sptErrorRegexMatch = HeadlessRegex.SptErrorRegex().Match(message);
-
-            if (sptErrorRegexMatch.Success)
-            {
-                process.Kill();
-            }
-        }
-
-        public void StartProcessAndRedirectOutput(string filePath, Action<Process, string> stdOut, TimeSpan timeout)
-        {
-            ProcessStartInfo startInfo = new ProcessStartInfo
-            {
-                FileName = filePath,
-                WorkingDirectory = Path.GetDirectoryName(filePath),
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-
-            using (Process process = new Process { StartInfo = startInfo })
-            {
-                Timer timeoutTimer = new(_ =>
-                {
-                    if (!process.HasExited)
-                    {
-                        process.Kill();
-                    }
-                }, null, timeout, Timeout.InfiniteTimeSpan);
-
-                process.OutputDataReceived += (sender, e) =>
-                {
-                    if (!string.IsNullOrEmpty(e.Data))
-                    {
-                        stdOut(process, e.Data);
-                    }
-                };
-
-                process.ErrorDataReceived += (sender, e) =>
-                {
-                    if (!process.HasExited)
-                    {
-                        try { process.Kill(); } catch { }
-                    }
-                };
-
-                process.Start();
-
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
-
-                process.WaitForExit();
-                timeoutTimer.Dispose();
-            }
         }
 
         public bool IsFikaServerInstalled()
