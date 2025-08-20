@@ -1,6 +1,4 @@
-﻿using Fika_Installer.Models.UI;
-
-namespace Fika_Installer.UI
+﻿namespace Fika_Installer.UI
 {
     public class Menu
     {
