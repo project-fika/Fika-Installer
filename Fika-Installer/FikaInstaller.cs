@@ -213,7 +213,13 @@ namespace Fika_Installer
         {
             string launcherConfigPath = Path.Combine(_installDir, @"user\launcher\config.json");
 
-            JObject launcherConfig = JsonUtils.ReadJson(launcherConfigPath);
+            JObject? launcherConfig = JsonUtils.ReadJson(launcherConfigPath);
+
+            if (launcherConfig == null)
+            {
+                ConUtils.WriteError("Could not read the launcher config.", true);
+                return;
+            }
 
             launcherConfig["IsDevMode"] = true;
             launcherConfig["GamePath"] = _installDir;
