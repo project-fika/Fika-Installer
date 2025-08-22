@@ -7,6 +7,7 @@ namespace Fika_Installer.Models
     {
         public Regex Pattern { get; }
         public Action<Process, Match> Action { get; }
+        public bool Success { get; set; }
 
         public MatchAction(string pattern, Action<Process, Match> action,
             RegexOptions options = RegexOptions.Compiled | RegexOptions.IgnoreCase)

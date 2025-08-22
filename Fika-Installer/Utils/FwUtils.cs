@@ -1,5 +1,5 @@
 ﻿namespace Fika_Installer.Utils
-{   
+{
     public static class FwUtils
     {
         public static void CreateFirewallRule(string displayName, string direction, string protocol, string port, string program = "")

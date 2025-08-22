@@ -36,7 +36,7 @@ namespace Fika_Installer.UI.Pages
                 }
             }
 
-            FikaHeadless fikaHeadless = new FikaHeadless(_installDir, _sptFolder);
+            FikaHeadless fikaHeadless = new(_installDir, _sptFolder);
 
             bool isFikaServerInstalled = fikaHeadless.IsFikaServerInstalled();
 
@@ -46,7 +46,7 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            List<SptProfile> sptProfileIds = fikaHeadless.SptProfiles;
+            List<SptProfile> sptProfileIds = fikaHeadless.SptInstance.Profiles;
 
             Menu profileSelectionMenu = _menuFactory.CreateProfileSelectionMenu(sptProfileIds);
             MenuChoice profileSelectionChoice = profileSelectionMenu.Show();

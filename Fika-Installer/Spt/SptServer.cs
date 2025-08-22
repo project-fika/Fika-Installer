@@ -3,20 +3,19 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Timer = System.Threading.Timer;
 
-namespace Fika_Installer
+namespace Fika_Installer.Spt
 {
-    public class SptServerHandler
+    public class SptServer
     {
         public string ExePath { get; set; }
         public TimeSpan KillAfter { get; set; } = Timeout.InfiniteTimeSpan;
-        public bool Success { get; private set; } = false;
 
         private readonly List<MatchAction> _matchActions = new();
         private readonly Regex _sptErrorRegex = new(@"Error", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        public SptServerHandler(string path) 
+        public SptServer(string exePath)
         {
-            ExePath = path;
+            ExePath = exePath;
         }
 
         public void AddMatchAction(MatchAction matchAction)
@@ -34,7 +33,7 @@ namespace Fika_Installer
                     try
                     {
                         matchAction.Action(process, match);
-                        Success = true;
+                        matchAction.Success = true;
                     }
                     catch
                     {
@@ -102,6 +101,8 @@ namespace Fika_Installer
 
                 process.WaitForExit();
                 timeoutTimer.Dispose();
+
+                _matchActions.Clear();
             }
         }
     }
