@@ -18,47 +18,6 @@ namespace Fika_Installer.Spt
             ExePath = sptInstance.ServerExePath;
         }
 
-        public void AddMatchAction(MatchAction matchAction)
-        {
-            _matchActions.Add(matchAction);
-        }
-
-        public void HandleOutput(Process process, string line)
-        {
-            foreach (var matchAction in _matchActions)
-            {
-                Match match = matchAction.Pattern.Match(line);
-                if (match.Success)
-                {
-                    try
-                    {
-                        matchAction.Action(process, match);
-                        matchAction.Success = true;
-                    }
-                    catch
-                    {
-
-                    }
-                }
-
-                if (_sptErrorRegex.IsMatch(line))
-                {
-                    if (!process.HasExited)
-                    {
-                        process.Kill();
-                    }
-                }
-            }
-        }
-
-        public void HandleError(Process process, string line)
-        {
-            if (!process.HasExited)
-            {
-                process.Kill();
-            }
-        }
-
         public void Start()
         {
             ProcessStartInfo startInfo = new ProcessStartInfo
@@ -101,6 +60,47 @@ namespace Fika_Installer.Spt
 
                 process.WaitForExit();
                 timeoutTimer.Dispose();
+            }
+        }
+
+        public void AddMatchAction(MatchAction matchAction)
+        {
+            _matchActions.Add(matchAction);
+        }
+
+        private void HandleOutput(Process process, string line)
+        {
+            foreach (var matchAction in _matchActions)
+            {
+                Match match = matchAction.Pattern.Match(line);
+                if (match.Success)
+                {
+                    try
+                    {
+                        matchAction.Action(process, match);
+                        matchAction.Success = true;
+                    }
+                    catch
+                    {
+
+                    }
+                }
+
+                if (_sptErrorRegex.IsMatch(line))
+                {
+                    if (!process.HasExited)
+                    {
+                        process.Kill();
+                    }
+                }
+            }
+        }
+
+        private void HandleError(Process process, string line)
+        {
+            if (!process.HasExited)
+            {
+                process.Kill();
             }
         }
     }
