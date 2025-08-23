@@ -46,9 +46,9 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            List<SptProfile> sptProfileIds = fikaHeadless.SptInstance.Profiles;
+            List<SptProfile> sptProfiles = fikaHeadless.SptInstance.GetHeadlessProfiles();
 
-            Menu profileSelectionMenu = _menuFactory.CreateProfileSelectionMenu(sptProfileIds);
+            Menu profileSelectionMenu = _menuFactory.CreateProfileSelectionMenu(sptProfiles);
             MenuChoice profileSelectionChoice = profileSelectionMenu.Show();
 
             string headlessProfileId = "";

@@ -7,15 +7,15 @@ namespace Fika_Installer.Spt
 {
     public class SptServer
     {
-        public string ExePath { get; set; }
-        public TimeSpan KillAfter { get; set; } = Timeout.InfiniteTimeSpan;
-
         private readonly List<MatchAction> _matchActions = new();
         private readonly Regex _sptErrorRegex = new(@"Error", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        public SptServer(string exePath)
+        public string ExePath { get; set; }
+        public TimeSpan KillAfter { get; set; } = Timeout.InfiniteTimeSpan;
+
+        public SptServer(SptInstance sptInstance)
         {
-            ExePath = exePath;
+            ExePath = sptInstance.ServerExePath;
         }
 
         public void AddMatchAction(MatchAction matchAction)
@@ -101,8 +101,6 @@ namespace Fika_Installer.Spt
 
                 process.WaitForExit();
                 timeoutTimer.Dispose();
-
-                _matchActions.Clear();
             }
         }
     }

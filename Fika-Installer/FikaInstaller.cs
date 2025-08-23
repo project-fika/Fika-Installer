@@ -1,6 +1,5 @@
 ﻿using Fika_Installer.Models;
 using Fika_Installer.Utils;
-using Newtonsoft.Json.Linq;
 
 namespace Fika_Installer
 {
@@ -207,25 +206,6 @@ namespace Fika_Installer
 
             string escapeFromTarkovPath = Path.Combine(installDir, "EscapeFromTarkov.exe");
             FwUtils.CreateFirewallRule("Fika (Core) - UDP 25565", "Inbound", "UDP", "25565", escapeFromTarkovPath);
-        }
-
-        public void ConfigureSptLauncherConfig()
-        {
-            string launcherConfigPath = Path.Combine(_installDir, @"user\launcher\config.json");
-
-            JObject? launcherConfig = JsonUtils.ReadJson(launcherConfigPath);
-
-            if (launcherConfig == null)
-            {
-                ConUtils.WriteError("Could not read the launcher config.", true);
-                return;
-            }
-
-            launcherConfig["IsDevMode"] = true;
-            launcherConfig["GamePath"] = _installDir;
-            launcherConfig["Server"]["Url"] = "https://127.0.0.1:6969";
-
-            JsonUtils.WriteJson(launcherConfig, launcherConfigPath);
         }
     }
 }

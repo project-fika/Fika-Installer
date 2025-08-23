@@ -1,5 +1,7 @@
 ﻿using Fika_Installer.Models;
+using Fika_Installer.Spt;
 using Fika_Installer.Utils;
+using Newtonsoft.Json.Linq;
 
 namespace Fika_Installer.UI.Pages
 {
@@ -49,7 +51,18 @@ namespace Fika_Installer.UI.Pages
                         return;
                     }
 
-                    fikaInstaller.ConfigureSptLauncherConfig();
+                    SptInstance sptInstance = new(_installDir);
+
+                    JObject? launcherConfig = sptInstance.GetLauncherConfig();
+
+                    if (launcherConfig != null)
+                    {
+                        launcherConfig["IsDevMode"] = true;
+                        launcherConfig["GamePath"] = _installDir;
+                        launcherConfig["Server"]["Url"] = "https://127.0.0.1:6969";
+
+                        sptInstance.SetLauncherConfig(launcherConfig);
+                    }
                 }
             }
 
