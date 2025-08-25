@@ -54,7 +54,10 @@ namespace Fika_Installer
                     @"Server is running",
                     (process, match) =>
                     {
-                        process.Kill();
+                        if (!process.HasExited)
+                        {
+                            process.Kill();
+                        }
                     });
 
                 generateFikaCfgSptServer.AddMatchAction(serverIsRunningMatchAction);
@@ -82,7 +85,6 @@ namespace Fika_Installer
 
             int sptProfilesCount = SptInstance.Profiles.Count;
 
-            int headlessProfilesAmount = (int)fikaConfig["headless"]["profiles"]["amount"];
             fikaConfig["headless"]["profiles"]["amount"] = sptProfilesCount + 1;
 
             bool writeFikaConfigResult = JsonUtils.WriteJson(fikaConfig, _fikaServerConfigPath);
@@ -101,7 +103,11 @@ namespace Fika_Installer
                 (process, match) =>
                 {
                     _headlessProfileId = match.Groups[1].Value;
-                    process.Kill();
+                    
+                    if (!process.HasExited)
+                    {
+                        process.Kill();
+                    }
                 });
 
             createHeadlessProfileSptServer.AddMatchAction(createHeadlessProfileMatchAction);

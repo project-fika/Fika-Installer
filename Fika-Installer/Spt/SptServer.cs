@@ -73,6 +73,7 @@ namespace Fika_Installer.Spt
             foreach (var matchAction in _matchActions)
             {
                 Match match = matchAction.Pattern.Match(line);
+
                 if (match.Success)
                 {
                     try
