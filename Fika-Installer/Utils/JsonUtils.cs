@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace Fika_Installer.Utils
 {
@@ -6,27 +7,27 @@ namespace Fika_Installer.Utils
     {
         private static readonly JsonSerializerOptions _jsonSerializerOptions = new() { WriteIndented = true };
 
-        public static T? ReadJson<T>(string jsonPath)
+        public static JsonObject? DeserializeFromFile(string jsonPath)
         {
             try
             {
                 string jsonContent = File.ReadAllText(jsonPath);
-                return JsonSerializer.Deserialize<T>(jsonContent);
+                return JsonSerializer.Deserialize<JsonObject>(jsonContent);
             }
             catch
             {
                 ConUtils.WriteError($"An error occurred while reading: {jsonPath}");
-                return default;
+                return null;
             }
         }
 
-        public static bool WriteJson<T>(string jsonPath, T obj)
+        public static bool SerializeToFile(string jsonPath, JsonObject jsonObject)
         {
             try
             {
-                string json = JsonSerializer.Serialize<T>(obj, _jsonSerializerOptions);
+                string json = JsonSerializer.Serialize<JsonObject>(jsonObject, _jsonSerializerOptions);
                 File.WriteAllText(jsonPath, json);
-                
+
                 return true;
             }
             catch (Exception ex)

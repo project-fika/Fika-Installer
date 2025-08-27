@@ -1,48 +1,50 @@
-﻿using Fika_Installer.Utils;
+﻿using Fika_Installer.Spt;
+using Fika_Installer.Utils;
 
 namespace Fika_Installer.UI.Pages
 {
-    public class InstallFikaPage : Page
+    public class InstallFikaPage(string installDir, string fikaCoreReleaseUrl, string fikaServerReleaseUrl) : Page
     {
-        private string _installDir;
-        private string _fikaCoreReleaseUrl;
-        private string _fikaServerReleaseUrl;
-
-        public InstallFikaPage(string installDir, string fikaCoreReleaseUrl, string fikaServerReleaseUrl)
-        {
-            _installDir = installDir;
-            _fikaCoreReleaseUrl = fikaCoreReleaseUrl;
-            _fikaServerReleaseUrl = fikaServerReleaseUrl;
-        }
+        private string _installDir = installDir;
+        private string _fikaCoreReleaseUrl = fikaCoreReleaseUrl;
+        private string _fikaServerReleaseUrl = fikaServerReleaseUrl;
 
         public override void OnShow()
         {
-            FikaInstaller fikaInstaller = new(_installDir, _installDir);
+            SptInstaller sptInstaller = new(_installDir, _installDir);
+            SptInstance? sptInstance;
 
-            bool isSptInstalled = fikaInstaller.IsSptInstalled();
+            bool isSptInstalled = sptInstaller.IsSptInstalled();
 
-            if (!isSptInstalled)
+            if (isSptInstalled)
+            {
+                sptInstance = new(_installDir);
+            }
+            else
             {
                 ConUtils.WriteError("SPT not found. Please place Fika-Installer inside your SPT directory.", true);
                 return;
             }
 
-            bool installResult = fikaInstaller.InstallRelease(_fikaCoreReleaseUrl);
+            FikaInstaller fikaInstaller = new(_installDir, sptInstance);
+
+            bool installResult = fikaInstaller.InstallReleaseFromUrl(_fikaCoreReleaseUrl);
 
             if (!installResult)
             {
                 return;
             }
 
-            bool installFikaServerResult = fikaInstaller.InstallRelease(_fikaServerReleaseUrl);
+            bool installFikaServerResult = fikaInstaller.InstallReleaseFromUrl(_fikaServerReleaseUrl);
 
             if (!installFikaServerResult)
             {
                 return;
             }
 
-            fikaInstaller.ApplyFirewallRules(_installDir, _installDir);
+            fikaInstaller.ApplyFirewallRules();
 
+            Console.WriteLine();
             ConUtils.WriteSuccess("Fika installed successfully!", true);
         }
     }

@@ -1,7 +1,7 @@
 ﻿using Fika_Installer.Models;
-using Fika_Installer.Models.Spt;
 using Fika_Installer.Spt;
 using Fika_Installer.Utils;
+using System.Text.Json.Nodes;
 
 namespace Fika_Installer.UI.Pages
 {
@@ -9,30 +9,33 @@ namespace Fika_Installer.UI.Pages
     {
         private MenuFactory _menuFactory;
         private string _installDir;
-        private string _sptFolder;
         private string _fikaCoreReleaseUrl;
         private string _fikaServerReleaseUrl;
 
-        public InstallFikaCurrentDirPage(MenuFactory menuFactory, string installDir, string sptFolder, string fikaCoreReleaseUrl, string fikaServerReleaseUrl)
+        public InstallFikaCurrentDirPage(MenuFactory menuFactory, string installDir, string fikaCoreReleaseUrl, string fikaServerReleaseUrl)
         {
             _menuFactory = menuFactory;
             _installDir = installDir;
-            _sptFolder = sptFolder;
             _fikaCoreReleaseUrl = fikaCoreReleaseUrl;
             _fikaServerReleaseUrl = fikaServerReleaseUrl;
         }
 
         public override void OnShow()
         {
-            FikaInstaller fikaInstaller = new(_installDir, _sptFolder);
+            SptInstaller sptInstaller = new(_installDir, _installDir);
+            SptInstance? sptInstance;
 
-            bool isSptInstalled = fikaInstaller.IsSptInstalled();
+            bool isSptInstalled = sptInstaller.IsSptInstalled();
 
-            if (!isSptInstalled)
+            if (isSptInstalled)
             {
-                _sptFolder = fikaInstaller.BrowseSptFolderAndValidate();
+                sptInstance = new(_installDir);
+            }
+            else
+            {
+                string? sptDir = sptInstaller.BrowseAndValidateSptDir();
 
-                if (string.IsNullOrEmpty(_sptFolder))
+                if (sptDir == null)
                 {
                     return;
                 }
@@ -44,44 +47,51 @@ namespace Fika_Installer.UI.Pages
 
                 if (Enum.TryParse(selectedInstallType, out InstallMethod installType))
                 {
-                    bool installSptResult = fikaInstaller.InstallSpt(installType);
+                    bool installSptResult = sptInstaller.InstallSpt(installType);
 
                     if (!installSptResult)
                     {
                         return;
                     }
 
-                    SptInstance sptInstance = new(_installDir);
+                    sptInstance = new(_installDir);
 
-                    SptLauncherConfigModel? launcherConfig = sptInstance.GetLauncherConfig();
+                    JsonObject? launcherConfig = sptInstance.GetLauncherConfig();
 
                     if (launcherConfig != null)
                     {
-                        launcherConfig.IsDevMode = true;
-                        launcherConfig.GamePath = _installDir;
-                        launcherConfig.Server.Url = "https://127.0.0.1:6969";
+                        launcherConfig["IsDevMode"] = true;
+                        launcherConfig["GamePath"] = _installDir;
+                        launcherConfig["Server"]["Url"] = "https://127.0.0.1:6969";
 
                         sptInstance.SetLauncherConfig(launcherConfig);
                     }
                 }
+                else
+                {
+                    return;
+                }
             }
 
-            bool installFikaCoreResult = fikaInstaller.InstallRelease(_fikaCoreReleaseUrl);
+            FikaInstaller fikaInstaller = new(_installDir, sptInstance);
+
+            bool installFikaCoreResult = fikaInstaller.InstallReleaseFromUrl(_fikaCoreReleaseUrl);
 
             if (!installFikaCoreResult)
             {
                 return;
             }
 
-            bool installFikaServerResult = fikaInstaller.InstallRelease(_fikaServerReleaseUrl);
+            bool installFikaServerResult = fikaInstaller.InstallReleaseFromUrl(_fikaServerReleaseUrl);
 
             if (!installFikaServerResult)
             {
                 return;
             }
 
-            fikaInstaller.ApplyFirewallRules(_installDir, _installDir);
+            fikaInstaller.ApplyFirewallRules();
 
+            Console.WriteLine();
             ConUtils.WriteSuccess("Fika installed successfully!", true);
         }
     }

@@ -3,17 +3,11 @@ using System.Text.RegularExpressions;
 
 namespace Fika_Installer.Models
 {
-    public class MatchAction
+    public class MatchAction(string pattern, Action<Process, Match> action,
+        RegexOptions options = RegexOptions.Compiled | RegexOptions.IgnoreCase)
     {
-        public Regex Pattern { get; }
-        public Action<Process, Match> Action { get; }
+        public Regex Pattern { get; } = new Regex(pattern, options);
+        public Action<Process, Match> Action { get; } = action;
         public bool Success { get; set; }
-
-        public MatchAction(string pattern, Action<Process, Match> action,
-            RegexOptions options = RegexOptions.Compiled | RegexOptions.IgnoreCase)
-        {
-            Pattern = new Regex(pattern, options);
-            Action = action;
-        }
     }
 }

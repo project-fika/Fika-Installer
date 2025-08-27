@@ -1,18 +1,10 @@
 ﻿namespace Fika_Installer.Models.Spt
 {
-    public class SptProfile
+    public class SptProfile(string profileId, string name, string password, bool headless)
     {
-        public string ProfileId { get; set; }
-        public string Name { get; set; }
-        public string Password { get; set; }
-        public bool Headless { get; set; }
-
-        public SptProfile(string profileId, string name, string password, bool headless)
-        {
-            ProfileId = profileId;
-            Name = name;
-            Password = password;
-            Headless = headless;
-        }
+        public string ProfileId { get; set; } = profileId;
+        public string Name { get; set; } = name;
+        public string Password { get; set; } = password;
+        public bool Headless { get; set; } = headless;
     }
 }

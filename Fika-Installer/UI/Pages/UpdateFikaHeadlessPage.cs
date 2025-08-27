@@ -1,39 +1,34 @@
-﻿using Fika_Installer.Utils;
+﻿using Fika_Installer.Spt;
+using Fika_Installer.Utils;
 
 namespace Fika_Installer.UI.Pages
 {
-    public class UpdateFikaHeadlessPage : Page
+    public class UpdateFikaHeadlessPage(string installDir, string fikaCoreReleaseUrl, string fikaHeadlessReleaseUrl) : Page
     {
-        private string _installDir;
-        private string _fikaCoreReleaseUrl;
-        private string _fikaHeadlessReleaseUrl;
-
-        public UpdateFikaHeadlessPage(string installDir, string fikaCoreReleaseUrl, string fikaHeadlessReleaseUrl)
-        {
-            _installDir = installDir;
-            _fikaCoreReleaseUrl = fikaCoreReleaseUrl;
-            _fikaHeadlessReleaseUrl = fikaHeadlessReleaseUrl;
-        }
-
+        private string _installDir = installDir;
+        private string _fikaCoreReleaseUrl = fikaCoreReleaseUrl;
+        private string _fikaHeadlessReleaseUrl = fikaHeadlessReleaseUrl;
 
         public override void OnShow()
         {
-            FikaInstaller fikaInstaller = new(_installDir, _installDir);
+            SptInstance sptInstance = new(_installDir);
+            FikaInstaller fikaInstaller = new(_installDir, sptInstance);
 
-            bool installHeadlessResult = fikaInstaller.InstallRelease(_fikaHeadlessReleaseUrl);
+            bool installHeadlessResult = fikaInstaller.InstallReleaseFromUrl(_fikaHeadlessReleaseUrl);
 
             if (!installHeadlessResult)
             {
                 return;
             }
 
-            bool installFikaCoreResult = fikaInstaller.InstallRelease(_fikaCoreReleaseUrl);
+            bool installFikaCoreResult = fikaInstaller.InstallReleaseFromUrl(_fikaCoreReleaseUrl);
 
             if (!installFikaCoreResult)
             {
                 return;
             }
 
+            Console.WriteLine();
             ConUtils.WriteSuccess("Fika Headless updated successfully!", true);
         }
     }

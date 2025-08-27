@@ -49,7 +49,12 @@ namespace Fika_Installer.Utils
                     string relativePath = Path.GetRelativePath(sourcePath, filePath);
                     string fileName = Path.GetFileName(filePath);
                     string destFile = Path.Combine(destinationPath, relativePath);
-                    string destDir = Path.GetDirectoryName(destFile);
+                    string? destDir = Path.GetDirectoryName(destFile);
+
+                    if (string.IsNullOrWhiteSpace(destDir))
+                    {
+                        continue;
+                    }
 
                     string message = $"Copying: {fileName}";
                     double progress = (double)filesCopied / totalFiles;
@@ -85,7 +90,12 @@ namespace Fika_Installer.Utils
 
             try
             {
-                string directoryPath = Path.GetDirectoryName(outputPath);
+                string? directoryPath = Path.GetDirectoryName(outputPath);
+
+                if (directoryPath == null)
+                {
+                    return false;
+                }
 
                 if (!Directory.Exists(directoryPath))
                 {
@@ -109,7 +119,7 @@ namespace Fika_Installer.Utils
 
                         using (Stream contentStream = response.Content.ReadAsStreamAsync().Result)
                         {
-                            using (FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                            using (FileStream fileStream = new(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
                             {
                                 byte[] buffer = new byte[8192];
                                 long totalRead = 0;

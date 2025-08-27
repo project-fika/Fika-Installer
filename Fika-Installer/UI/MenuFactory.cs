@@ -10,14 +10,12 @@ namespace Fika_Installer.UI
         private string _fikaServerReleaseUrl;
         private string _fikaHeadlessReleaseUrl;
         private string _installDir;
-        private string _sptFolder;
         private string _fikaCorePath;
         private string _fikaHeadlessPath;
 
         public MenuFactory(string installerDirectory, string fikaCoreReleaseUrl, string fikaServerReleaseUrl, string fikaHeadlessReleaseUrl)
         {
             _installDir = installerDirectory;
-            _sptFolder = installerDirectory;
             _fikaCoreReleaseUrl = fikaCoreReleaseUrl;
             _fikaServerReleaseUrl = fikaServerReleaseUrl;
             _fikaHeadlessReleaseUrl = fikaHeadlessReleaseUrl;
@@ -68,7 +66,7 @@ namespace Fika_Installer.UI
             }
             else
             {
-                InstallFikaHeadlessPage installFikaHeadlessPage = new(this, _installDir, _sptFolder, _fikaCoreReleaseUrl, _fikaHeadlessReleaseUrl);
+                InstallFikaHeadlessPage installFikaHeadlessPage = new(this, _installDir, _fikaCoreReleaseUrl, _fikaHeadlessReleaseUrl);
 
                 MenuChoice installFikaHeadlessChoice = new("Install Fika Headless", installFikaHeadlessPage);
                 choices.Add(installFikaHeadlessChoice);
@@ -78,7 +76,7 @@ namespace Fika_Installer.UI
 
             if (!fikaCoreDetected)
             {
-                InstallFikaCurrentDirPage installFikaCurrentDirPage = new(this, _installDir, _sptFolder, _fikaCoreReleaseUrl, _fikaServerReleaseUrl);
+                InstallFikaCurrentDirPage installFikaCurrentDirPage = new(this, _installDir, _fikaCoreReleaseUrl, _fikaServerReleaseUrl);
 
                 MenuChoice installFikaInCurrentFolder = new("Install Fika in current folder", installFikaCurrentDirPage);
                 choices.Add(installFikaInCurrentFolder);

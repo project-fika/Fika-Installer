@@ -34,9 +34,18 @@
             Console.ResetColor();
         }
 
+        public static void WriteWarning(string message)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(message);
+            Console.ResetColor();
+        }
+
         public static void WriteConfirm(string message)
         {
             Console.WriteLine(message);
+            Console.WriteLine();
+            Console.WriteLine("Press any key to continue.");
             Console.ReadKey(true);
         }
 
