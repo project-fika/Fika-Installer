@@ -26,4 +26,4 @@ There is an "Advanced options" menu with a few additional features:
 Fika-Installer requires admin elevation for firewall configuration and symlinking. Fika-Installer does not perform any other modifications to your system.
 
 ## Linux Support
-Linux support is not planned. However, only minimal code modifications should be required for Linux compatibility. Feel free to submit a PR.
+Linux support is not planned. Feel free to submit a PR for Linux support.
