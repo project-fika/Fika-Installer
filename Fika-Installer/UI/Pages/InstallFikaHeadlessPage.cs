@@ -1,4 +1,6 @@
 ﻿using Fika_Installer.Models;
+using Fika_Installer.Models.Spt;
+using Fika_Installer.Spt;
 using Fika_Installer.Utils;
 
 namespace Fika_Installer.UI.Pages
@@ -20,7 +22,7 @@ namespace Fika_Installer.UI.Pages
             _fikaHeadlessReleaseUrl = fikaHeadlessReleaseUrl;
         }
 
-        public override void Draw()
+        public override void OnShow()
         {
             FikaInstaller fikaInstaller = new(_installDir, _sptFolder);
 

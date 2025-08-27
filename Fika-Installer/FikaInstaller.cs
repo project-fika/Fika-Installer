@@ -1,32 +1,36 @@
 ﻿using Fika_Installer.Models;
+using Fika_Installer.Models.GitHub;
+using Fika_Installer.Spt;
 using Fika_Installer.Utils;
+using System.Text.RegularExpressions;
 
 namespace Fika_Installer
 {
-    public class FikaInstaller
+    public partial class FikaInstaller
     {
         private string _installDir;
-        private string _sptFolder;
+        private SptInstance _sptInstance;
         private string _tempDir;
+        
+        [GeneratedRegex(@"Compatible with EFT ([\d.]+)", RegexOptions.IgnoreCase)]
+        private static partial Regex CompatibleWithEftVersionRegex();
 
         public FikaInstaller(string installDir, string sptFolder)
         {
             _installDir = installDir;
-            _sptFolder = sptFolder;
+            _sptInstance = new(sptFolder);
             _tempDir = Path.Combine(_installDir, "FikaInstallerTemp");
         }
 
         private bool ValidateSptFolder(string sptFolder)
         {
-            string sptServerPath = Path.Combine(sptFolder, "SPT.Server.exe");
-            string sptLauncherPath = Path.Combine(sptFolder, "SPT.Launcher.exe");
-
-            if (!File.Exists(sptServerPath) || !File.Exists(sptLauncherPath))
+            if (!File.Exists(_sptInstance.ServerExePath) || !File.Exists(_sptInstance.LauncherExePath))
             {
                 ConUtils.WriteError("The selected folder does not contain a valid SPT installation.", true);
                 return false;
             }
 
+            // TODO: add in SptInstance?
             string sptAssemblyCSharpBak = Path.Combine(sptFolder, @"EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll.spt-bak");
 
             if (!File.Exists(sptAssemblyCSharpBak))
@@ -49,6 +53,8 @@ namespace Fika_Installer
                 return string.Empty;
             }
 
+            _sptInstance = new(sptFolder);
+
             bool sptValidationResult = ValidateSptFolder(sptFolder);
 
             if (!sptValidationResult)
@@ -56,8 +62,6 @@ namespace Fika_Installer
                 ConUtils.WriteError("An error occurred during validation of SPT folder.", true);
                 return string.Empty;
             }
-
-            _sptFolder = sptFolder;
 
             return sptFolder;
         }
@@ -82,7 +86,7 @@ namespace Fika_Installer
             {
                 excludeFiles.Add("EscapeFromTarkov_Data");
 
-                string escapeFromTarkovDataPath = Path.Combine(_sptFolder, "EscapeFromTarkov_Data");
+                string escapeFromTarkovDataPath = Path.Combine(_sptInstance.SptPath, "EscapeFromTarkov_Data");
                 string escapeFromTarkovDataFikaPath = Path.Combine(_installDir, "EscapeFromTarkov_Data");
 
                 Console.WriteLine("Creating symlink...");
@@ -98,7 +102,7 @@ namespace Fika_Installer
 
             Console.WriteLine("Copying SPT folder...");
 
-            bool copySptFolderResult = FileUtils.CopyFolderWithProgress(_sptFolder, _installDir, excludeFiles);
+            bool copySptFolderResult = FileUtils.CopyFolderWithProgress(_sptInstance.SptPath, _installDir, excludeFiles);
 
             if (!copySptFolderResult)
             {
@@ -126,7 +130,40 @@ namespace Fika_Installer
 
         public bool InstallRelease(string url)
         {
-            DownloadReleaseResult downloadReleaseResult = DownloadRelease(url, _tempDir);
+            GitHubRelease? gitHubRelease = GitHub.GetReleaseFromUrl(url);
+
+            if (gitHubRelease == null)
+            {
+                return false;
+            }
+
+            string? compatibleEftVersion = GetCompatibleEftVersionFromRelease(gitHubRelease);
+            string? eftVersion = _sptInstance.EftVersion;
+
+            // Skip the check if the versions are not available for some reason...
+            if (!string.IsNullOrEmpty(compatibleEftVersion) || !string.IsNullOrEmpty(eftVersion))
+            {
+                if (compatibleEftVersion != eftVersion)
+                {
+                    ConUtils.WriteError($"{gitHubRelease.Name} is not compatible with your Escape From Tarkov version.");
+                    Console.WriteLine();
+                    Console.WriteLine();
+                    ConUtils.WriteError($"Your version:         {eftVersion}");
+                    ConUtils.WriteError($"Compatible version:   {compatibleEftVersion}", true);
+                    
+                    return false;
+                }
+            }
+
+            // Always pick the first asset
+            GitHubAsset? asset = gitHubRelease.Assets.FirstOrDefault();
+
+            if (asset == null)
+            {
+                return false;
+            }
+            
+            DownloadReleaseResult downloadReleaseResult = DownloadRelease(asset, _tempDir);
 
             if (!downloadReleaseResult.Result)
             {
@@ -146,32 +183,22 @@ namespace Fika_Installer
             return true;
         }
 
-        private DownloadReleaseResult DownloadRelease(string releaseUrl, string outputDir)
+        private DownloadReleaseResult DownloadRelease(GitHubAsset asset, string outputDir)
         {
-            GitHubAsset[] githubAssets = GitHub.FetchGitHubAssets(releaseUrl);
+            string assetName = asset.Name;
+            string assetUrl = asset.BrowserDownloadUrl;
 
-            DownloadReleaseResult downloadReleaseResult = new();
+            Console.WriteLine($"Downloading {assetName}...");
 
-            if (githubAssets.Length > 0)
+            string outputPath = Path.Combine(outputDir, assetName);
+            bool downloadResult = FileUtils.DownloadFileWithProgress(assetUrl, outputPath);
+
+            if (!downloadResult)
             {
-                // TODO: Make sure we grab the correct file if there's more than 1 file...
-                string releaseName = githubAssets[0].Name;
-                string assetUrl = githubAssets[0].Url;
-
-                Console.WriteLine($"Downloading {releaseName}...");
-
-                string outputPath = Path.Combine(outputDir, releaseName);
-                bool downloadResult = FileUtils.DownloadFileWithProgress(assetUrl, outputPath);
-
-                if (!downloadResult)
-                {
-                    ConUtils.WriteError($"An error occurred while downloading {releaseName}.", true);
-                }
-
-                downloadReleaseResult.Name = releaseName;
-                downloadReleaseResult.Url = assetUrl;
-                downloadReleaseResult.Result = downloadResult;
+                ConUtils.WriteError($"An error occurred while downloading {assetName}.", true);
             }
+
+            DownloadReleaseResult downloadReleaseResult = new(assetName, assetUrl, downloadResult);
 
             return downloadReleaseResult;
         }
@@ -206,6 +233,20 @@ namespace Fika_Installer
 
             string escapeFromTarkovPath = Path.Combine(installDir, "EscapeFromTarkov.exe");
             FwUtils.CreateFirewallRule("Fika (Core) - UDP 25565", "Inbound", "UDP", "25565", escapeFromTarkovPath);
+        }
+
+        public string? GetCompatibleEftVersionFromRelease(GitHubRelease gitHubRelease)
+        {
+            string body = gitHubRelease.Body;
+
+            Match match = CompatibleWithEftVersionRegex().Match(body);
+
+            if (match.Success)
+            {
+                return match.Groups[1].Value;
+            }
+
+            return null;
         }
     }
 }

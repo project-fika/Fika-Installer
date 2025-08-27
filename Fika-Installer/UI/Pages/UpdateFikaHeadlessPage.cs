@@ -16,7 +16,7 @@ namespace Fika_Installer.UI.Pages
         }
 
 
-        public override void Draw()
+        public override void OnShow()
         {
             FikaInstaller fikaInstaller = new(_installDir, _installDir);
 

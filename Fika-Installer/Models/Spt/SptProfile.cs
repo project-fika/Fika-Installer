@@ -1,4 +1,4 @@
-﻿namespace Fika_Installer.Models
+﻿namespace Fika_Installer.Models.Spt
 {
     public class SptProfile
     {
@@ -6,14 +6,6 @@
         public string Name { get; set; }
         public string Password { get; set; }
         public bool Headless { get; set; }
-
-        public SptProfile()
-        {
-            ProfileId = "";
-            Name = "";
-            Password = "";
-            Headless = false;
-        }
 
         public SptProfile(string profileId, string name, string password, bool headless)
         {

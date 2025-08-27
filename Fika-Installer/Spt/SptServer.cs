@@ -32,7 +32,7 @@ namespace Fika_Installer.Spt
 
             using (Process process = new Process { StartInfo = startInfo })
             {
-                Timer timeoutTimer = new(_ =>
+                Timer killAfterTimer = new(_ =>
                 {
                     if (!process.HasExited)
                     {
@@ -59,7 +59,7 @@ namespace Fika_Installer.Spt
                 process.BeginErrorReadLine();
 
                 process.WaitForExit();
-                timeoutTimer.Dispose();
+                killAfterTimer.Dispose();
             }
         }
 

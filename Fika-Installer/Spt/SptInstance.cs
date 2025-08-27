@@ -1,6 +1,7 @@
-﻿using Fika_Installer.Models;
+﻿using Fika_Installer.Models.Spt;
 using Fika_Installer.Utils;
-using Newtonsoft.Json.Linq;
+using System.Diagnostics;
+using System.Text.Json;
 
 namespace Fika_Installer.Spt
 {
@@ -9,63 +10,37 @@ namespace Fika_Installer.Spt
         private string _profilesPath;
         private string _launcherConfigPath;
 
-        public string LocationPath { get; private set; }
+        public string SptPath { get; private set; }
         public string ServerExePath { get; private set; }
         public string LauncherExePath { get; private set; }
-        public List<SptProfile> Profiles { get; private set; }
+        public string TarkovExePath { get; private set; }
+        public string EftVersion { get; private set; } = "";
+        public List<SptProfile> Profiles { get; private set; } = [];
 
-        public SptInstance(string locationPath)
+        public SptInstance(string sptPath)
         {
-            _profilesPath = Path.Combine(locationPath, @"user\profiles");
-            _launcherConfigPath = Path.Combine(locationPath, @"user\launcher\config.json");
+            _profilesPath = Path.Combine(sptPath, @"user\profiles");
+            _launcherConfigPath = Path.Combine(sptPath, @"user\launcher\config.json");
 
-            LocationPath = locationPath;
-            ServerExePath = Path.Combine(locationPath, "SPT.Server.exe");
-            LauncherExePath = Path.Combine(locationPath, "SPT.Launcher.exe");
-            Profiles = LoadProfiles();
-        }
+            SptPath = sptPath;
+            ServerExePath = Path.Combine(sptPath, "SPT.Server.exe");
+            LauncherExePath = Path.Combine(sptPath, "SPT.Launcher.exe");
+            TarkovExePath = Path.Combine(sptPath, "EscapeFromTarkov.exe");
 
-        public SptProfile? GetProfile(string profileId)
-        {
-            return Profiles.FirstOrDefault(p => p.ProfileId == profileId);
-        }
+            LoadProfiles();
 
-        public List<SptProfile> GetHeadlessProfiles()
-        {
-            return [.. Profiles.Where(p => p.Headless)];
-        }
-
-        public JObject? GetLauncherConfig()
-        {
-            JObject? launcherConfig = JsonUtils.ReadJson(_launcherConfigPath);
-
-            if (launcherConfig == null)
+            if (File.Exists(TarkovExePath))
             {
-                return null;
-            }
+                FileVersionInfo? tarkovVersionInfo = FileVersionInfo.GetVersionInfo(TarkovExePath);
 
-            return launcherConfig;
-        }
-
-        public bool SetLauncherConfig(JObject launcherConfig)
-        {
-            try
-            {
-                JsonUtils.WriteJson(launcherConfig, _launcherConfigPath);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                return false;
+                if (tarkovVersionInfo.FileVersion != null)
+                {
+                    EftVersion = tarkovVersionInfo.FileVersion;
+                }
             }
         }
 
-        public void ReloadProfiles()
-        {
-            Profiles = LoadProfiles();
-        }
-
-        private List<SptProfile> LoadProfiles()
+        public void LoadProfiles()
         {
             List<SptProfile> sptProfiles = [];
 
@@ -87,7 +62,43 @@ namespace Fika_Installer.Spt
                 }
             }
 
-            return sptProfiles;
+            Profiles = sptProfiles;
+        }
+
+        public SptProfile? GetProfile(string profileId)
+        {
+            return Profiles.FirstOrDefault(p => p.ProfileId == profileId);
+        }
+
+        public List<SptProfile> GetHeadlessProfiles()
+        {
+            return [.. Profiles.Where(p => p.Headless)];
+        }
+
+        public SptLauncherConfigModel? GetLauncherConfig()
+        {
+            if (File.Exists(_launcherConfigPath))
+            {
+                SptLauncherConfigModel? launcherConfig = JsonUtils.ReadJson<SptLauncherConfigModel>(_launcherConfigPath);
+                
+                return launcherConfig;
+            }
+
+            return null;
+        }
+
+        public bool SetLauncherConfig(SptLauncherConfigModel launcherConfig)
+        {
+            try
+            {
+                JsonUtils.WriteJson(_launcherConfigPath, launcherConfig);
+                
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private SptProfile? GetProfileFromJson(string sptProfilePath)
@@ -96,26 +107,20 @@ namespace Fika_Installer.Spt
             {
                 try
                 {
-                    string profileJson = File.ReadAllText(sptProfilePath);
-                    JObject profile = JObject.Parse(profileJson);
+                    SptProfileModel? profile = JsonUtils.ReadJson<SptProfileModel>(sptProfilePath);
 
-                    string? profileId = profile["info"]?["id"]?.ToString();
-                    string? username = profile["info"]?["username"]?.ToString();
-                    string? password = profile["info"]?["password"]?.ToString();
-
-                    if (profileId != null && username != null && password != null)
+                    if (profile != null)
                     {
                         bool headlessProfile = false;
 
-                        if (password == "fika-headless")
+                        if (profile.Info.Password == "fika-headless")
                         {
                             headlessProfile = true;
                         }
 
-                        SptProfile sptProfile = new(profileId, username, password, headlessProfile);
+                        SptProfile sptProfile = new(profile.Info.Id, profile.Info.Username, profile.Info.Password, headlessProfile);
 
                         return sptProfile;
-
                     }
                 }
                 catch (Exception ex)

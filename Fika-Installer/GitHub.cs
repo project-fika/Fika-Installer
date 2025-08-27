@@ -1,46 +1,24 @@
-﻿using Fika_Installer.Models;
-using Fika_Installer.Utils;
-using Newtonsoft.Json.Linq;
+﻿using Fika_Installer.Models.GitHub;
+using System.Text.Json;
 
 namespace Fika_Installer
 {
     public static class GitHub
     {
-        public static GitHubAsset[] FetchGitHubAssets(string releaseUrl)
+        public static GitHubRelease? GetReleaseFromUrl(string url)
         {
-            List<GitHubAsset> githubAssets = [];
-
             try
             {
-                string json = GetHttpContent(releaseUrl);
+                string releaseJson = GetHttpContent(url);
 
-                JObject release = JObject.Parse(json);
+                GitHubRelease? gitHubRelease = JsonSerializer.Deserialize<GitHubRelease>(releaseJson);
 
-                JArray assets = (JArray)release["assets"];
-
-                if (assets == null || assets.Count == 0)
-                {
-                    return [.. githubAssets];
-                }
-
-                foreach (JObject asset in assets)
-                {
-                    string? name = asset["name"]?.ToString();
-                    string? url = asset["browser_download_url"]?.ToString();
-
-                    if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(url))
-                    {
-                        GitHubAsset gitHubAsset = new(name, url);
-                        githubAssets.Add(gitHubAsset);
-                    }
-                }
+                return gitHubRelease;
             }
-            catch (Exception ex)
+            catch
             {
-                ConUtils.WriteError($"An error occurred when fetching GitHub assets: {ex.Message}", true);
+                return null;
             }
-
-            return [.. githubAssets];
         }
 
         public static string GetHttpContent(string url)

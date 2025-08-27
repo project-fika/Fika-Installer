@@ -1,7 +1,8 @@
 ﻿using Fika_Installer.Models;
+using Fika_Installer.Models.Fika;
+using Fika_Installer.Models.Spt;
 using Fika_Installer.Spt;
 using Fika_Installer.Utils;
-using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 
 namespace Fika_Installer
@@ -44,7 +45,7 @@ namespace Fika_Installer
                 Thread.Sleep(1000);
             }
 
-            if (!IsFikaConfigFound())
+            if (!IsFikaServerConfigFound())
             {
                 Console.WriteLine("Generating Fika config file... This may take a moment.");
 
@@ -70,24 +71,24 @@ namespace Fika_Installer
                     return null;
                 }
 
-                if (!IsFikaConfigFound())
+                if (!IsFikaServerConfigFound())
                 {
                     return null;
                 }
             }
 
-            JObject? fikaConfig = JsonUtils.ReadJson(_fikaServerConfigPath);
+            FikaServerConfigModel? fikaServerConfig = JsonUtils.ReadJson<FikaServerConfigModel>(_fikaServerConfigPath);
 
-            if (fikaConfig == null)
+            if (fikaServerConfig == null)
             {
                 return null;
             }
 
             int sptProfilesCount = SptInstance.Profiles.Count;
 
-            fikaConfig["headless"]["profiles"]["amount"] = sptProfilesCount + 1;
+            fikaServerConfig.Headless.Profiles.Amount = sptProfilesCount + 1;
 
-            bool writeFikaConfigResult = JsonUtils.WriteJson(fikaConfig, _fikaServerConfigPath);
+            bool writeFikaConfigResult = JsonUtils.WriteJson<FikaServerConfigModel>(_fikaServerConfigPath, fikaServerConfig);
 
             if (!writeFikaConfigResult)
             {
@@ -125,7 +126,7 @@ namespace Fika_Installer
                 return null;
             }
 
-            SptInstance.ReloadProfiles();
+            SptInstance.LoadProfiles();
 
             SptProfile? headlessProfile = SptInstance.GetProfile(_headlessProfileId);
 
@@ -162,7 +163,7 @@ namespace Fika_Installer
             return false;
         }
 
-        public bool IsFikaConfigFound()
+        public bool IsFikaServerConfigFound()
         {
             if (File.Exists(_fikaServerConfigPath))
             {

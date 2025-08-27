@@ -1,4 +1,5 @@
 ﻿using Fika_Installer.Models;
+using Fika_Installer.Models.Spt;
 using Fika_Installer.UI.Pages;
 
 namespace Fika_Installer.UI
