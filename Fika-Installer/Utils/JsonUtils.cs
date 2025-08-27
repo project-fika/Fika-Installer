@@ -14,9 +14,9 @@ namespace Fika_Installer.Utils
                 string jsonContent = File.ReadAllText(jsonPath);
                 return JsonSerializer.Deserialize<JsonObject>(jsonContent);
             }
-            catch
+            catch(Exception ex)
             {
-                ConUtils.WriteError($"An error occurred while reading: {jsonPath}");
+                ConUtils.WriteError($"An error occurred while reading: {jsonPath}. {ex.Message}");
                 return null;
             }
         }
@@ -32,7 +32,7 @@ namespace Fika_Installer.Utils
             }
             catch (Exception ex)
             {
-                ConUtils.WriteError($"An error occurred while writing to: {jsonPath}");
+                ConUtils.WriteError($"An error occurred while writing to: {jsonPath}. {ex.Message}");
             }
 
             return false;

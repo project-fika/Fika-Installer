@@ -25,9 +25,8 @@ namespace Fika_Installer
         public static readonly string LauncherExeName = "SPT.Launcher.exe";
     }
 
-    public static class TarkovConstants
+    public static class EftConstants
     {
-        public static readonly string ExeName = "EscapeFromTarkov.exe";
-        public static readonly string TarkovDataFolderName = "EscapeFromTarkov_Data";
+        public static readonly string GameExeName = "EscapeFromTarkov.exe";
     }
 }

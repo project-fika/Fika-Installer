@@ -5,18 +5,13 @@ using Timer = System.Threading.Timer;
 
 namespace Fika_Installer.Spt
 {
-    public class SptServer
+    public class SptServer(SptInstance sptInstance)
     {
         private readonly List<MatchAction> _matchActions = new();
         private readonly Regex _sptErrorRegex = new(@"Error", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        public string ExePath { get; set; }
+        public string ExePath { get; set; } = sptInstance.ServerExePath;
         public TimeSpan KillAfter { get; set; } = Timeout.InfiniteTimeSpan;
-
-        public SptServer(SptInstance sptInstance)
-        {
-            ExePath = sptInstance.ServerExePath;
-        }
 
         public void Start()
         {

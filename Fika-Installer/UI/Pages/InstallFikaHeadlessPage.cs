@@ -14,10 +14,9 @@ namespace Fika_Installer.UI.Pages
 
         public override void OnShow()
         {
-            SptInstaller sptInstaller = new(_installDir, _installDir);
             SptInstance? sptInstance;
 
-            bool isSptInstalled = sptInstaller.IsSptInstalled();
+            bool isSptInstalled = SptUtils.IsSptInstalled(_installDir);
 
             if (isSptInstalled)
             {
@@ -25,7 +24,7 @@ namespace Fika_Installer.UI.Pages
             }
             else
             {
-                string? sptDir = sptInstaller.BrowseAndValidateSptDir();
+                string? sptDir = SptUtils.BrowseAndValidateSptDir();
 
                 if (sptDir == null)
                 {
@@ -90,6 +89,7 @@ namespace Fika_Installer.UI.Pages
 
                 if (Enum.TryParse(selectedInstallMethod, out InstallMethod installType))
                 {
+                    SptInstaller sptInstaller = new(_installDir, sptInstance.SptPath);
                     bool installSptResult = sptInstaller.InstallSpt(installType, true);
 
                     if (!installSptResult)

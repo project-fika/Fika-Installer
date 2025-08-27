@@ -9,7 +9,7 @@ namespace Fika_Installer
 {
     public class FikaHeadless
     {
-        private string _fikaDirectory;
+        private string _installDir;
         private SptInstance _sptInstance;
         private string _fikaServerModPath;
         private string _fikaServerScriptsFolder;
@@ -18,7 +18,7 @@ namespace Fika_Installer
 
         public FikaHeadless(string installDir, SptInstance sptInstance)
         {
-            _fikaDirectory = installDir;
+            _installDir = installDir;
             _sptInstance = sptInstance;
             _fikaServerModPath = Path.Combine(_sptInstance.SptPath, @"user\mods\fika-server");
             _fikaServerScriptsFolder = Path.Combine(_fikaServerModPath, @"assets\scripts");
@@ -137,7 +137,7 @@ namespace Fika_Installer
 
             if (File.Exists(headlessProfileStartScriptPath))
             {
-                string headlessProfileStartScriptDestPath = Path.Combine(_fikaDirectory, headlessProfileStartScript);
+                string headlessProfileStartScriptDestPath = Path.Combine(_installDir, headlessProfileStartScript);
                 File.Copy(headlessProfileStartScriptPath, headlessProfileStartScriptDestPath, true);
             }
             else
@@ -151,22 +151,13 @@ namespace Fika_Installer
 
         public bool IsFikaServerInstalled()
         {
-            if (Directory.Exists(_fikaServerModPath))
-            {
-                return true;
-            }
-
-            return false;
+            // This is a lazy check and is not indicative of a proper Fika-Server installation.
+            return Directory.Exists(_fikaServerModPath);
         }
 
         public bool IsFikaServerConfigFound()
         {
-            if (File.Exists(_fikaServerConfigPath))
-            {
-                return true;
-            }
-
-            return false;
+            return File.Exists(_fikaServerConfigPath);
         }
     }
 }

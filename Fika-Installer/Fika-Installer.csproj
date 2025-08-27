@@ -8,8 +8,8 @@
     <Nullable>enable</Nullable>
 	<UseWindowsForms>true</UseWindowsForms>
 	<ApplicationManifest>app.manifest</ApplicationManifest>
-	<AssemblyVersion>1.0.5</AssemblyVersion>
-	<FileVersion>1.0.5</FileVersion>
-	<InformationalVersion>1.0.5</InformationalVersion>
+	<AssemblyVersion>1.0.6</AssemblyVersion>
+	<FileVersion>1.0.6</FileVersion>
+	<InformationalVersion>1.0.6</InformationalVersion>
   </PropertyGroup>
 </Project>

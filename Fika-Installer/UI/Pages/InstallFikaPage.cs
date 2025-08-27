@@ -14,7 +14,7 @@ namespace Fika_Installer.UI.Pages
             SptInstaller sptInstaller = new(_installDir, _installDir);
             SptInstance? sptInstance;
 
-            bool isSptInstalled = sptInstaller.IsSptInstalled();
+            bool isSptInstalled = SptUtils.IsSptInstalled(_installDir);
 
             if (isSptInstalled)
             {

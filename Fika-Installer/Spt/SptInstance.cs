@@ -12,7 +12,7 @@ namespace Fika_Installer.Spt
 
         public string SptPath { get; private set; }
         public string ServerExePath { get; private set; }
-        public string TarkovExePath { get; private set; }
+        public string EftExePath { get; private set; }
         public string EftVersion { get; private set; } = "";
         public List<SptProfile> Profiles { get; private set; } = [];
 
@@ -23,13 +23,13 @@ namespace Fika_Installer.Spt
 
             SptPath = sptPath;
             ServerExePath = Path.Combine(sptPath, SptConstants.ServerExeName);
-            TarkovExePath = Path.Combine(sptPath, TarkovConstants.ExeName);
+            EftExePath = Path.Combine(sptPath, EftConstants.GameExeName);
 
             LoadProfiles();
 
-            if (File.Exists(TarkovExePath))
+            if (File.Exists(EftExePath))
             {
-                FileVersionInfo? tarkovVersionInfo = FileVersionInfo.GetVersionInfo(TarkovExePath);
+                FileVersionInfo? tarkovVersionInfo = FileVersionInfo.GetVersionInfo(EftExePath);
 
                 if (tarkovVersionInfo.FileVersion != null)
                 {
@@ -48,7 +48,7 @@ namespace Fika_Installer.Spt
 
                 foreach (string profilePath in profilesPaths)
                 {
-                    SptProfile? sptProfile = GetProfileFromJson(profilePath);
+                    SptProfile? sptProfile = SptUtils.GetProfileFromJson(profilePath);
 
                     if (sptProfile != null)
                     {
@@ -94,41 +94,6 @@ namespace Fika_Installer.Spt
             {
                 return false;
             }
-        }
-
-        private SptProfile? GetProfileFromJson(string sptProfilePath)
-        {
-            if (File.Exists(sptProfilePath))
-            {
-                try
-                {
-                    JsonObject? profile = JsonUtils.DeserializeFromFile(sptProfilePath);
-
-                    if (profile != null)
-                    {
-                        bool headless = false;
-
-                        string? id = profile["info"]?["id"]?.GetValue<string>();
-                        string? username = profile["info"]?["username"]?.GetValue<string>();
-                        string? password = profile["info"]?["password"]?.GetValue<string>();
-
-                        if (id != null && username != null && password != null)
-                        {
-                            headless = password == "fika-headless";
-
-                            SptProfile sptProfile = new(id, username, password, headless);
-
-                            return sptProfile;
-                        }
-                    }
-                }
-                catch
-                {
-                    ConUtils.WriteError($"Failed to read profile: {sptProfilePath}");
-                }
-            }
-
-            return null;
         }
     }
 }

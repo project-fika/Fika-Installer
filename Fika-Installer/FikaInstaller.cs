@@ -85,7 +85,7 @@ namespace Fika_Installer
             string sptServerPath = Path.Combine(_sptInstance.SptPath, SptConstants.ServerExeName);
             FwUtils.CreateFirewallRule("Fika (SPT) - TCP 6969", "Inbound", "TCP", "6969", sptServerPath);
 
-            string escapeFromTarkovPath = Path.Combine(_installDir, TarkovConstants.ExeName);
+            string escapeFromTarkovPath = Path.Combine(_installDir, EftConstants.GameExeName);
             FwUtils.CreateFirewallRule("Fika (Core) - UDP 25565", "Inbound", "UDP", "25565", escapeFromTarkovPath);
         }
 
