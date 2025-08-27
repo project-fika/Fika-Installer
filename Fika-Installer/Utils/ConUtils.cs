@@ -8,7 +8,7 @@
 
             if (confirm)
             {
-                WriteConfirm(message);
+                WriteConfirm(message, true);
             }
             else
             {
@@ -24,7 +24,7 @@
 
             if (confirm)
             {
-                WriteConfirm(message);
+                WriteConfirm(message, true);
             }
             else
             {
@@ -41,11 +41,16 @@
             Console.ResetColor();
         }
 
-        public static void WriteConfirm(string message)
+        public static void WriteConfirm(string message, bool confirmMessage = false)
         {
             Console.WriteLine(message);
-            Console.WriteLine();
-            Console.WriteLine("Press any key to continue.");
+
+            if (confirmMessage)
+            {
+                Console.WriteLine();
+                Console.WriteLine("Press any key to continue.");
+            }
+            
             Console.ReadKey(true);
         }
 
