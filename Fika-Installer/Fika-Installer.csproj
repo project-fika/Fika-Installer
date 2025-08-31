@@ -7,6 +7,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<UseWindowsForms>true</UseWindowsForms>
+	<CETCompat>false</CETCompat>
 	<ApplicationManifest>app.manifest</ApplicationManifest>
 	<AssemblyVersion>1.0.6</AssemblyVersion>
 	<FileVersion>1.0.6</FileVersion>
