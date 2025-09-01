@@ -31,7 +31,7 @@ namespace Fika_Installer
             string? compatibleEftVersion = GetCompatibleEftVersionFromRelease(gitHubRelease);
             string? eftVersion = _sptInstance.EftVersion;
 
-            if (!string.IsNullOrEmpty(compatibleEftVersion) || !string.IsNullOrEmpty(eftVersion))
+            if (!string.IsNullOrEmpty(compatibleEftVersion) && !string.IsNullOrEmpty(eftVersion))
             {
                 if (compatibleEftVersion != eftVersion)
                 {
@@ -45,7 +45,7 @@ namespace Fika_Installer
             }
             else
             {
-                ConUtils.WriteWarning($"WARNING: Could not verify compatibility of {gitHubRelease.Name} with your Escape From Tarkov version. Your Fika installation may not work!");
+                ConUtils.WriteWarning($"Could not verify compatibility of {gitHubRelease.Name} with your Escape From Tarkov version.");
             }
 
             // Pick the first asset from release
