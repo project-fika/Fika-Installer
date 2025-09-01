@@ -10,7 +10,7 @@ namespace Fika_Installer.Spt
 
         public bool InstallSpt(InstallMethod installType, bool headless = false)
         {
-            List<string> excludeFiles = ["FikaInstallerTemp"];
+            List<string> excludeFiles = ["FikaInstallerTemp", "Fika-Installer.exe", "SPTInstaller.exe"];
 
             if (headless)
             {
