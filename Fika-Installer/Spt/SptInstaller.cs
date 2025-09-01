@@ -18,7 +18,6 @@ namespace Fika_Installer.Spt
                 [
                     SptConstants.ServerExeName,
                     SptConstants.LauncherExeName,
-                    "SPTInstaller.exe",
                     "SPT_Data",
                     "user",
                 ]);
