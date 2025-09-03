@@ -8,7 +8,7 @@ namespace Fika_Installer
         public static readonly string InstallerDir = Directory.GetCurrentDirectory();
         public static readonly string InstallerTempDir = Path.Combine(InstallerDir, "FikaInstallerTemp");
     }
-    
+
     public static class FikaConstants
     {
         public static readonly Dictionary<string, string> ReleaseUrls = new()

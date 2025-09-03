@@ -15,12 +15,14 @@ namespace Fika_Installer.UI.Pages
         public override void OnShow()
         {
             SptInstance? sptInstance;
+            SptInstaller? sptInstaller;
 
             bool isSptInstalled = SptUtils.IsSptInstalled(_installDir);
 
             if (isSptInstalled)
             {
                 sptInstance = new(_installDir);
+                sptInstaller = new(_installDir, _installDir);
             }
             else
             {
@@ -30,15 +32,14 @@ namespace Fika_Installer.UI.Pages
                 {
                     return;
                 }
-                
+
                 sptInstance = new(sptDir);
+                sptInstaller = new(_installDir, sptDir);
             }
 
             FikaHeadless fikaHeadless = new(_installDir, sptInstance);
 
-            bool isFikaServerInstalled = fikaHeadless.IsFikaServerInstalled();
-
-            if (!isFikaServerInstalled)
+            if (!fikaHeadless.IsFikaServerInstalled())
             {
                 ConUtils.WriteError("Fika-Server must be installed in the SPT folder before installing Fika-Headless.", true);
                 return;
@@ -73,9 +74,7 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            bool copyProfileScriptResult = fikaHeadless.CopyProfileScript(headlessProfileId);
-
-            if (!copyProfileScriptResult)
+            if (!fikaHeadless.CopyProfileScript(headlessProfileId))
             {
                 return;
             }
@@ -89,28 +88,32 @@ namespace Fika_Installer.UI.Pages
 
                 if (Enum.TryParse(selectedInstallMethod, out InstallMethod installType))
                 {
-                    SptInstaller sptInstaller = new(_installDir, sptInstance.SptPath);
                     bool installSptResult = sptInstaller.InstallSpt(installType, true);
 
                     if (!installSptResult)
                     {
                         return;
                     }
+
+                    // Change directory to installed SPT directory
+                    sptInstance = new(_installDir);
                 }
             }
 
-            FikaInstaller fikaInstaller = new(_installDir, sptInstance);
-
-            bool installHeadlessResult = fikaInstaller.InstallReleaseFromUrl(_fikaHeadlessReleaseUrl);
-
-            if (!installHeadlessResult)
+            if (!sptInstaller.InstallSptRequirements())
             {
                 return;
             }
 
-            bool installFikaResult = fikaInstaller.InstallReleaseFromUrl(_fikaCoreReleaseUrl);
+            FikaInstaller fikaInstaller = new(_installDir, sptInstance);
 
-            if (!installFikaResult)
+
+            if (!fikaInstaller.InstallReleaseFromUrl(_fikaHeadlessReleaseUrl))
+            {
+                return;
+            }
+
+            if (!fikaInstaller.InstallReleaseFromUrl(_fikaCoreReleaseUrl))
             {
                 return;
             }

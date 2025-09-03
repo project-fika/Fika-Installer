@@ -13,9 +13,9 @@ namespace Fika_Installer.UI
         private string _fikaCorePath;
         private string _fikaHeadlessPath;
 
-        public MenuFactory(string installerDirectory, string fikaCoreReleaseUrl, string fikaServerReleaseUrl, string fikaHeadlessReleaseUrl)
+        public MenuFactory(string installDir, string fikaCoreReleaseUrl, string fikaServerReleaseUrl, string fikaHeadlessReleaseUrl)
         {
-            _installDir = installerDirectory;
+            _installDir = installDir;
             _fikaCoreReleaseUrl = fikaCoreReleaseUrl;
             _fikaServerReleaseUrl = fikaServerReleaseUrl;
             _fikaHeadlessReleaseUrl = fikaHeadlessReleaseUrl;

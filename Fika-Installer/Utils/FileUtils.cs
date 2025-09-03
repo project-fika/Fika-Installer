@@ -26,7 +26,7 @@ namespace Fika_Installer.Utils
         {
             bool result = false;
 
-            var allFiles = Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories)
+            List<string> allFiles = Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories)
                 .Where(file =>
                 {
                     string relativePath = Path.GetRelativePath(sourcePath, file);

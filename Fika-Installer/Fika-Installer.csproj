@@ -13,4 +13,8 @@
 	<FileVersion>1.0.9</FileVersion>
 	<InformationalVersion>1.0.9</InformationalVersion>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SharpHDiffPatch.Core" Version="2.3.3" />
+  </ItemGroup>
 </Project>

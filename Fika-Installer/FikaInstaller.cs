@@ -58,9 +58,7 @@ namespace Fika_Installer
 
             string tempDir = InstallerConstants.InstallerTempDir;
 
-            bool downloadReleaseResult = DownloadRelease(asset, tempDir);
-
-            if (!downloadReleaseResult)
+            if (!DownloadRelease(asset, tempDir))
             {
                 return false;
             }
@@ -68,9 +66,7 @@ namespace Fika_Installer
             string releaseName = asset.Name;
             string releaseZipFilePath = Path.Combine(tempDir, releaseName);
 
-            bool extractResult = ExtractRelease(releaseZipFilePath, _installDir);
-
-            if (!extractResult)
+            if (!ExtractRelease(releaseZipFilePath, _installDir))
             {
                 return false;
             }

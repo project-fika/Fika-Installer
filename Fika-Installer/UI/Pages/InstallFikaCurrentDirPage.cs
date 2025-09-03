@@ -23,12 +23,14 @@ namespace Fika_Installer.UI.Pages
         public override void OnShow()
         {
             SptInstance? sptInstance;
+            SptInstaller? sptInstaller;
 
             bool isSptInstalled = SptUtils.IsSptInstalled(_installDir);
 
             if (isSptInstalled)
             {
                 sptInstance = new(_installDir);
+                sptInstaller = new(_installDir, _installDir);
             }
             else
             {
@@ -46,10 +48,9 @@ namespace Fika_Installer.UI.Pages
 
                 if (Enum.TryParse(selectedInstallType, out InstallMethod installType))
                 {
-                    SptInstaller sptInstaller = new(_installDir, sptDir);
-                    bool installSptResult = sptInstaller.InstallSpt(installType);
+                    sptInstaller = new(_installDir, sptDir);
 
-                    if (!installSptResult)
+                    if (!sptInstaller.InstallSpt(installType))
                     {
                         return;
                     }
@@ -73,18 +74,19 @@ namespace Fika_Installer.UI.Pages
                 }
             }
 
-            FikaInstaller fikaInstaller = new(_installDir, sptInstance);
-
-            bool installFikaCoreResult = fikaInstaller.InstallReleaseFromUrl(_fikaCoreReleaseUrl);
-
-            if (!installFikaCoreResult)
+            if (!sptInstaller.InstallSptRequirements())
             {
                 return;
             }
 
-            bool installFikaServerResult = fikaInstaller.InstallReleaseFromUrl(_fikaServerReleaseUrl);
+            FikaInstaller fikaInstaller = new(_installDir, sptInstance);
 
-            if (!installFikaServerResult)
+            if (!fikaInstaller.InstallReleaseFromUrl(_fikaCoreReleaseUrl))
+            {
+                return;
+            }
+
+            if (!fikaInstaller.InstallReleaseFromUrl(_fikaServerReleaseUrl))
             {
                 return;
             }

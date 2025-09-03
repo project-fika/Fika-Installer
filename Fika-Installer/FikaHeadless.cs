@@ -84,9 +84,7 @@ namespace Fika_Installer
 
             fikaServerConfig["headless"]["profiles"]["amount"] = sptProfilesCount + 1;
 
-            bool writeFikaConfigResult = JsonUtils.SerializeToFile(_fikaServerConfigPath, fikaServerConfig);
-
-            if (!writeFikaConfigResult)
+            if (!JsonUtils.SerializeToFile(_fikaServerConfigPath, fikaServerConfig))
             {
                 return null;
             }

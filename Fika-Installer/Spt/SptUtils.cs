@@ -1,5 +1,6 @@
 ﻿using Fika_Installer.Models.Spt;
 using Fika_Installer.Utils;
+using SharpHDiffPatch.Core;
 using System.Text.Json.Nodes;
 
 namespace Fika_Installer.Spt
@@ -28,34 +29,13 @@ namespace Fika_Installer.Spt
                 return null;
             }
 
-            bool sptValidationResult = ValidateSptFolder(sptDir);
-
-            if (!sptValidationResult)
+            if (!IsSptInstalled(sptDir))
             {
-                ConUtils.WriteError("An error occurred during validation of SPT folder.", true);
+                ConUtils.WriteError("The selected folder does not contain a valid SPT installation.", true);
                 return null;
             }
 
             return sptDir;
-        }
-
-        private static bool ValidateSptFolder(string sptDir)
-        {
-            if (!IsSptInstalled(sptDir))
-            {
-                ConUtils.WriteError("The selected folder does not contain a valid SPT installation.", true);
-                return false;
-            }
-
-            string sptAssemblyCSharpBak = Path.Combine(sptDir, @"EscapeFromTarkov_Data\Managed\Assembly-CSharp.dll.spt-bak");
-
-            if (!File.Exists(sptAssemblyCSharpBak))
-            {
-                ConUtils.WriteError("You must run SPT.Launcher.exe and start the game at least once before you attempt to install Fika using the selected SPT folder.", true);
-                return false;
-            }
-
-            return true;
         }
 
         public static SptProfile? GetProfileFromJson(string sptProfilePath)
@@ -84,13 +64,45 @@ namespace Fika_Installer.Spt
                         }
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     ConUtils.WriteError($"Failed to read profile: {sptProfilePath}. {ex.Message}");
                 }
             }
 
             return null;
+        }
+
+        /* License: NCSA Open Source License
+         * 
+         * Copyright: SPT
+         * AUTHORS:
+         * waffle.lord
+         */
+        public static bool ApplyPatch(string targetFile, string patchFile)
+        {
+            var backupFile = $"{targetFile}.spt-bak";
+
+            if (!File.Exists(backupFile))
+            {
+                File.Copy(targetFile, backupFile);
+            }
+
+            try
+            {
+                HDiffPatch patcher = new();
+                HDiffPatch.LogVerbosity = Verbosity.Quiet;
+
+                patcher.Initialize(patchFile);
+                patcher.Patch(backupFile, targetFile, false, default, false, false);
+            }
+            catch (Exception ex)
+            {
+                ConUtils.WriteError($"Failed to patch: {targetFile}!");
+                return false;
+            }
+
+            return true;
         }
     }
 }

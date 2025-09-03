@@ -11,7 +11,6 @@ namespace Fika_Installer.UI.Pages
 
         public override void OnShow()
         {
-            SptInstaller sptInstaller = new(_installDir, _installDir);
             SptInstance? sptInstance;
 
             bool isSptInstalled = SptUtils.IsSptInstalled(_installDir);
@@ -26,18 +25,21 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            FikaInstaller fikaInstaller = new(_installDir, sptInstance);
+            SptInstaller sptInstaller = new(_installDir, _installDir);
 
-            bool installResult = fikaInstaller.InstallReleaseFromUrl(_fikaCoreReleaseUrl);
-
-            if (!installResult)
+            if (!sptInstaller.InstallSptRequirements())
             {
                 return;
             }
 
-            bool installFikaServerResult = fikaInstaller.InstallReleaseFromUrl(_fikaServerReleaseUrl);
+            FikaInstaller fikaInstaller = new(_installDir, sptInstance);
 
-            if (!installFikaServerResult)
+            if (!fikaInstaller.InstallReleaseFromUrl(_fikaCoreReleaseUrl))
+            {
+                return;
+            }
+
+            if (!fikaInstaller.InstallReleaseFromUrl(_fikaServerReleaseUrl))
             {
                 return;
             }

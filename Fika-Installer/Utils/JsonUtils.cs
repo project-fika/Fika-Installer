@@ -14,7 +14,7 @@ namespace Fika_Installer.Utils
                 string jsonContent = File.ReadAllText(jsonPath);
                 return JsonSerializer.Deserialize<JsonObject>(jsonContent);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ConUtils.WriteError($"An error occurred while reading: {jsonPath}. {ex.Message}");
                 return null;
