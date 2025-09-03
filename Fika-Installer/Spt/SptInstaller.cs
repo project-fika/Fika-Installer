@@ -58,19 +58,19 @@ namespace Fika_Installer.Spt
 
         public bool InstallSptRequirements()
         {
-            Console.WriteLine("Cleaning up files...");
-
-            if (!CleanupEftFiles())
-            {
-                ConUtils.WriteError("An error occurred when cleaning up files.");
-                return false;
-            }
-
             Console.WriteLine("Applying SPT patches...");
 
             if (!ApplyPatches())
             {
                 ConUtils.WriteError("An error occurred when applying SPT patches. Please verify your SPT installation.", true);
+                return false;
+            }
+
+            Console.WriteLine("Cleaning up files...");
+
+            if (!CleanupEftFiles())
+            {
+                ConUtils.WriteError("An error occurred when cleaning up files.", true);
                 return false;
             }
 
@@ -110,8 +110,6 @@ namespace Fika_Installer.Spt
                         {
                             return false;
                         }
-
-                        return true;
                     }
                 }
             }
