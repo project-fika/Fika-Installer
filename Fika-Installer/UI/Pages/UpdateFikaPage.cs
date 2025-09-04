@@ -14,16 +14,12 @@ namespace Fika_Installer.UI.Pages
             SptInstance sptInstance = new(_installDir);
             FikaInstaller fikaInstaller = new(_installDir, sptInstance);
 
-            bool installResult = fikaInstaller.InstallReleaseFromUrl(_fikaCoreReleaseUrl);
-
-            if (!installResult)
+            if (!fikaInstaller.InstallReleaseFromUrl(_fikaCoreReleaseUrl))
             {
                 return;
             }
 
-            bool installFikaServerResult = fikaInstaller.InstallReleaseFromUrl(_fikaServerReleaseUrl);
-
-            if (!installFikaServerResult)
+            if (!fikaInstaller.InstallReleaseFromUrl(_fikaServerReleaseUrl))
             {
                 return;
             }

@@ -11,26 +11,22 @@ namespace Fika_Installer.UI.Pages
 
         public override void OnShow()
         {
-            SptInstance? sptInstance;
-
             bool isSptInstalled = SptUtils.IsSptInstalled(_installDir);
 
-            if (isSptInstalled)
-            {
-                sptInstance = new(_installDir);
-            }
-            else
+            if (!isSptInstalled)
             {
                 ConUtils.WriteError("SPT not found. Please place Fika-Installer inside your SPT directory.", true);
                 return;
             }
-
+            
             SptInstaller sptInstaller = new(_installDir, _installDir);
 
             if (!sptInstaller.InstallSptRequirements())
             {
                 return;
             }
+
+            SptInstance sptInstance = new(_installDir);
 
             FikaInstaller fikaInstaller = new(_installDir, sptInstance);
 

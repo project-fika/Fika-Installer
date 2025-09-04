@@ -88,9 +88,7 @@ namespace Fika_Installer.UI.Pages
 
                 if (Enum.TryParse(selectedInstallMethod, out InstallMethod installType))
                 {
-                    bool installSptResult = sptInstaller.InstallSpt(installType, true);
-
-                    if (!installSptResult)
+                    if (!sptInstaller.InstallSpt(installType, true))
                     {
                         return;
                     }
@@ -106,7 +104,6 @@ namespace Fika_Installer.UI.Pages
             }
 
             FikaInstaller fikaInstaller = new(_installDir, sptInstance);
-
 
             if (!fikaInstaller.InstallReleaseFromUrl(_fikaHeadlessReleaseUrl))
             {

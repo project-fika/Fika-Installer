@@ -5,20 +5,12 @@ using System.Text.Json.Nodes;
 
 namespace Fika_Installer.UI.Pages
 {
-    public class InstallFikaCurrentDirPage : Page
+    public class InstallFikaCurrentDirPage(MenuFactory menuFactory, string installDir, string fikaCoreReleaseUrl, string fikaServerReleaseUrl) : Page
     {
-        private MenuFactory _menuFactory;
-        private string _installDir;
-        private string _fikaCoreReleaseUrl;
-        private string _fikaServerReleaseUrl;
-
-        public InstallFikaCurrentDirPage(MenuFactory menuFactory, string installDir, string fikaCoreReleaseUrl, string fikaServerReleaseUrl)
-        {
-            _menuFactory = menuFactory;
-            _installDir = installDir;
-            _fikaCoreReleaseUrl = fikaCoreReleaseUrl;
-            _fikaServerReleaseUrl = fikaServerReleaseUrl;
-        }
+        private MenuFactory _menuFactory = menuFactory;
+        private string _installDir = installDir;
+        private string _fikaCoreReleaseUrl = fikaCoreReleaseUrl;
+        private string _fikaServerReleaseUrl = fikaServerReleaseUrl;
 
         public override void OnShow()
         {
