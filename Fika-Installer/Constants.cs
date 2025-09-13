@@ -4,7 +4,11 @@ namespace Fika_Installer
 {
     public static class InstallerConstants
     {
-        public static readonly string VersionString = $"Fika Installer v{Assembly.GetExecutingAssembly().GetName().Version}";
+        private static readonly string _versionMajor = Assembly.GetExecutingAssembly().GetName().Version.Major.ToString();
+        private static readonly string _versionMinor = Assembly.GetExecutingAssembly().GetName().Version.Minor.ToString();
+        private static readonly string _versionBuild = Assembly.GetExecutingAssembly().GetName().Version.Build.ToString();
+
+        public static readonly string VersionString = $"Fika Installer v{_versionMajor}.{_versionMinor}.{_versionBuild}";
         public static readonly string InstallerDir = Directory.GetCurrentDirectory();
         public static readonly string InstallerTempDir = Path.Combine(InstallerDir, "FikaInstallerTemp");
     }
