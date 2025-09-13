@@ -45,8 +45,6 @@ namespace Fika_Installer
             {
                 Console.WriteLine("Generating Fika config file... This may take a moment.");
 
-                SptServer generateFikaCfgSptServer = new(_sptInstance);
-
                 MatchAction serverIsRunningMatchAction = new(
                     @"Server is running",
                     (process, match) =>
@@ -56,6 +54,8 @@ namespace Fika_Installer
                             process.Kill();
                         }
                     });
+
+                SptServer generateFikaCfgSptServer = new(_sptInstance);
 
                 generateFikaCfgSptServer.AddMatchAction(serverIsRunningMatchAction);
                 generateFikaCfgSptServer.KillAfter = TimeSpan.FromMinutes(2);
@@ -80,9 +80,9 @@ namespace Fika_Installer
                 return null;
             }
 
-            int sptProfilesCount = _sptInstance.Profiles.Count;
+            int headlessProfileCount = _sptInstance.GetHeadlessProfiles().Count;
 
-            fikaServerConfig["headless"]["profiles"]["amount"] = sptProfilesCount + 1;
+            fikaServerConfig["headless"]["profiles"]["amount"] = headlessProfileCount + 1;
 
             if (!JsonUtils.SerializeToFile(_fikaServerConfigPath, fikaServerConfig))
             {
@@ -90,8 +90,6 @@ namespace Fika_Installer
             }
 
             Console.WriteLine("Creating headless profile... This may take a moment.");
-
-            SptServer createHeadlessProfileSptServer = new(_sptInstance);
 
             MatchAction createHeadlessProfileMatchAction = new(
                 @"Start_headless_([^.]+)",
@@ -104,6 +102,8 @@ namespace Fika_Installer
                         process.Kill();
                     }
                 });
+
+            SptServer createHeadlessProfileSptServer = new(_sptInstance);
 
             createHeadlessProfileSptServer.AddMatchAction(createHeadlessProfileMatchAction);
             createHeadlessProfileSptServer.KillAfter = TimeSpan.FromMinutes(2);
