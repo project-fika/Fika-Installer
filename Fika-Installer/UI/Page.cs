@@ -1,5 +1,5 @@
 ﻿namespace Fika_Installer.UI
-{    
+{
     public abstract class Page
     {
         private int _totalLines = 0;
@@ -17,7 +17,7 @@
             PageLogger.AddLogger(_logger);
             PageLogger.AddLogger(_pageLogger);
         }
-        
+
         public void Show()
         {
             OnShow();

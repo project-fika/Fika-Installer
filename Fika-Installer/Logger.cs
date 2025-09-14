@@ -1,5 +1,4 @@
 ﻿using Fika_Installer.Utils;
-using System.Windows.Forms;
 
 namespace Fika_Installer
 {
@@ -126,7 +125,7 @@ namespace Fika_Installer
                 if (logger is IPageLogger pageLogger)
                 {
                     pageLogger.Log(message);
-                } 
+                }
                 else
                 {
                     logger.Log(message);
@@ -183,7 +182,7 @@ namespace Fika_Installer
                 }
             }
         }
-        
+
         public void Error(string message)
         {
             Error(message, false);

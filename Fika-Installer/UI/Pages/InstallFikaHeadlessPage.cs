@@ -1,7 +1,6 @@
 ﻿using Fika_Installer.Models;
 using Fika_Installer.Models.Spt;
 using Fika_Installer.Spt;
-using Fika_Installer.Utils;
 
 namespace Fika_Installer.UI.Pages
 {
@@ -13,7 +12,7 @@ namespace Fika_Installer.UI.Pages
         private string _fikaHeadlessReleaseUrl = fikaHeadlessReleaseUrl;
 
         public override void OnShow()
-        {            
+        {
             SptInstance? sptInstance;
             SptInstaller? sptInstaller;
 

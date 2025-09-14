@@ -1,5 +1,4 @@
 ﻿using Fika_Installer.Spt;
-using Fika_Installer.Utils;
 
 namespace Fika_Installer.UI.Pages
 {
@@ -10,7 +9,7 @@ namespace Fika_Installer.UI.Pages
         private string _fikaServerReleaseUrl = fikaServerReleaseUrl;
 
         public override void OnShow()
-        {           
+        {
             bool isSptInstalled = SptUtils.IsSptInstalled(_installDir);
 
             if (!isSptInstalled)
@@ -18,7 +17,7 @@ namespace Fika_Installer.UI.Pages
                 PageLogger.Error("SPT not found. Please place Fika-Installer inside your SPT directory.", true);
                 return;
             }
-            
+
             SptInstaller sptInstaller = new(_installDir, _installDir, PageLogger);
 
             if (!sptInstaller.InstallSptRequirements())
