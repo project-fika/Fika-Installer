@@ -7,7 +7,7 @@ namespace Fika_Installer.Utils
     {
         private static readonly JsonSerializerOptions _jsonSerializerOptions = new() { WriteIndented = true };
 
-        public static JsonObject? DeserializeFromFile(string jsonPath)
+        public static JsonObject? DeserializeFromFile(string jsonPath, CompositeLogger? logger)
         {
             try
             {
@@ -16,12 +16,12 @@ namespace Fika_Installer.Utils
             }
             catch (Exception ex)
             {
-                ConUtils.WriteError($"An error occurred while reading: {jsonPath}. {ex.Message}");
+                logger?.Error($"An error occurred while reading: {jsonPath}. {ex.Message}");
                 return null;
             }
         }
 
-        public static bool SerializeToFile(string jsonPath, JsonObject jsonObject)
+        public static bool SerializeToFile(string jsonPath, JsonObject jsonObject, CompositeLogger? logger)
         {
             try
             {
@@ -32,7 +32,7 @@ namespace Fika_Installer.Utils
             }
             catch (Exception ex)
             {
-                ConUtils.WriteError($"An error occurred while writing to: {jsonPath}. {ex.Message}");
+                logger?.Error($"An error occurred while writing to: {jsonPath}. {ex.Message}");
             }
 
             return false;

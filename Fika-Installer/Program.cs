@@ -7,15 +7,19 @@ namespace Fika_Installer
         [STAThread]
         static void Main(string[] args)
         {
+            ILogger logger = new Logger();
+            logger.Log("Fika-Installer Start");
+
             Console.Title = InstallerConstants.VersionString;
+            Header.Show();
 
             string installerDirectory = InstallerConstants.InstallerDir;
             string fikaCoreReleaseUrl = FikaConstants.ReleaseUrls["Fika.Core"];
             string fikaServerReleaseUrl = FikaConstants.ReleaseUrls["Fika.Server"];
             string fikaHeadlessReleaseUrl = FikaConstants.ReleaseUrls["Fika.Headless"];
 
-            MenuFactory menuFactory = new(installerDirectory, fikaCoreReleaseUrl, fikaServerReleaseUrl, fikaHeadlessReleaseUrl);
-
+            MenuFactory menuFactory = new(installerDirectory, fikaCoreReleaseUrl, fikaServerReleaseUrl, fikaHeadlessReleaseUrl, logger);
+            
             while (true)
             {
                 Menu mainMenu = menuFactory.CreateMainMenu();

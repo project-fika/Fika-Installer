@@ -3,11 +3,12 @@ using Fika_Installer.Utils;
 
 namespace Fika_Installer.Spt
 {
-    public class SptInstaller(string installDir, string sptDir)
+    public class SptInstaller(string installDir, string sptDir, CompositeLogger? logger)
     {
         private string _installDir = installDir;
         private string _sptDir = sptDir;
         private string _sptPatchesDir = Path.Combine(installDir, @"SPT_Data\Launcher\Patches");
+        private CompositeLogger _logger = logger;
 
         public bool InstallSpt(InstallMethod installType, bool headless = false)
         {
@@ -37,18 +38,18 @@ namespace Fika_Installer.Spt
                 string escapeFromTarkovDataPath = Path.Combine(_sptDir, "EscapeFromTarkov_Data");
                 string escapeFromTarkovDataFikaPath = Path.Combine(_installDir, "EscapeFromTarkov_Data");
 
-                Console.WriteLine("Creating symlink...");
+                _logger?.Log("Creating symlink...");
 
-                if (!FileUtils.CreateFolderSymlink(escapeFromTarkovDataPath, escapeFromTarkovDataFikaPath))
+                if (!FileUtils.CreateFolderSymlink(escapeFromTarkovDataPath, escapeFromTarkovDataFikaPath, _logger))
                 {
-                    ConUtils.WriteError($"An error occurred when creating the symlink.", true);
+                    _logger?.Error($"An error occurred when creating the symlink.", true);
                     return false;
                 }
             }
 
-            Console.WriteLine("Copying SPT folder...");
+            _logger?.Log("Copying SPT folder...");
 
-            if (!FileUtils.CopyFolderWithProgress(_sptDir, _installDir, excludeFiles))
+            if (!FileUtils.CopyFolderWithProgress(_sptDir, _installDir, excludeFiles, _logger))
             {
                 return false;
             }
@@ -58,19 +59,19 @@ namespace Fika_Installer.Spt
 
         public bool InstallSptRequirements()
         {
-            Console.WriteLine("Applying SPT patches...");
+            _logger?.Log("Applying SPT patches...");
 
             if (!ApplyPatches())
             {
-                ConUtils.WriteError("An error occurred when applying SPT patches. Please verify your SPT installation.", true);
+                logger?.Error("An error occurred when applying SPT patches. Please verify your SPT installation.", true);
                 return false;
             }
 
-            Console.WriteLine("Cleaning up files...");
+            _logger?.Log("Cleaning up files...");
 
             if (!CleanupEftFiles())
             {
-                ConUtils.WriteError("An error occurred when cleaning up files.", true);
+                _logger?.Error("An error occurred when cleaning up files.", true);
                 return false;
             }
 
@@ -106,7 +107,7 @@ namespace Fika_Installer.Spt
                         // create a target file from the relative patch file while utilizing targetpath as the root directory.
                         target = new FileInfo(Path.Combine(_installDir, relativefile.Replace(".delta", "")));
 
-                        if (!SptUtils.ApplyPatch(target.FullName, file.FullName))
+                        if (!SptUtils.ApplyPatch(target.FullName, file.FullName, _logger))
                         {
                             return false;
                         }
@@ -115,7 +116,7 @@ namespace Fika_Installer.Spt
             }
             catch (Exception ex)
             {
-                ConUtils.WriteError(ex.Message);
+                _logger?.Error(ex.Message);
                 return false;
             }
 
@@ -154,7 +155,7 @@ namespace Fika_Installer.Spt
             }
             catch (Exception ex)
             {
-                ConUtils.WriteError(ex.Message);
+                _logger?.Error(ex.Message);
 
                 return false;
             }

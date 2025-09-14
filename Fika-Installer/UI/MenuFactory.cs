@@ -12,16 +12,17 @@ namespace Fika_Installer.UI
         private string _installDir;
         private string _fikaCorePath;
         private string _fikaHeadlessPath;
+        private ILogger _logger;
 
-        public MenuFactory(string installDir, string fikaCoreReleaseUrl, string fikaServerReleaseUrl, string fikaHeadlessReleaseUrl)
+        public MenuFactory(string installDir, string fikaCoreReleaseUrl, string fikaServerReleaseUrl, string fikaHeadlessReleaseUrl, ILogger logger)
         {
             _installDir = installDir;
             _fikaCoreReleaseUrl = fikaCoreReleaseUrl;
             _fikaServerReleaseUrl = fikaServerReleaseUrl;
             _fikaHeadlessReleaseUrl = fikaHeadlessReleaseUrl;
-
             _fikaCorePath = Path.Combine(_installDir, @"BepInEx\plugins\Fika.Core.dll");
             _fikaHeadlessPath = Path.Combine(_installDir, @"BepInEx\plugins\Fika.Headless.dll");
+            _logger = logger;
         }
 
         public Menu CreateMainMenu()
@@ -32,14 +33,14 @@ namespace Fika_Installer.UI
 
             if (fikaDetected)
             {
-                UpdateFikaPage updateFikaPage = new(_installDir, _fikaCoreReleaseUrl, _fikaServerReleaseUrl);
+                UpdateFikaPage updateFikaPage = new(_installDir, _fikaCoreReleaseUrl, _fikaServerReleaseUrl, _logger);
 
                 MenuChoice updateFikaChoice = new("Update Fika", updateFikaPage);
                 choices.Add(updateFikaChoice);
             }
             else
             {
-                InstallFikaPage installFikaPage = new(_installDir, _fikaCoreReleaseUrl, _fikaServerReleaseUrl);
+                InstallFikaPage installFikaPage = new(_installDir, _fikaCoreReleaseUrl, _fikaServerReleaseUrl, _logger);
 
                 MenuChoice installFikaChoice = new("Install Fika", installFikaPage);
                 choices.Add(installFikaChoice);
@@ -48,25 +49,27 @@ namespace Fika_Installer.UI
             MenuChoice advancedChoice = new("Advanced Options", CreateAdvancedOptionsMenu());
             choices.Add(advancedChoice);
 
-            Menu mainMenu = new Menu(choices);
+            Menu mainMenu = new(choices);
+
             return mainMenu;
         }
 
         public Menu CreateAdvancedOptionsMenu()
         {
+
             List<MenuChoice> choices = [];
 
             bool fikaHeadlessDetected = File.Exists(_fikaHeadlessPath);
 
             if (fikaHeadlessDetected)
             {
-                UpdateFikaHeadlessPage updateFikaHeadlessPage = new(_installDir, _fikaCoreReleaseUrl, _fikaHeadlessReleaseUrl);
+                UpdateFikaHeadlessPage updateFikaHeadlessPage = new(_installDir, _fikaCoreReleaseUrl, _fikaHeadlessReleaseUrl, _logger);
                 MenuChoice updateFikaHeadlessChoice = new("Update Fika Headless", updateFikaHeadlessPage);
                 choices.Add(updateFikaHeadlessChoice);
             }
             else
             {
-                InstallFikaHeadlessPage installFikaHeadlessPage = new(this, _installDir, _fikaCoreReleaseUrl, _fikaHeadlessReleaseUrl);
+                InstallFikaHeadlessPage installFikaHeadlessPage = new(this, _installDir, _fikaCoreReleaseUrl, _fikaHeadlessReleaseUrl, _logger);
 
                 MenuChoice installFikaHeadlessChoice = new("Install Fika Headless", installFikaHeadlessPage);
                 choices.Add(installFikaHeadlessChoice);
@@ -76,7 +79,7 @@ namespace Fika_Installer.UI
 
             if (!fikaCoreDetected)
             {
-                InstallFikaCurrentDirPage installFikaCurrentDirPage = new(this, _installDir, _fikaCoreReleaseUrl, _fikaServerReleaseUrl);
+                InstallFikaCurrentDirPage installFikaCurrentDirPage = new(this, _installDir, _fikaCoreReleaseUrl, _fikaServerReleaseUrl, _logger);
 
                 MenuChoice installFikaInCurrentFolder = new("Install Fika in current folder", installFikaCurrentDirPage);
                 choices.Add(installFikaInCurrentFolder);
@@ -86,6 +89,7 @@ namespace Fika_Installer.UI
             choices.Add(backChoice);
 
             Menu advancedOptionsMenu = new(choices);
+
             return advancedOptionsMenu;
         }
 
@@ -103,6 +107,7 @@ namespace Fika_Installer.UI
             choices.Add(createNewHeadlessProfile);
 
             Menu profileSelectionMenu = new("Please choose the headless profile to use for your headless client:", choices);
+
             return profileSelectionMenu;
         }
 
@@ -119,6 +124,7 @@ namespace Fika_Installer.UI
             }
 
             Menu installMethodMenu = new("Please choose your installation method. This will determine how the SPT folder will be copied.", choices);
+
             return installMethodMenu;
         }
     }

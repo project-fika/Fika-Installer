@@ -26,8 +26,6 @@
                 bool paging = Choices.Count > 9;
                 int pageSize = paging ? 8 : 9;
 
-                Header.Show();
-
                 if (!string.IsNullOrEmpty(Message))
                 {
                     Console.WriteLine(Message);

@@ -5,7 +5,7 @@ using Fika_Installer.Utils;
 
 namespace Fika_Installer.UI.Pages
 {
-    public class InstallFikaHeadlessPage(MenuFactory menuFactory, string installDir, string fikaCoreReleaseUrl, string fikaHeadlessReleaseUrl) : Page
+    public class InstallFikaHeadlessPage(MenuFactory menuFactory, string installDir, string fikaCoreReleaseUrl, string fikaHeadlessReleaseUrl, ILogger logger) : Page(logger)
     {
         private MenuFactory _menuFactory = menuFactory;
         private string _installDir = installDir;
@@ -13,7 +13,7 @@ namespace Fika_Installer.UI.Pages
         private string _fikaHeadlessReleaseUrl = fikaHeadlessReleaseUrl;
 
         public override void OnShow()
-        {
+        {            
             SptInstance? sptInstance;
             SptInstaller? sptInstaller;
 
@@ -21,8 +21,8 @@ namespace Fika_Installer.UI.Pages
 
             if (isSptInstalled)
             {
-                sptInstance = new(_installDir);
-                sptInstaller = new(_installDir, _installDir);
+                sptInstance = new(_installDir, PageLogger);
+                sptInstaller = new(_installDir, _installDir, PageLogger);
             }
             else
             {
@@ -33,15 +33,15 @@ namespace Fika_Installer.UI.Pages
                     return;
                 }
 
-                sptInstance = new(sptDir);
-                sptInstaller = new(_installDir, sptDir);
+                sptInstance = new(sptDir, PageLogger);
+                sptInstaller = new(_installDir, sptDir, PageLogger);
             }
 
-            FikaHeadless fikaHeadless = new(_installDir, sptInstance);
+            FikaHeadless fikaHeadless = new(_installDir, sptInstance, PageLogger);
 
             if (!fikaHeadless.IsFikaServerInstalled())
             {
-                ConUtils.WriteError("Fika-Server must be installed in the SPT folder before installing Fika-Headless.", true);
+                PageLogger.Error("Fika-Server must be installed in the SPT folder before installing Fika-Headless.", true);
                 return;
             }
 
@@ -58,7 +58,7 @@ namespace Fika_Installer.UI.Pages
 
                 if (headlessProfile == null)
                 {
-                    ConUtils.WriteError("An error occurred while creating the headless profile. Please check the SPT Server logs.", true);
+                    PageLogger.Error("An error occurred while creating the headless profile. Please check the SPT Server logs.", true);
                     return;
                 }
 
@@ -94,7 +94,7 @@ namespace Fika_Installer.UI.Pages
                     }
 
                     // Change directory to installed SPT directory
-                    sptInstance = new(_installDir);
+                    sptInstance = new(_installDir, PageLogger);
                 }
             }
 
@@ -103,7 +103,7 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            FikaInstaller fikaInstaller = new(_installDir, sptInstance);
+            FikaInstaller fikaInstaller = new(_installDir, sptInstance, PageLogger);
 
             if (!fikaInstaller.InstallReleaseFromUrl(_fikaHeadlessReleaseUrl))
             {
@@ -117,8 +117,8 @@ namespace Fika_Installer.UI.Pages
 
             fikaInstaller.ApplyFirewallRules();
 
-            Console.WriteLine();
-            ConUtils.WriteSuccess("Fika Headless installed successfully!", true);
+            PageLogger.Log("");
+            PageLogger.Success("Fika Headless installed successfully!", true);
         }
     }
 }

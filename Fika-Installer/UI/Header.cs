@@ -4,8 +4,6 @@
     {
         public static void Show()
         {
-            Console.Clear();
-
             Console.ForegroundColor = ConsoleColor.White;
             Console.BackgroundColor = ConsoleColor.Blue;
 

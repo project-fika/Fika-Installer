@@ -22,7 +22,7 @@ namespace Fika_Installer.Utils
             return string.Empty;
         }
 
-        public static bool CopyFolderWithProgress(string sourcePath, string destinationPath, List<string> exclusions)
+        public static bool CopyFolderWithProgress(string sourcePath, string destinationPath, List<string> exclusions, CompositeLogger? logger)
         {
             bool result = false;
 
@@ -74,7 +74,7 @@ namespace Fika_Installer.Utils
             catch (Exception ex)
             {
                 progressBar.Dispose();
-                ConUtils.WriteError($"An error occurred while copying the folder: {ex.Message}", true);
+                logger.Error($"An error occurred while copying the folder: {ex.Message}", true);
             }
 
             progressBar.Dispose();
@@ -82,7 +82,7 @@ namespace Fika_Installer.Utils
             return result;
         }
 
-        public static bool DownloadFileWithProgress(string downloadUrl, string outputPath)
+        public static bool DownloadFileWithProgress(string downloadUrl, string outputPath, CompositeLogger? logger)
         {
             bool result = false;
 
@@ -146,7 +146,7 @@ namespace Fika_Installer.Utils
             catch (Exception ex)
             {
                 progressBar.Dispose();
-                Console.WriteLine(ex.Message);
+                logger?.Error(ex.Message);
             }
 
             progressBar.Dispose();
@@ -154,7 +154,7 @@ namespace Fika_Installer.Utils
             return result;
         }
 
-        public static void ExtractZip(string zipFilePath, string outputDirectory)
+        public static void ExtractZip(string zipFilePath, string outputDirectory, CompositeLogger? logger)
         {
             try
             {
@@ -163,11 +163,11 @@ namespace Fika_Installer.Utils
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                logger?.Log(ex.Message);
             }
         }
 
-        public static bool CreateFolderSymlink(string fromPath, string toPath)
+        public static bool CreateFolderSymlink(string fromPath, string toPath, CompositeLogger? logger)
         {
             try
             {
@@ -175,7 +175,7 @@ namespace Fika_Installer.Utils
             }
             catch (Exception ex)
             {
-                ConUtils.WriteError($"An error occurred when creating the symlink: {ex.Message}");
+                logger?.Error($"An error occurred when creating the symlink: {ex.Message}");
                 return false;
             }
 

@@ -9,14 +9,16 @@ namespace Fika_Installer
     {
         private string _installDir;
         private SptInstance _sptInstance;
+        private CompositeLogger _logger;
 
         [GeneratedRegex(@"Compatible with EFT ([\d.]+)", RegexOptions.IgnoreCase)]
         private static partial Regex CompatibleWithEftVersionRegex();
 
-        public FikaInstaller(string installDir, SptInstance sptInstance)
+        public FikaInstaller(string installDir, SptInstance sptInstance, CompositeLogger logger)
         {
             _installDir = installDir;
             _sptInstance = sptInstance;
+            _logger = logger;
         }
 
         public bool InstallReleaseFromUrl(string url)
@@ -35,17 +37,17 @@ namespace Fika_Installer
             {
                 if (compatibleEftVersion != eftVersion)
                 {
-                    ConUtils.WriteError($"{gitHubRelease.Name} is not compatible with your Escape From Tarkov version.");
-                    Console.WriteLine();
-                    ConUtils.WriteError($"Your version:         {eftVersion}");
-                    ConUtils.WriteError($"Compatible version:   {compatibleEftVersion}", true);
+                    _logger?.Error($"{gitHubRelease.Name} is not compatible with your Escape From Tarkov version.");
+                    _logger?.Log("");
+                    _logger?.Error($"Your version:         {eftVersion}");
+                    _logger?.Error($"Compatible version:   {compatibleEftVersion}", true);
 
                     return false;
                 }
             }
             else
             {
-                ConUtils.WriteWarning($"Could not verify compatibility of {gitHubRelease.Name} with your Escape From Tarkov version.");
+                _logger?.Warning($"Could not verify compatibility of {gitHubRelease.Name} with your Escape From Tarkov version.");
             }
 
             // Pick the first asset from release
@@ -76,7 +78,7 @@ namespace Fika_Installer
 
         public void ApplyFirewallRules()
         {
-            Console.WriteLine("Applying Fika firewall rules...");
+            _logger?.Log("Applying Fika firewall rules...");
 
             string sptServerPath = Path.Combine(_sptInstance.SptPath, SptConstants.ServerExeName);
             FwUtils.CreateFirewallRule("Fika (SPT) - TCP 6969", "Inbound", "TCP", "6969", sptServerPath);
@@ -102,14 +104,14 @@ namespace Fika_Installer
             string assetName = asset.Name;
             string assetUrl = asset.BrowserDownloadUrl;
 
-            Console.WriteLine($"Downloading {assetName}...");
+            _logger?.Log($"Downloading {assetName}...");
 
             string outputPath = Path.Combine(outputDir, assetName);
-            bool downloadResult = FileUtils.DownloadFileWithProgress(assetUrl, outputPath);
+            bool downloadResult = FileUtils.DownloadFileWithProgress(assetUrl, outputPath, _logger);
 
             if (!downloadResult)
             {
-                ConUtils.WriteError($"An error occurred while downloading {assetName}.", true);
+                _logger?.Error($"An error occurred while downloading {assetName}.", true);
             }
 
             return downloadResult;
@@ -121,14 +123,14 @@ namespace Fika_Installer
             {
                 string fileName = Path.GetFileName(releasePath);
 
-                Console.WriteLine($"Extracting {fileName}...");
-                FileUtils.ExtractZip(releasePath, outputDir);
+                _logger?.Log($"Extracting {fileName}...");
+                FileUtils.ExtractZip(releasePath, outputDir, _logger);
 
                 return true;
             }
             catch (Exception ex)
             {
-                ConUtils.WriteError($"An error occurred when extracting the ZIP archive: {ex.Message}", true);
+                _logger?.Error($"An error occurred when extracting the ZIP archive: {ex.Message}", true);
             }
 
             return false;

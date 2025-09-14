@@ -9,6 +9,7 @@ namespace Fika_Installer.Spt
     {
         private string _profilesPath;
         private string _launcherConfigPath;
+        private CompositeLogger _logger;
 
         public string SptPath { get; private set; }
         public string ServerExePath { get; private set; }
@@ -16,10 +17,11 @@ namespace Fika_Installer.Spt
         public string EftVersion { get; private set; } = "";
         public List<SptProfile> Profiles { get; private set; } = [];
 
-        public SptInstance(string sptPath)
+        public SptInstance(string sptPath, CompositeLogger logger)
         {
             _profilesPath = Path.Combine(sptPath, @"user\profiles");
             _launcherConfigPath = Path.Combine(sptPath, @"user\launcher\config.json");
+            _logger = logger;
 
             SptPath = sptPath;
             ServerExePath = Path.Combine(sptPath, SptConstants.ServerExeName);
@@ -48,7 +50,7 @@ namespace Fika_Installer.Spt
 
                 foreach (string profilePath in profilesPaths)
                 {
-                    SptProfile? sptProfile = SptUtils.GetProfileFromJson(profilePath);
+                    SptProfile? sptProfile = SptUtils.GetProfileFromJson(profilePath, _logger);
 
                     if (sptProfile != null)
                     {
@@ -74,7 +76,7 @@ namespace Fika_Installer.Spt
         {
             if (File.Exists(_launcherConfigPath))
             {
-                JsonObject? launcherConfig = JsonUtils.DeserializeFromFile(_launcherConfigPath);
+                JsonObject? launcherConfig = JsonUtils.DeserializeFromFile(_launcherConfigPath, _logger);
 
                 return launcherConfig;
             }
@@ -86,7 +88,7 @@ namespace Fika_Installer.Spt
         {
             try
             {
-                JsonUtils.SerializeToFile(_launcherConfigPath, launcherConfig);
+                JsonUtils.SerializeToFile(_launcherConfigPath, launcherConfig, _logger);
 
                 return true;
             }

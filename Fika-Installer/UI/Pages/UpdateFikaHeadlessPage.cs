@@ -3,7 +3,7 @@ using Fika_Installer.Utils;
 
 namespace Fika_Installer.UI.Pages
 {
-    public class UpdateFikaHeadlessPage(string installDir, string fikaCoreReleaseUrl, string fikaHeadlessReleaseUrl) : Page
+    public class UpdateFikaHeadlessPage(string installDir, string fikaCoreReleaseUrl, string fikaHeadlessReleaseUrl, ILogger logger) : Page(logger)
     {
         private string _installDir = installDir;
         private string _fikaCoreReleaseUrl = fikaCoreReleaseUrl;
@@ -11,8 +11,8 @@ namespace Fika_Installer.UI.Pages
 
         public override void OnShow()
         {
-            SptInstance sptInstance = new(_installDir);
-            FikaInstaller fikaInstaller = new(_installDir, sptInstance);
+            SptInstance sptInstance = new(_installDir, PageLogger);
+            FikaInstaller fikaInstaller = new(_installDir, sptInstance, PageLogger);
 
             if (!fikaInstaller.InstallReleaseFromUrl(_fikaHeadlessReleaseUrl))
             {
@@ -24,8 +24,8 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            Console.WriteLine();
-            ConUtils.WriteSuccess("Fika Headless updated successfully!", true);
+            PageLogger.Log("");
+            PageLogger.Success("Fika Headless updated successfully!", true);
         }
     }
 }

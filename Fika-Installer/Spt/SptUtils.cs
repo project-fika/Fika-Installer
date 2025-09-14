@@ -18,9 +18,9 @@ namespace Fika_Installer.Spt
             return sptServerFound && sptLauncherFound;
         }
 
-        public static string? BrowseAndValidateSptDir()
+        public static string? BrowseAndValidateSptDir(CompositeLogger? logger = null)
         {
-            ConUtils.WriteConfirm("SPT not detected. Press ENTER to browse for your SPT folder.");
+            logger?.Confirm("SPT not detected. Press ENTER to browse for your SPT folder.");
 
             string sptDir = FileUtils.BrowseFolder("Please select your SPT installation folder.");
 
@@ -31,20 +31,20 @@ namespace Fika_Installer.Spt
 
             if (!IsSptInstalled(sptDir))
             {
-                ConUtils.WriteError("The selected folder does not contain a valid SPT installation.", true);
+                logger?.Error("The selected folder does not contain a valid SPT installation.", true);
                 return null;
             }
 
             return sptDir;
         }
 
-        public static SptProfile? GetProfileFromJson(string sptProfilePath)
+        public static SptProfile? GetProfileFromJson(string sptProfilePath, CompositeLogger? logger)
         {
             if (File.Exists(sptProfilePath))
             {
                 try
                 {
-                    JsonObject? profile = JsonUtils.DeserializeFromFile(sptProfilePath);
+                    JsonObject? profile = JsonUtils.DeserializeFromFile(sptProfilePath, logger);
 
                     if (profile != null)
                     {
@@ -66,7 +66,7 @@ namespace Fika_Installer.Spt
                 }
                 catch (Exception ex)
                 {
-                    ConUtils.WriteError($"Failed to read profile: {sptProfilePath}. {ex.Message}");
+                    logger?.Error($"Failed to read profile: {sptProfilePath}. {ex.Message}");
                 }
             }
 
@@ -79,7 +79,7 @@ namespace Fika_Installer.Spt
          * AUTHORS:
          * waffle.lord
          */
-        public static bool ApplyPatch(string targetFile, string patchFile)
+        public static bool ApplyPatch(string targetFile, string patchFile, CompositeLogger? logger)
         {
             var backupFile = $"{targetFile}.spt-bak";
 
@@ -98,7 +98,7 @@ namespace Fika_Installer.Spt
             }
             catch (Exception ex)
             {
-                ConUtils.WriteError($"Failed to patch: {targetFile}!");
+                logger?.Error($"Failed to patch: {targetFile}!");
                 return false;
             }
 

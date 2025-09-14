@@ -3,32 +3,32 @@ using Fika_Installer.Utils;
 
 namespace Fika_Installer.UI.Pages
 {
-    public class InstallFikaPage(string installDir, string fikaCoreReleaseUrl, string fikaServerReleaseUrl) : Page
+    public class InstallFikaPage(string installDir, string fikaCoreReleaseUrl, string fikaServerReleaseUrl, ILogger logger) : Page(logger)
     {
         private string _installDir = installDir;
         private string _fikaCoreReleaseUrl = fikaCoreReleaseUrl;
         private string _fikaServerReleaseUrl = fikaServerReleaseUrl;
 
         public override void OnShow()
-        {
+        {           
             bool isSptInstalled = SptUtils.IsSptInstalled(_installDir);
 
             if (!isSptInstalled)
             {
-                ConUtils.WriteError("SPT not found. Please place Fika-Installer inside your SPT directory.", true);
+                PageLogger.Error("SPT not found. Please place Fika-Installer inside your SPT directory.", true);
                 return;
             }
             
-            SptInstaller sptInstaller = new(_installDir, _installDir);
+            SptInstaller sptInstaller = new(_installDir, _installDir, PageLogger);
 
             if (!sptInstaller.InstallSptRequirements())
             {
                 return;
             }
 
-            SptInstance sptInstance = new(_installDir);
+            SptInstance sptInstance = new(_installDir, PageLogger);
 
-            FikaInstaller fikaInstaller = new(_installDir, sptInstance);
+            FikaInstaller fikaInstaller = new(_installDir, sptInstance, PageLogger);
 
             if (!fikaInstaller.InstallReleaseFromUrl(_fikaCoreReleaseUrl))
             {
@@ -42,8 +42,8 @@ namespace Fika_Installer.UI.Pages
 
             fikaInstaller.ApplyFirewallRules();
 
-            Console.WriteLine();
-            ConUtils.WriteSuccess("Fika installed successfully!", true);
+            PageLogger?.Log("");
+            PageLogger?.Success("Fika installed successfully!", true);
         }
     }
 }

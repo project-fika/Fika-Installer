@@ -5,7 +5,7 @@ using System.Text.Json.Nodes;
 
 namespace Fika_Installer.UI.Pages
 {
-    public class InstallFikaCurrentDirPage(MenuFactory menuFactory, string installDir, string fikaCoreReleaseUrl, string fikaServerReleaseUrl) : Page
+    public class InstallFikaCurrentDirPage(MenuFactory menuFactory, string installDir, string fikaCoreReleaseUrl, string fikaServerReleaseUrl, ILogger logger) : Page(logger)
     {
         private MenuFactory _menuFactory = menuFactory;
         private string _installDir = installDir;
@@ -21,8 +21,8 @@ namespace Fika_Installer.UI.Pages
 
             if (isSptInstalled)
             {
-                sptInstance = new(_installDir);
-                sptInstaller = new(_installDir, _installDir);
+                sptInstance = new(_installDir, PageLogger);
+                sptInstaller = new(_installDir, _installDir, PageLogger);
             }
             else
             {
@@ -40,14 +40,14 @@ namespace Fika_Installer.UI.Pages
 
                 if (Enum.TryParse(selectedInstallType, out InstallMethod installType))
                 {
-                    sptInstaller = new(_installDir, sptDir);
+                    sptInstaller = new(_installDir, sptDir, PageLogger);
 
                     if (!sptInstaller.InstallSpt(installType))
                     {
                         return;
                     }
 
-                    sptInstance = new(_installDir);
+                    sptInstance = new(_installDir, PageLogger);
 
                     JsonObject? launcherConfig = sptInstance.GetLauncherConfig();
 
@@ -71,7 +71,7 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            FikaInstaller fikaInstaller = new(_installDir, sptInstance);
+            FikaInstaller fikaInstaller = new(_installDir, sptInstance, PageLogger);
 
             if (!fikaInstaller.InstallReleaseFromUrl(_fikaCoreReleaseUrl))
             {
@@ -85,8 +85,8 @@ namespace Fika_Installer.UI.Pages
 
             fikaInstaller.ApplyFirewallRules();
 
-            Console.WriteLine();
-            ConUtils.WriteSuccess("Fika installed successfully!", true);
+            PageLogger.Log("");
+            PageLogger?.Success("Fika installed successfully!", true);
         }
     }
 }
