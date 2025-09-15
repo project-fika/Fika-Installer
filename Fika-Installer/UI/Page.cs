@@ -6,16 +6,16 @@
         private ILogger _logger;
         private IPageLogger _pageLogger;
 
-        public CompositeLogger PageLogger { get; private set; }
+        public CompositeLogger CompositeLogger { get; private set; }
 
         public Page(ILogger logger)
         {
             _logger = logger;
             _pageLogger = new PageLogger(AddLines);
 
-            PageLogger = new();
-            PageLogger.AddLogger(_logger);
-            PageLogger.AddLogger(_pageLogger);
+            CompositeLogger = new();
+            CompositeLogger.AddLogger(_logger);
+            CompositeLogger.AddLogger(_pageLogger);
         }
 
         public void Show()

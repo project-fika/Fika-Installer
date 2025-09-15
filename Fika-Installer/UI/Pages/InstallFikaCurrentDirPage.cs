@@ -20,8 +20,8 @@ namespace Fika_Installer.UI.Pages
 
             if (isSptInstalled)
             {
-                sptInstance = new(_installDir, PageLogger);
-                sptInstaller = new(_installDir, _installDir, PageLogger);
+                sptInstance = new(_installDir, CompositeLogger);
+                sptInstaller = new(_installDir, _installDir, CompositeLogger);
             }
             else
             {
@@ -39,14 +39,14 @@ namespace Fika_Installer.UI.Pages
 
                 if (Enum.TryParse(selectedInstallType, out InstallMethod installType))
                 {
-                    sptInstaller = new(_installDir, sptDir, PageLogger);
+                    sptInstaller = new(_installDir, sptDir, CompositeLogger);
 
                     if (!sptInstaller.InstallSpt(installType))
                     {
                         return;
                     }
 
-                    sptInstance = new(_installDir, PageLogger);
+                    sptInstance = new(_installDir, CompositeLogger);
 
                     JsonObject? launcherConfig = sptInstance.GetLauncherConfig();
 
@@ -70,7 +70,7 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            FikaInstaller fikaInstaller = new(_installDir, sptInstance, PageLogger);
+            FikaInstaller fikaInstaller = new(_installDir, sptInstance, CompositeLogger);
 
             if (!fikaInstaller.InstallReleaseFromUrl(_fikaCoreReleaseUrl))
             {
@@ -84,8 +84,8 @@ namespace Fika_Installer.UI.Pages
 
             fikaInstaller.ApplyFirewallRules();
 
-            PageLogger.Log("");
-            PageLogger?.Success("Fika installed successfully!", true);
+            CompositeLogger.Log("");
+            CompositeLogger?.Success("Fika installed successfully!", true);
         }
     }
 }

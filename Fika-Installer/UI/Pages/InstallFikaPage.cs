@@ -14,20 +14,20 @@ namespace Fika_Installer.UI.Pages
 
             if (!isSptInstalled)
             {
-                PageLogger.Error("SPT not found. Please place Fika-Installer inside your SPT directory.", true);
+                CompositeLogger.Error("SPT not found. Please place Fika-Installer inside your SPT directory.", true);
                 return;
             }
 
-            SptInstaller sptInstaller = new(_installDir, _installDir, PageLogger);
+            SptInstaller sptInstaller = new(_installDir, _installDir, CompositeLogger);
 
             if (!sptInstaller.InstallSptRequirements())
             {
                 return;
             }
 
-            SptInstance sptInstance = new(_installDir, PageLogger);
+            SptInstance sptInstance = new(_installDir, CompositeLogger);
 
-            FikaInstaller fikaInstaller = new(_installDir, sptInstance, PageLogger);
+            FikaInstaller fikaInstaller = new(_installDir, sptInstance, CompositeLogger);
 
             if (!fikaInstaller.InstallReleaseFromUrl(_fikaCoreReleaseUrl))
             {
@@ -41,8 +41,8 @@ namespace Fika_Installer.UI.Pages
 
             fikaInstaller.ApplyFirewallRules();
 
-            PageLogger?.Log("");
-            PageLogger?.Success("Fika installed successfully!", true);
+            CompositeLogger?.Log("");
+            CompositeLogger?.Success("Fika installed successfully!", true);
         }
     }
 }

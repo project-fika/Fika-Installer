@@ -50,7 +50,7 @@ namespace Fika_Installer.Spt
 
                 foreach (string profilePath in profilesPaths)
                 {
-                    SptProfile? sptProfile = SptUtils.GetProfileFromJson(profilePath, _logger);
+                    SptProfile? sptProfile = GetProfileFromJson(profilePath);
 
                     if (sptProfile != null)
                     {
@@ -65,6 +65,41 @@ namespace Fika_Installer.Spt
         public SptProfile? GetProfile(string profileId)
         {
             return Profiles.FirstOrDefault(p => p.ProfileId == profileId);
+        }
+
+        public SptProfile? GetProfileFromJson(string sptProfilePath)
+        {
+            if (File.Exists(sptProfilePath))
+            {
+                try
+                {
+                    JsonObject? profile = JsonUtils.DeserializeFromFile(sptProfilePath, _logger);
+
+                    if (profile != null)
+                    {
+                        bool headless = false;
+
+                        string? id = profile["info"]?["id"]?.GetValue<string>();
+                        string? username = profile["info"]?["username"]?.GetValue<string>();
+                        string? password = profile["info"]?["password"]?.GetValue<string>();
+
+                        if (id != null && username != null && password != null)
+                        {
+                            headless = password == "fika-headless";
+
+                            SptProfile sptProfile = new(id, username, password, headless);
+
+                            return sptProfile;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger?.Error($"Failed to read profile: {sptProfilePath}. {ex.Message}");
+                }
+            }
+
+            return null;
         }
 
         public List<SptProfile> GetHeadlessProfiles()

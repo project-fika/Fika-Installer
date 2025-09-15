@@ -10,8 +10,8 @@ namespace Fika_Installer.UI.Pages
 
         public override void OnShow()
         {
-            SptInstance sptInstance = new(_installDir, PageLogger);
-            FikaInstaller fikaInstaller = new(_installDir, sptInstance, PageLogger);
+            SptInstance sptInstance = new(_installDir, CompositeLogger);
+            FikaInstaller fikaInstaller = new(_installDir, sptInstance, CompositeLogger);
 
             if (!fikaInstaller.InstallReleaseFromUrl(_fikaCoreReleaseUrl))
             {
@@ -23,8 +23,8 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            PageLogger.Log("");
-            PageLogger.Success("Fika updated successfully!", true);
+            CompositeLogger.Log("");
+            CompositeLogger.Success("Fika updated successfully!", true);
         }
     }
 }

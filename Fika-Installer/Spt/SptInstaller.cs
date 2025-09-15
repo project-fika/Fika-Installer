@@ -1,5 +1,6 @@
 ﻿using Fika_Installer.Models;
 using Fika_Installer.Utils;
+using SharpHDiffPatch.Core;
 
 namespace Fika_Installer.Spt
 {
@@ -107,7 +108,7 @@ namespace Fika_Installer.Spt
                         // create a target file from the relative patch file while utilizing targetpath as the root directory.
                         target = new FileInfo(Path.Combine(_installDir, relativefile.Replace(".delta", "")));
 
-                        if (!SptUtils.ApplyPatch(target.FullName, file.FullName, _logger))
+                        if (!ApplyPatch(target.FullName, file.FullName))
                         {
                             return false;
                         }
@@ -117,6 +118,38 @@ namespace Fika_Installer.Spt
             catch (Exception ex)
             {
                 _logger?.Error(ex.Message);
+                return false;
+            }
+
+            return true;
+        }
+
+        /* License: NCSA Open Source License
+         * 
+         * Copyright: SPT
+         * AUTHORS:
+         * waffle.lord
+         */
+        public bool ApplyPatch(string targetFile, string patchFile)
+        {
+            var backupFile = $"{targetFile}.spt-bak";
+
+            if (!File.Exists(backupFile))
+            {
+                File.Copy(targetFile, backupFile);
+            }
+
+            try
+            {
+                HDiffPatch patcher = new();
+                HDiffPatch.LogVerbosity = Verbosity.Quiet;
+
+                patcher.Initialize(patchFile);
+                patcher.Patch(backupFile, targetFile, false, default, false, false);
+            }
+            catch
+            {
+                _logger?.Error($"Failed to patch: {targetFile}!");
                 return false;
             }
 
