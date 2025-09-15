@@ -74,7 +74,7 @@ namespace Fika_Installer.Utils
             catch (Exception ex)
             {
                 progressBar.Dispose();
-                logger.Error($"An error occurred while copying the folder: {ex.Message}", true);
+                logger?.Error($"An error occurred while copying the folder: {ex.Message}", true);
             }
 
             progressBar.Dispose();

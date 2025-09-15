@@ -5,21 +5,14 @@ using System.Text.RegularExpressions;
 
 namespace Fika_Installer
 {
-    public partial class FikaInstaller
+    public partial class FikaInstaller(string installDir, SptInstance sptInstance, CompositeLogger logger)
     {
-        private string _installDir;
-        private SptInstance _sptInstance;
-        private CompositeLogger _logger;
+        private string _installDir = installDir;
+        private SptInstance _sptInstance = sptInstance;
+        private CompositeLogger _logger = logger;
 
         [GeneratedRegex(@"Compatible with EFT ([\d.]+)", RegexOptions.IgnoreCase)]
         private static partial Regex CompatibleWithEftVersionRegex();
-
-        public FikaInstaller(string installDir, SptInstance sptInstance, CompositeLogger logger)
-        {
-            _installDir = installDir;
-            _sptInstance = sptInstance;
-            _logger = logger;
-        }
 
         public bool InstallReleaseFromUrl(string url)
         {

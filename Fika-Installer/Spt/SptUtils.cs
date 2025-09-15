@@ -15,7 +15,7 @@ namespace Fika_Installer.Spt
             return sptServerFound && sptLauncherFound;
         }
 
-        public static string? BrowseAndValidateSptDir(CompositeLogger? logger = null)
+        public static string? BrowseAndValidateSptDir(CompositeLogger? logger)
         {
             logger?.Confirm("SPT not detected. Press ENTER to browse for your SPT folder.");
 

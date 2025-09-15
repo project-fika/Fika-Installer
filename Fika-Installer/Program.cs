@@ -7,7 +7,7 @@ namespace Fika_Installer
         [STAThread]
         static void Main(string[] args)
         {
-            ILogger logger = new Logger();
+            Logger logger = new();
             logger.Log("Fika-Installer Start");
 
             Console.Title = InstallerConstants.VersionString;
