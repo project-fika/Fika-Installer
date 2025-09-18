@@ -21,16 +21,18 @@ namespace Fika_Installer.UI.Pages
             if (isSptInstalled)
             {
                 sptInstance = new(_installDir, CompositeLogger);
-                sptInstaller = new(_installDir, _installDir, CompositeLogger);
+                sptInstaller = new(_installDir, sptInstance, CompositeLogger);
             }
             else
             {
-                string? sptDir = SptUtils.BrowseAndValidateSptDir(CompositeLogger);
+                sptInstance = SptUtils.BrowseAndValidateSptDir(CompositeLogger);
 
-                if (sptDir == null)
+                if (sptInstance == null)
                 {
                     return;
                 }
+
+                sptInstaller = new(_installDir, sptInstance, CompositeLogger);
 
                 Menu installMethodMenu = _menuFactory.CreateInstallMethodMenu();
                 MenuChoice installTypeChoice = installMethodMenu.Show();
@@ -39,8 +41,6 @@ namespace Fika_Installer.UI.Pages
 
                 if (Enum.TryParse(selectedInstallType, out InstallMethod installType))
                 {
-                    sptInstaller = new(_installDir, sptDir, CompositeLogger);
-
                     if (!sptInstaller.InstallSpt(installType))
                     {
                         return;
@@ -84,7 +84,6 @@ namespace Fika_Installer.UI.Pages
 
             fikaInstaller.ApplyFirewallRules();
 
-            CompositeLogger.Log("");
             CompositeLogger?.Success("Fika installed successfully!", true);
         }
     }

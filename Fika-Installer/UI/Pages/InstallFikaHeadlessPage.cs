@@ -21,19 +21,18 @@ namespace Fika_Installer.UI.Pages
             if (isSptInstalled)
             {
                 sptInstance = new(_installDir, CompositeLogger);
-                sptInstaller = new(_installDir, _installDir, CompositeLogger);
+                sptInstaller = new(_installDir, sptInstance, CompositeLogger);
             }
             else
             {
-                string? sptDir = SptUtils.BrowseAndValidateSptDir(CompositeLogger);
+                sptInstance = SptUtils.BrowseAndValidateSptDir(CompositeLogger);
 
-                if (sptDir == null)
+                if (sptInstance == null)
                 {
                     return;
                 }
 
-                sptInstance = new(sptDir, CompositeLogger);
-                sptInstaller = new(_installDir, sptDir, CompositeLogger);
+                sptInstaller = new(_installDir, sptInstance, CompositeLogger);
             }
 
             FikaHeadless fikaHeadless = new(_installDir, sptInstance, CompositeLogger);

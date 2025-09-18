@@ -15,7 +15,7 @@ namespace Fika_Installer.Spt
             return sptServerFound && sptLauncherFound;
         }
 
-        public static string? BrowseAndValidateSptDir(CompositeLogger? logger)
+        public static SptInstance? BrowseAndValidateSptDir(CompositeLogger? logger)
         {
             logger?.Confirm("SPT not detected. Press ENTER to browse for your SPT folder.");
 
@@ -32,7 +32,7 @@ namespace Fika_Installer.Spt
                 return null;
             }
 
-            return sptDir;
+            return new SptInstance(sptDir, logger);
         }
     }
 }

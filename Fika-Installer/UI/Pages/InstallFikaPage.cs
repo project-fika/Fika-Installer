@@ -18,14 +18,13 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            SptInstaller sptInstaller = new(_installDir, _installDir, CompositeLogger);
+            SptInstance sptInstance = new(_installDir, CompositeLogger);
+            SptInstaller sptInstaller = new(_installDir, sptInstance, CompositeLogger);
 
             if (!sptInstaller.InstallSptRequirements())
             {
                 return;
             }
-
-            SptInstance sptInstance = new(_installDir, CompositeLogger);
 
             FikaInstaller fikaInstaller = new(_installDir, sptInstance, CompositeLogger);
 
@@ -41,7 +40,6 @@ namespace Fika_Installer.UI.Pages
 
             fikaInstaller.ApplyFirewallRules();
 
-            CompositeLogger?.Log("");
             CompositeLogger?.Success("Fika installed successfully!", true);
         }
     }

@@ -4,10 +4,10 @@ using SharpHDiffPatch.Core;
 
 namespace Fika_Installer.Spt
 {
-    public class SptInstaller(string installDir, string sptDir, CompositeLogger? logger)
+    public class SptInstaller(string installDir, SptInstance sptInstance, CompositeLogger? logger)
     {
         private string _installDir = installDir;
-        private string _sptDir = sptDir;
+        private SptInstance _sptInstance = sptInstance;
         private string _sptPatchesDir = Path.Combine(installDir, @"SPT_Data\Launcher\Patches");
         private CompositeLogger _logger = logger;
 
@@ -36,7 +36,7 @@ namespace Fika_Installer.Spt
             {
                 excludeFiles.Add("EscapeFromTarkov_Data");
 
-                string escapeFromTarkovDataPath = Path.Combine(_sptDir, "EscapeFromTarkov_Data");
+                string escapeFromTarkovDataPath = Path.Combine(_sptInstance.SptPath, "EscapeFromTarkov_Data");
                 string escapeFromTarkovDataFikaPath = Path.Combine(_installDir, "EscapeFromTarkov_Data");
 
                 _logger?.Log("Creating symlink...");
@@ -50,7 +50,7 @@ namespace Fika_Installer.Spt
 
             _logger?.Log("Copying SPT folder...");
 
-            if (!FileUtils.CopyFolderWithProgress(_sptDir, _installDir, excludeFiles, _logger))
+            if (!FileUtils.CopyFolderWithProgress(_sptInstance.SptPath, _installDir, excludeFiles, _logger))
             {
                 return false;
             }
