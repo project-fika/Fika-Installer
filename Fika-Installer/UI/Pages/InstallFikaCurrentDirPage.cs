@@ -25,7 +25,7 @@ namespace Fika_Installer.UI.Pages
             }
             else
             {
-                string? sptDir = SptUtils.BrowseAndValidateSptDir();
+                string? sptDir = SptUtils.BrowseAndValidateSptDir(CompositeLogger);
 
                 if (sptDir == null)
                 {
