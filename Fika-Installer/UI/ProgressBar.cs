@@ -18,8 +18,6 @@
 
             Console.WriteLine(_message);
             Draw(0);
-
-            Console.CursorVisible = false;
         }
 
         public void Draw(double ratio)
@@ -96,7 +94,6 @@
             Erase(0, _progressBarCursorTopPos, progressBarTotalLength);
 
             Console.SetCursorPosition(0, _messageCursorTopPos);
-            Console.CursorVisible = true;
 
             _isDisposed = true;
         }

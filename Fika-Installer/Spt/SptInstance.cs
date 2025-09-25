@@ -9,7 +9,7 @@ namespace Fika_Installer.Spt
     {
         private string _profilesPath;
         private string _launcherConfigPath;
-        private CompositeLogger _logger;
+        private CompositeLogger? _logger;
 
         public string SptPath { get; private set; }
         public string ServerExePath { get; private set; }
@@ -17,7 +17,7 @@ namespace Fika_Installer.Spt
         public string EftVersion { get; private set; } = "";
         public List<SptProfile> Profiles { get; private set; } = [];
 
-        public SptInstance(string sptPath, CompositeLogger logger)
+        public SptInstance(string sptPath, CompositeLogger? logger)
         {
             _profilesPath = Path.Combine(sptPath, @"user\profiles");
             _launcherConfigPath = Path.Combine(sptPath, @"user\launcher\config.json");
@@ -62,11 +62,6 @@ namespace Fika_Installer.Spt
             Profiles = sptProfiles;
         }
 
-        public SptProfile? GetProfile(string profileId)
-        {
-            return Profiles.FirstOrDefault(p => p.ProfileId == profileId);
-        }
-
         public SptProfile? GetProfileFromJson(string sptProfilePath)
         {
             if (File.Exists(sptProfilePath))
@@ -100,6 +95,11 @@ namespace Fika_Installer.Spt
             }
 
             return null;
+        }
+
+        public SptProfile? GetProfile(string profileId)
+        {
+            return Profiles.FirstOrDefault(p => p.ProfileId == profileId);
         }
 
         public List<SptProfile> GetHeadlessProfiles()

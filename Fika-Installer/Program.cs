@@ -11,6 +11,8 @@ namespace Fika_Installer
             logger.Log("Fika-Installer Start");
 
             Console.Title = InstallerConstants.VersionString;
+            Console.CursorVisible = false;
+
             Header.Show();
 
             string installerDirectory = InstallerConstants.InstallerDir;

@@ -12,7 +12,7 @@ namespace Fika_Installer
 
     public interface IPageLogger : ILogger
     {
-        void Confirm(string message);
+        void Confirm(string message, bool confirm = false);
         void Success(string message, bool confirm = false);
         void Error(string message, bool confirm = false);
     }
@@ -76,8 +76,13 @@ namespace Fika_Installer
 
         public void Confirm(string message)
         {
-            ConUtils.WriteConfirm(message);
-            _logAction(message, true);
+            Confirm(message, false);
+        }
+        
+        public void Confirm(string message, bool confirm = false)
+        {
+            ConUtils.WriteConfirm(message, confirm);
+            _logAction(message, confirm);
         }
 
         public void Success(string message)

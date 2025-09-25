@@ -69,6 +69,51 @@ namespace Fika_Installer
             return true;
         }
 
+        public bool UninstallFika()
+        {
+            string bepInExPluginsPath = Path.Combine(_installDir, @"BepInEx\plugins");
+            string bepInExConfigPath = Path.Combine(_installDir, @"BepInEx\config");
+            string userModsPath = Path.Combine(_installDir, @"user\mods");
+
+            string[] filesToDelete =
+            [
+                Path.Combine(bepInExPluginsPath, "Fika.Core.dll"),
+                Path.Combine(bepInExPluginsPath, "Fika.Headless.dll"),
+                Path.Combine(bepInExConfigPath, "com.fika.core.cfg"),
+                Path.Combine(bepInExConfigPath, "com.fika.headless.cfg"),
+                Path.Combine(userModsPath, "fika-server"),
+            ];
+
+            try
+            {
+                foreach (string file in filesToDelete)
+                {
+                    if (File.Exists(file))
+                    {
+                        string fileName = Path.GetFileName(file);
+                        _logger?.Log($"Removing {fileName}...");
+
+                        File.Delete(file);
+                    }
+
+                    if (Directory.Exists(file))
+                    {
+                        string folderName = Path.GetFileName(file);
+                        _logger?.Log($"Removing {folderName}...");
+
+                        Directory.Delete(file, true);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error($"An error occurred during uninstalling Fika: {ex.Message}", true);
+                return false;
+            }
+
+            return true;
+        }
+
         public void ApplyFirewallRules()
         {
             _logger?.Log("Applying Fika firewall rules...");

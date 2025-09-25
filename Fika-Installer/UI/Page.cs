@@ -3,19 +3,19 @@
     public abstract class Page
     {
         private int _totalLines = 0;
-        private ILogger _logger;
-        private IPageLogger _pageLogger;
 
+        public ILogger FileLogger { get; set; }
+        public IPageLogger PageLogger {  get; set; }
         public CompositeLogger CompositeLogger { get; private set; }
 
         public Page(ILogger logger)
         {
-            _logger = logger;
-            _pageLogger = new PageLogger(AddLines);
+            FileLogger = logger;
+            PageLogger = new PageLogger(AddLines);
 
             CompositeLogger = new();
-            CompositeLogger.AddLogger(_logger);
-            CompositeLogger.AddLogger(_pageLogger);
+            CompositeLogger.AddLogger(FileLogger);
+            CompositeLogger.AddLogger(PageLogger);
         }
 
         public void Show()
@@ -23,6 +23,8 @@
             OnShow();
             Dispose();
         }
+
+        public abstract void OnShow();
 
         public void Dispose()
         {
@@ -39,11 +41,9 @@
             _totalLines = 0;
         }
 
-        public abstract void OnShow();
-
         private void AddLines(string message, bool confirm = false)
         {
-            _totalLines++;
+            _totalLines += message.Length / Console.BufferWidth + 1;
 
             if (confirm)
             {

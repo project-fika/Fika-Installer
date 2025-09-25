@@ -4,13 +4,9 @@ namespace Fika_Installer.UI.Pages
 {
     public class InstallFikaPage(string installDir, string fikaCoreReleaseUrl, string fikaServerReleaseUrl, ILogger logger) : Page(logger)
     {
-        private string _installDir = installDir;
-        private string _fikaCoreReleaseUrl = fikaCoreReleaseUrl;
-        private string _fikaServerReleaseUrl = fikaServerReleaseUrl;
-
         public override void OnShow()
         {
-            bool isSptInstalled = SptUtils.IsSptInstalled(_installDir);
+            bool isSptInstalled = SptUtils.IsSptInstalled(installDir);
 
             if (!isSptInstalled)
             {
@@ -18,22 +14,22 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            SptInstance sptInstance = new(_installDir, CompositeLogger);
-            SptInstaller sptInstaller = new(_installDir, sptInstance, CompositeLogger);
+            SptInstance sptInstance = new(installDir, CompositeLogger);
+            SptInstaller sptInstaller = new(installDir, sptInstance, CompositeLogger);
 
             if (!sptInstaller.InstallSptRequirements())
             {
                 return;
             }
 
-            FikaInstaller fikaInstaller = new(_installDir, sptInstance, CompositeLogger);
+            FikaInstaller fikaInstaller = new(installDir, sptInstance, CompositeLogger);
 
-            if (!fikaInstaller.InstallReleaseFromUrl(_fikaCoreReleaseUrl))
+            if (!fikaInstaller.InstallReleaseFromUrl(fikaCoreReleaseUrl))
             {
                 return;
             }
 
-            if (!fikaInstaller.InstallReleaseFromUrl(_fikaServerReleaseUrl))
+            if (!fikaInstaller.InstallReleaseFromUrl(fikaServerReleaseUrl))
             {
                 return;
             }

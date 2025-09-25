@@ -1,6 +1,4 @@
-﻿using Fika_Installer.Utils;
-
-namespace Fika_Installer.Spt
+﻿namespace Fika_Installer.Spt
 {
     public static class SptUtils
     {
@@ -13,26 +11,6 @@ namespace Fika_Installer.Spt
             bool sptLauncherFound = File.Exists(sptLauncherPath);
 
             return sptServerFound && sptLauncherFound;
-        }
-
-        public static SptInstance? BrowseAndValidateSptDir(CompositeLogger? logger)
-        {
-            logger?.Confirm("SPT not detected. Press ENTER to browse for your SPT folder.");
-
-            string sptDir = FileUtils.BrowseFolder("Please select your SPT installation folder.");
-
-            if (string.IsNullOrEmpty(sptDir))
-            {
-                return null;
-            }
-
-            if (!IsSptInstalled(sptDir))
-            {
-                logger?.Error("The selected folder does not contain a valid SPT installation.", true);
-                return null;
-            }
-
-            return new SptInstance(sptDir, logger);
         }
     }
 }

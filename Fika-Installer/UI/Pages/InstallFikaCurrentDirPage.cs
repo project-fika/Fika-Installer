@@ -25,7 +25,15 @@ namespace Fika_Installer.UI.Pages
             }
             else
             {
-                sptInstance = SptUtils.BrowseAndValidateSptDir(CompositeLogger);
+                BrowseSptFolderPage browseSptFolderPage = new(FileLogger);
+                browseSptFolderPage.Show();
+
+                if (browseSptFolderPage.Result == null)
+                {
+                    return;
+                }
+
+                sptInstance = new(browseSptFolderPage.Result, CompositeLogger);
 
                 if (sptInstance == null)
                 {
@@ -37,9 +45,7 @@ namespace Fika_Installer.UI.Pages
                 Menu installMethodMenu = _menuFactory.CreateInstallMethodMenu();
                 MenuChoice installTypeChoice = installMethodMenu.Show();
 
-                string selectedInstallType = installTypeChoice.Text;
-
-                if (Enum.TryParse(selectedInstallType, out InstallMethod installType))
+                if (Enum.TryParse(installTypeChoice.Text, out InstallMethod installType))
                 {
                     if (!sptInstaller.InstallSpt(installType))
                     {

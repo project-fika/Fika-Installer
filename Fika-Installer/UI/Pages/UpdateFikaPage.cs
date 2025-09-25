@@ -4,26 +4,21 @@ namespace Fika_Installer.UI.Pages
 {
     public class UpdateFikaPage(string installDir, string fikaCoreReleaseUrl, string fikaServerReleaseUrl, ILogger logger) : Page(logger)
     {
-        private string _installDir = installDir;
-        private string _fikaCoreReleaseUrl = fikaCoreReleaseUrl;
-        private string _fikaServerReleaseUrl = fikaServerReleaseUrl;
-
         public override void OnShow()
         {
-            SptInstance sptInstance = new(_installDir, CompositeLogger);
-            FikaInstaller fikaInstaller = new(_installDir, sptInstance, CompositeLogger);
+            SptInstance sptInstance = new(installDir, CompositeLogger);
+            FikaInstaller fikaInstaller = new(installDir, sptInstance, CompositeLogger);
 
-            if (!fikaInstaller.InstallReleaseFromUrl(_fikaCoreReleaseUrl))
+            if (!fikaInstaller.InstallReleaseFromUrl(fikaCoreReleaseUrl))
             {
                 return;
             }
 
-            if (!fikaInstaller.InstallReleaseFromUrl(_fikaServerReleaseUrl))
+            if (!fikaInstaller.InstallReleaseFromUrl(fikaServerReleaseUrl))
             {
                 return;
             }
 
-            CompositeLogger.Log("");
             CompositeLogger.Success("Fika updated successfully!", true);
         }
     }

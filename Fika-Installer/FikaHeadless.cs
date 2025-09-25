@@ -39,8 +39,8 @@ namespace Fika_Installer
 
             while (sptServerRunning)
             {
+                Thread.Sleep(500);
                 sptServerRunning = Process.GetProcessesByName(sptProcessName).Length != 0;
-                Thread.Sleep(1000);
             }
 
             if (!IsFikaServerConfigFound())
