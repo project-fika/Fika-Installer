@@ -24,12 +24,12 @@ namespace Fika_Installer.UI.Pages
 
             FikaInstaller fikaInstaller = new(installDir, sptInstance, CompositeLogger);
 
-            if (!fikaInstaller.InstallReleaseFromUrl(fikaCoreReleaseUrl))
+            if (!fikaInstaller.InstallReleaseFromUrl(fikaCoreReleaseUrl, "Fika.Release"))
             {
                 return;
             }
 
-            if (!fikaInstaller.InstallReleaseFromUrl(fikaServerReleaseUrl))
+            if (!fikaInstaller.InstallReleaseFromUrl(fikaServerReleaseUrl, "fika-server"))
             {
                 return;
             }

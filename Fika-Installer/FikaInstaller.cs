@@ -14,7 +14,7 @@ namespace Fika_Installer
         [GeneratedRegex(@"Compatible with EFT ([\d.]+)", RegexOptions.IgnoreCase)]
         private static partial Regex CompatibleWithEftVersionRegex();
 
-        public bool InstallReleaseFromUrl(string url)
+        public bool InstallReleaseFromUrl(string url, string releaseName)
         {
             GitHubRelease? gitHubRelease = GitHub.GetReleaseFromUrl(url);
 
@@ -43,8 +43,7 @@ namespace Fika_Installer
                 _logger?.Warning($"Could not verify compatibility of {gitHubRelease.Name} with your Escape From Tarkov version.");
             }
 
-            // Pick the first asset from release
-            GitHubAsset? asset = gitHubRelease.Assets.FirstOrDefault();
+            GitHubAsset? asset = gitHubRelease.Assets.FirstOrDefault(asset => asset.Name.Contains(releaseName));
 
             if (asset == null)
             {
@@ -58,8 +57,8 @@ namespace Fika_Installer
                 return false;
             }
 
-            string releaseName = asset.Name;
-            string releaseZipFilePath = Path.Combine(tempDir, releaseName);
+            string assetReleaseName = asset.Name;
+            string releaseZipFilePath = Path.Combine(tempDir, assetReleaseName);
 
             if (!ExtractRelease(releaseZipFilePath, _installDir))
             {
