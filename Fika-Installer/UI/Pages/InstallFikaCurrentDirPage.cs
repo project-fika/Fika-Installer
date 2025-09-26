@@ -28,7 +28,7 @@ namespace Fika_Installer.UI.Pages
 
                 sptInstance = new(browseSptFolderPage.Result, CompositeLogger);
             }
-                
+
             SptInstaller sptInstaller = new(installDir, sptInstance, CompositeLogger);
 
             Menu installMethodMenu = menuFactory.CreateInstallMethodMenu();

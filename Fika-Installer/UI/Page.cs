@@ -5,7 +5,7 @@
         private int _totalLines = 0;
 
         public ILogger FileLogger { get; set; }
-        public IPageLogger PageLogger {  get; set; }
+        public IPageLogger PageLogger { get; set; }
         public CompositeLogger CompositeLogger { get; private set; }
 
         public Page(ILogger logger)

@@ -78,7 +78,7 @@ namespace Fika_Installer
         {
             Confirm(message, false);
         }
-        
+
         public void Confirm(string message, bool confirm = false)
         {
             ConUtils.WriteConfirm(message, confirm);

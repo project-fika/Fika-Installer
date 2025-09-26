@@ -23,7 +23,7 @@ namespace Fika_Installer.UI
                 choices.Add(updateFikaChoice);
 
                 UninstallFikaPage uninstallFikaPage = new(this, installDir, logger);
-                
+
                 MenuChoice uninstallFikaChoice = new("Uninstall Fika", uninstallFikaPage);
                 choices.Add(uninstallFikaChoice);
             }
@@ -52,7 +52,7 @@ namespace Fika_Installer.UI
             if (fikaHeadlessDetected)
             {
                 UpdateFikaHeadlessPage updateFikaHeadlessPage = new(installDir, fikaCoreReleaseUrl, fikaHeadlessReleaseUrl, logger);
-                
+
                 MenuChoice updateFikaHeadlessChoice = new("Update Fika Headless", updateFikaHeadlessPage);
                 choices.Add(updateFikaHeadlessChoice);
             }
@@ -128,7 +128,7 @@ namespace Fika_Installer.UI
             choices.Add(choiceNo);
 
             Menu uninstallFikaMenu = new("Are you sure you want to uninstall Fika? Your Fika settings will be lost.", choices);
-            
+
             return uninstallFikaMenu;
         }
     }

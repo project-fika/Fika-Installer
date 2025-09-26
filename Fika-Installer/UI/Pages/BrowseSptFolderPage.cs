@@ -6,7 +6,7 @@ namespace Fika_Installer.UI.Pages
     public class BrowseSptFolderPage(ILogger logger) : Page(logger)
     {
         public string? Result;
-        
+
         public override void OnShow()
         {
             CompositeLogger.Confirm("SPT not detected. Press ENTER to browse for your SPT folder.");

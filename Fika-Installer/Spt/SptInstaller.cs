@@ -9,7 +9,7 @@ namespace Fika_Installer.Spt
         private string _installDir = installDir;
         private SptInstance _sptInstance = sptInstance;
         private string _sptPatchesDir = Path.Combine(installDir, @"SPT_Data\Launcher\Patches");
-        private CompositeLogger _logger = logger;
+        private CompositeLogger? _logger = logger;
 
         public bool InstallSpt(InstallMethod installType, bool headless = false)
         {
