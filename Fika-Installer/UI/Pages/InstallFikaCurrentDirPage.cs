@@ -6,22 +6,15 @@ namespace Fika_Installer.UI.Pages
 {
     public class InstallFikaCurrentDirPage(MenuFactory menuFactory, string installDir, string fikaCoreReleaseUrl, string fikaServerReleaseUrl, ILogger logger) : Page(logger)
     {
-        private MenuFactory _menuFactory = menuFactory;
-        private string _installDir = installDir;
-        private string _fikaCoreReleaseUrl = fikaCoreReleaseUrl;
-        private string _fikaServerReleaseUrl = fikaServerReleaseUrl;
-
         public override void OnShow()
         {
             SptInstance? sptInstance;
-            SptInstaller? sptInstaller;
 
-            bool isSptInstalled = SptUtils.IsSptInstalled(_installDir);
+            bool isSptInstalled = SptUtils.IsSptInstalled(installDir);
 
             if (isSptInstalled)
             {
-                sptInstance = new(_installDir, CompositeLogger);
-                sptInstaller = new(_installDir, sptInstance, CompositeLogger);
+                sptInstance = new(installDir, CompositeLogger);
             }
             else
             {
@@ -34,41 +27,37 @@ namespace Fika_Installer.UI.Pages
                 }
 
                 sptInstance = new(browseSptFolderPage.Result, CompositeLogger);
+            }
+                
+            SptInstaller sptInstaller = new(installDir, sptInstance, CompositeLogger);
 
-                if (sptInstance == null)
+            Menu installMethodMenu = menuFactory.CreateInstallMethodMenu();
+            MenuChoice installTypeChoice = installMethodMenu.Show();
+
+            if (Enum.TryParse(installTypeChoice.Text, out InstallMethod installType))
+            {
+                if (!sptInstaller.InstallSpt(installType))
                 {
                     return;
                 }
 
-                sptInstaller = new(_installDir, sptInstance, CompositeLogger);
+                // Change directory to installed SPT directory
+                sptInstance = new(installDir, CompositeLogger);
 
-                Menu installMethodMenu = _menuFactory.CreateInstallMethodMenu();
-                MenuChoice installTypeChoice = installMethodMenu.Show();
+                JsonObject? launcherConfig = sptInstance.GetLauncherConfig();
 
-                if (Enum.TryParse(installTypeChoice.Text, out InstallMethod installType))
+                if (launcherConfig != null)
                 {
-                    if (!sptInstaller.InstallSpt(installType))
-                    {
-                        return;
-                    }
+                    launcherConfig["IsDevMode"] = true;
+                    launcherConfig["GamePath"] = installDir;
+                    launcherConfig["Server"]["Url"] = "https://127.0.0.1:6969";
 
-                    sptInstance = new(_installDir, CompositeLogger);
-
-                    JsonObject? launcherConfig = sptInstance.GetLauncherConfig();
-
-                    if (launcherConfig != null)
-                    {
-                        launcherConfig["IsDevMode"] = true;
-                        launcherConfig["GamePath"] = _installDir;
-                        launcherConfig["Server"]["Url"] = "https://127.0.0.1:6969";
-
-                        sptInstance.SetLauncherConfig(launcherConfig);
-                    }
+                    sptInstance.SetLauncherConfig(launcherConfig);
                 }
-                else
-                {
-                    return;
-                }
+            }
+            else
+            {
+                return;
             }
 
             if (!sptInstaller.InstallSptRequirements())
@@ -76,14 +65,14 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            FikaInstaller fikaInstaller = new(_installDir, sptInstance, CompositeLogger);
+            FikaInstaller fikaInstaller = new(installDir, sptInstance, CompositeLogger);
 
-            if (!fikaInstaller.InstallReleaseFromUrl(_fikaCoreReleaseUrl))
+            if (!fikaInstaller.InstallReleaseFromUrl(fikaCoreReleaseUrl))
             {
                 return;
             }
 
-            if (!fikaInstaller.InstallReleaseFromUrl(_fikaServerReleaseUrl))
+            if (!fikaInstaller.InstallReleaseFromUrl(fikaServerReleaseUrl))
             {
                 return;
             }

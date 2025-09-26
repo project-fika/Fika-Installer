@@ -9,14 +9,12 @@ namespace Fika_Installer.UI.Pages
         public override void OnShow()
         {
             SptInstance? sptInstance;
-            SptInstaller? sptInstaller;
 
             bool isSptInstalled = SptUtils.IsSptInstalled(installDir);
 
             if (isSptInstalled)
             {
                 sptInstance = new(installDir, CompositeLogger);
-                sptInstaller = new(installDir, sptInstance, CompositeLogger);
             }
             else
             {
@@ -29,13 +27,6 @@ namespace Fika_Installer.UI.Pages
                 }
 
                 sptInstance = new(browseSptFolderPage.Result, CompositeLogger);
-
-                if (sptInstance == null)
-                {
-                    return;
-                }
-
-                sptInstaller = new(installDir, sptInstance, CompositeLogger);
             }
 
             FikaHeadless fikaHeadless = new(installDir, sptInstance, CompositeLogger);
@@ -79,6 +70,8 @@ namespace Fika_Installer.UI.Pages
             {
                 return;
             }
+
+            SptInstaller sptInstaller = new(installDir, sptInstance, CompositeLogger);
 
             if (!isSptInstalled)
             {
