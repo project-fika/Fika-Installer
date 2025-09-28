@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using Fika_Installer.Models;
+using System.Reflection;
 
 namespace Fika_Installer
 {
@@ -15,11 +16,11 @@ namespace Fika_Installer
 
     public static class FikaConstants
     {
-        public static readonly Dictionary<string, string> ReleaseUrls = new()
+        public static readonly Dictionary<string, FikaRelease> FikaReleases = new()
         {
-            { "Fika.Core", "https://api.github.com/repos/project-fika/Fika-Plugin/releases/latest" },
-            { "Fika.Headless", "https://api.github.com/repos/project-fika/Fika-Headless/releases/latest" },
-            { "Fika.Server", "https://api.github.com/repos/project-fika/Fika-Server/releases/latest" }
+            { "Fika.Core", new("Fika.Release", "https://api.github.com/repos/project-fika/Fika-Plugin/releases/latest") },
+            { "Fika.Headless", new("Fika.Headless", "https://api.github.com/repos/project-fika/Fika-Headless/releases/latest") },
+            { "Fika.Server", new("fika-server", "https://api.github.com/repos/project-fika/Fika-Server/releases/latest") }
         };
     }
 

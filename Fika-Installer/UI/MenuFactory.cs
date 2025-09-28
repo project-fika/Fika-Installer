@@ -4,7 +4,7 @@ using Fika_Installer.UI.Pages;
 
 namespace Fika_Installer.UI
 {
-    public class MenuFactory(string installDir, string fikaCoreReleaseUrl, string fikaServerReleaseUrl, string fikaHeadlessReleaseUrl, ILogger logger)
+    public class MenuFactory(string installDir, FikaRelease fikaCoreRelease, FikaRelease fikaServerRelease, FikaRelease fikaHeadlessRelease, ILogger logger)
     {
         private string _fikaCorePath = Path.Combine(installDir, @"BepInEx\plugins\Fika.Core.dll");
         private string _fikaHeadlessPath = Path.Combine(installDir, @"BepInEx\plugins\Fika.Headless.dll");
@@ -17,7 +17,7 @@ namespace Fika_Installer.UI
 
             if (fikaDetected)
             {
-                UpdateFikaPage updateFikaPage = new(installDir, fikaCoreReleaseUrl, fikaServerReleaseUrl, logger);
+                UpdateFikaPage updateFikaPage = new(installDir, fikaCoreRelease, fikaServerRelease, logger);
 
                 MenuChoice updateFikaChoice = new("Update Fika", updateFikaPage);
                 choices.Add(updateFikaChoice);
@@ -29,7 +29,7 @@ namespace Fika_Installer.UI
             }
             else
             {
-                InstallFikaPage installFikaPage = new(installDir, fikaCoreReleaseUrl, fikaServerReleaseUrl, logger);
+                InstallFikaPage installFikaPage = new(installDir, fikaCoreRelease, fikaServerRelease, logger);
 
                 MenuChoice installFikaChoice = new("Install Fika", installFikaPage);
                 choices.Add(installFikaChoice);
@@ -51,14 +51,14 @@ namespace Fika_Installer.UI
 
             if (fikaHeadlessDetected)
             {
-                UpdateFikaHeadlessPage updateFikaHeadlessPage = new(installDir, fikaCoreReleaseUrl, fikaHeadlessReleaseUrl, logger);
+                UpdateFikaHeadlessPage updateFikaHeadlessPage = new(installDir, fikaCoreRelease, fikaHeadlessRelease, logger);
 
                 MenuChoice updateFikaHeadlessChoice = new("Update Fika Headless", updateFikaHeadlessPage);
                 choices.Add(updateFikaHeadlessChoice);
             }
             else
             {
-                InstallFikaHeadlessPage installFikaHeadlessPage = new(this, installDir, fikaCoreReleaseUrl, fikaHeadlessReleaseUrl, logger);
+                InstallFikaHeadlessPage installFikaHeadlessPage = new(this, installDir, fikaCoreRelease, fikaHeadlessRelease, logger);
 
                 MenuChoice installFikaHeadlessChoice = new("Install Fika Headless", installFikaHeadlessPage);
                 choices.Add(installFikaHeadlessChoice);
@@ -68,7 +68,7 @@ namespace Fika_Installer.UI
 
             if (!fikaCoreDetected)
             {
-                InstallFikaCurrentDirPage installFikaCurrentDirPage = new(this, installDir, fikaCoreReleaseUrl, fikaServerReleaseUrl, logger);
+                InstallFikaCurrentDirPage installFikaCurrentDirPage = new(this, installDir, fikaCoreRelease, fikaServerRelease, logger);
 
                 MenuChoice installFikaInCurrentFolder = new("Install Fika in current folder", installFikaCurrentDirPage);
                 choices.Add(installFikaInCurrentFolder);

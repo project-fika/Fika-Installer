@@ -1,4 +1,5 @@
-﻿using Fika_Installer.Models.GitHub;
+﻿using Fika_Installer.Models;
+using Fika_Installer.Models.GitHub;
 using Fika_Installer.Spt;
 using Fika_Installer.Utils;
 using System.Text.RegularExpressions;
@@ -14,9 +15,9 @@ namespace Fika_Installer
         [GeneratedRegex(@"Compatible with EFT ([\d.]+)", RegexOptions.IgnoreCase)]
         private static partial Regex CompatibleWithEftVersionRegex();
 
-        public bool InstallReleaseFromUrl(string url, string releaseName)
+        public bool InstallRelease(FikaRelease fikaRelease)
         {
-            GitHubRelease? gitHubRelease = GitHub.GetReleaseFromUrl(url);
+            GitHubRelease? gitHubRelease = GitHub.GetReleaseFromUrl(fikaRelease.Url);
 
             if (gitHubRelease == null)
             {
@@ -43,7 +44,7 @@ namespace Fika_Installer
                 _logger?.Warning($"Could not verify compatibility of {gitHubRelease.Name} with your Escape From Tarkov version.");
             }
 
-            GitHubAsset? asset = gitHubRelease.Assets.FirstOrDefault(asset => asset.Name.Contains(releaseName));
+            GitHubAsset? asset = gitHubRelease.Assets.FirstOrDefault(asset => asset.Name.Contains(fikaRelease.Name));
 
             if (asset == null)
             {

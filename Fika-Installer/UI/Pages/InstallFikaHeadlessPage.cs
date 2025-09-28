@@ -4,7 +4,7 @@ using Fika_Installer.Spt;
 
 namespace Fika_Installer.UI.Pages
 {
-    public class InstallFikaHeadlessPage(MenuFactory menuFactory, string installDir, string fikaCoreReleaseUrl, string fikaHeadlessReleaseUrl, ILogger logger) : Page(logger)
+    public class InstallFikaHeadlessPage(MenuFactory menuFactory, string installDir, FikaRelease fikaCoreRelease, FikaRelease fikaHeadlessRelease, ILogger logger) : Page(logger)
     {
         public override void OnShow()
         {
@@ -99,12 +99,12 @@ namespace Fika_Installer.UI.Pages
 
             FikaInstaller fikaInstaller = new(installDir, sptInstance, CompositeLogger);
 
-            if (!fikaInstaller.InstallReleaseFromUrl(fikaHeadlessReleaseUrl, "Fika.Headless"))
+            if (!fikaInstaller.InstallRelease(fikaHeadlessRelease))
             {
                 return;
             }
 
-            if (!fikaInstaller.InstallReleaseFromUrl(fikaCoreReleaseUrl, "Fika.Release"))
+            if (!fikaInstaller.InstallRelease(fikaCoreRelease))
             {
                 return;
             }

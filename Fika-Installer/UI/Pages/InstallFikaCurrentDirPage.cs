@@ -4,7 +4,7 @@ using System.Text.Json.Nodes;
 
 namespace Fika_Installer.UI.Pages
 {
-    public class InstallFikaCurrentDirPage(MenuFactory menuFactory, string installDir, string fikaCoreReleaseUrl, string fikaServerReleaseUrl, ILogger logger) : Page(logger)
+    public class InstallFikaCurrentDirPage(MenuFactory menuFactory, string installDir, FikaRelease fikaCoreRelease, FikaRelease fikaServerRelease, ILogger logger) : Page(logger)
     {
         public override void OnShow()
         {
@@ -67,12 +67,12 @@ namespace Fika_Installer.UI.Pages
 
             FikaInstaller fikaInstaller = new(installDir, sptInstance, CompositeLogger);
 
-            if (!fikaInstaller.InstallReleaseFromUrl(fikaCoreReleaseUrl, "Fika.Release"))
+            if (!fikaInstaller.InstallRelease(fikaCoreRelease))
             {
                 return;
             }
 
-            if (!fikaInstaller.InstallReleaseFromUrl(fikaServerReleaseUrl, "fika-server"))
+            if (!fikaInstaller.InstallRelease(fikaServerRelease))
             {
                 return;
             }

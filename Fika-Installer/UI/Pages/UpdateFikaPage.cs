@@ -1,20 +1,21 @@
-﻿using Fika_Installer.Spt;
+﻿using Fika_Installer.Models;
+using Fika_Installer.Spt;
 
 namespace Fika_Installer.UI.Pages
 {
-    public class UpdateFikaPage(string installDir, string fikaCoreReleaseUrl, string fikaServerReleaseUrl, ILogger logger) : Page(logger)
+    public class UpdateFikaPage(string installDir, FikaRelease fikaCoreRelease, FikaRelease fikaServerRelease, ILogger logger) : Page(logger)
     {
         public override void OnShow()
         {
             SptInstance sptInstance = new(installDir, CompositeLogger);
             FikaInstaller fikaInstaller = new(installDir, sptInstance, CompositeLogger);
 
-            if (!fikaInstaller.InstallReleaseFromUrl(fikaCoreReleaseUrl, "Fika.Release"))
+            if (!fikaInstaller.InstallRelease(fikaCoreRelease))
             {
                 return;
             }
 
-            if (!fikaInstaller.InstallReleaseFromUrl(fikaServerReleaseUrl, "fika-server"))
+            if (!fikaInstaller.InstallRelease(fikaServerRelease))
             {
                 return;
             }
