@@ -1,5 +1,4 @@
 ﻿using Fika_Installer.Models;
-using Fika_Installer.Spt;
 
 namespace Fika_Installer.UI.Pages
 {
@@ -7,8 +6,7 @@ namespace Fika_Installer.UI.Pages
     {
         public override void OnShow()
         {
-            SptInstance sptInstance = new(installDir, CompositeLogger);
-            FikaInstaller fikaInstaller = new(installDir, sptInstance, CompositeLogger);
+            FikaInstaller fikaInstaller = new(installDir, CompositeLogger);
 
             if (!fikaInstaller.InstallRelease(fikaHeadlessRelease))
             {

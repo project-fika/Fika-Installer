@@ -6,6 +6,10 @@ namespace Fika_Installer.UI.Pages
 {
     public class InstallFikaHeadlessPage(MenuFactory menuFactory, string installDir, FikaRelease fikaCoreRelease, FikaRelease fikaHeadlessRelease, ILogger logger) : Page(logger)
     {
+        private bool _createHeadlessProfile = false;
+        private string? _headlessProfileId;
+        private InstallMethod _installMethod;
+
         public override void OnShow()
         {
             SptInstance? sptInstance;
@@ -29,7 +33,7 @@ namespace Fika_Installer.UI.Pages
                 sptInstance = new(browseSptFolderPage.Result, CompositeLogger);
             }
 
-            FikaHeadless fikaHeadless = new(installDir, sptInstance, CompositeLogger);
+            FikaHeadless fikaHeadless = new(sptInstance, CompositeLogger);
 
             if (!fikaHeadless.IsFikaServerInstalled())
             {
@@ -42,9 +46,27 @@ namespace Fika_Installer.UI.Pages
             Menu profileSelectionMenu = menuFactory.CreateProfileSelectionMenu(sptProfiles);
             MenuChoice profileSelectionChoice = profileSelectionMenu.Show();
 
-            string headlessProfileId;
-
             if (profileSelectionChoice.Id == "createNewHeadlessProfile")
+            {
+                _createHeadlessProfile = true;
+            }
+            else
+            {
+                _headlessProfileId = profileSelectionChoice.Text;
+            }
+
+            if (!isSptInstalled)
+            {
+                Menu installMethodMenu = menuFactory.CreateInstallMethodMenu();
+                MenuChoice installMethodMenuChoice = installMethodMenu.Show();
+
+                if (!Enum.TryParse(installMethodMenuChoice.Text, out _installMethod))
+                {
+                    return;
+                }
+            }
+
+            if (_createHeadlessProfile)
             {
                 SptProfile? headlessProfile = fikaHeadless.CreateHeadlessProfile();
 
@@ -54,50 +76,37 @@ namespace Fika_Installer.UI.Pages
                     return;
                 }
 
-                headlessProfileId = headlessProfile.ProfileId;
-            }
-            else
-            {
-                headlessProfileId = profileSelectionChoice.Text;
+                _headlessProfileId = headlessProfile.ProfileId;
             }
 
-            if (string.IsNullOrEmpty(headlessProfileId))
+            if (string.IsNullOrEmpty(_headlessProfileId))
             {
                 return;
             }
 
-            if (!fikaHeadless.CopyProfileScript(headlessProfileId))
+            if (!fikaHeadless.CopyProfileScript(_headlessProfileId, installDir))
             {
                 return;
             }
-
-            SptInstaller sptInstaller = new(installDir, sptInstance, CompositeLogger);
 
             if (!isSptInstalled)
             {
-                Menu installMethodMenu = menuFactory.CreateInstallMethodMenu();
-                MenuChoice installMethodMenuChoice = installMethodMenu.Show();
+                SptInstaller selectedSptInstaller = new(sptInstance.SptPath, CompositeLogger);
 
-                string selectedInstallMethod = installMethodMenuChoice.Text;
-
-                if (Enum.TryParse(selectedInstallMethod, out InstallMethod installType))
+                if (!selectedSptInstaller.InstallSpt(installDir, _installMethod, true))
                 {
-                    if (!sptInstaller.InstallSpt(installType, true))
-                    {
-                        return;
-                    }
-
-                    // Change directory to installed SPT directory
-                    sptInstance = new(installDir, CompositeLogger);
+                    return;
                 }
             }
 
-            if (!sptInstaller.InstallSptRequirements())
+            SptInstaller sptInstaller = new(installDir, CompositeLogger);
+
+            if (!sptInstaller.InstallSptRequirements(installDir))
             {
                 return;
             }
 
-            FikaInstaller fikaInstaller = new(installDir, sptInstance, CompositeLogger);
+            FikaInstaller fikaInstaller = new(installDir, CompositeLogger);
 
             if (!fikaInstaller.InstallRelease(fikaHeadlessRelease))
             {

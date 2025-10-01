@@ -1,6 +1,5 @@
 ﻿using Fika_Installer.Models.Spt;
 using Fika_Installer.Utils;
-using System.Diagnostics;
 using System.Text.Json.Nodes;
 
 namespace Fika_Installer.Spt
@@ -28,16 +27,6 @@ namespace Fika_Installer.Spt
             EftExePath = Path.Combine(sptPath, EftConstants.GameExeName);
 
             LoadProfiles();
-
-            if (File.Exists(EftExePath))
-            {
-                FileVersionInfo? tarkovVersionInfo = FileVersionInfo.GetVersionInfo(EftExePath);
-
-                if (tarkovVersionInfo.FileVersion != null)
-                {
-                    EftVersion = tarkovVersionInfo.FileVersion;
-                }
-            }
         }
 
         public void LoadProfiles()

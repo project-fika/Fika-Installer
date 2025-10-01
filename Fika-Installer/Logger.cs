@@ -61,17 +61,9 @@ namespace Fika_Installer
 
     public class PageLogger : IPageLogger
     {
-        private readonly Action<string, bool> _logAction;
-
-        public PageLogger(Action<string, bool> logAction)
-        {
-            _logAction = logAction;
-        }
-
         public void Log(string message)
         {
             Console.WriteLine(message);
-            _logAction(message, false);
         }
 
         public void Confirm(string message)
@@ -82,7 +74,6 @@ namespace Fika_Installer
         public void Confirm(string message, bool confirm = false)
         {
             ConUtils.WriteConfirm(message, confirm);
-            _logAction(message, confirm);
         }
 
         public void Success(string message)
@@ -93,13 +84,11 @@ namespace Fika_Installer
         public void Success(string message, bool confirm = false)
         {
             ConUtils.WriteSuccess(message, confirm);
-            _logAction(message, confirm);
         }
 
         public void Warning(string message)
         {
             ConUtils.WriteWarning(message);
-            _logAction(message, false);
         }
 
         public void Error(string message)
@@ -110,7 +99,6 @@ namespace Fika_Installer
         public void Error(string message, bool confirm = false)
         {
             ConUtils.WriteError(message, confirm);
-            _logAction(message, confirm);
         }
     }
 

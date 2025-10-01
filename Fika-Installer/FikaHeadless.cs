@@ -9,7 +9,6 @@ namespace Fika_Installer
 {
     public class FikaHeadless
     {
-        private string _installDir;
         private SptInstance _sptInstance;
         private string _fikaServerModPath;
         private string _fikaServerScriptsFolder;
@@ -17,9 +16,8 @@ namespace Fika_Installer
         private string? _headlessProfileId;
         private CompositeLogger _logger;
 
-        public FikaHeadless(string installDir, SptInstance sptInstance, CompositeLogger logger)
+        public FikaHeadless(SptInstance sptInstance, CompositeLogger logger)
         {
-            _installDir = installDir;
             _sptInstance = sptInstance;
             _fikaServerModPath = Path.Combine(_sptInstance.SptPath, @"user\mods\fika-server");
             _fikaServerScriptsFolder = Path.Combine(_fikaServerModPath, @"assets\scripts");
@@ -129,7 +127,7 @@ namespace Fika_Installer
             return headlessProfile;
         }
 
-        public bool CopyProfileScript(string profileId)
+        public bool CopyProfileScript(string profileId, string installDir)
         {
             string headlessProfileStartScript = $"Start_headless_{profileId}.ps1";
 
@@ -137,7 +135,7 @@ namespace Fika_Installer
 
             if (File.Exists(headlessProfileStartScriptPath))
             {
-                string headlessProfileStartScriptDestPath = Path.Combine(_installDir, headlessProfileStartScript);
+                string headlessProfileStartScriptDestPath = Path.Combine(installDir, headlessProfileStartScript);
                 File.Copy(headlessProfileStartScriptPath, headlessProfileStartScriptDestPath, true);
             }
             else

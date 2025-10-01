@@ -2,20 +2,22 @@
 {
     public abstract class Page
     {
-        private int _totalLines = 0;
-
         public ILogger FileLogger { get; set; }
         public IPageLogger PageLogger { get; set; }
         public CompositeLogger CompositeLogger { get; private set; }
 
+        private int _pageStartPos = 0;
+
         public Page(ILogger logger)
         {
             FileLogger = logger;
-            PageLogger = new PageLogger(AddLines);
+            PageLogger = new PageLogger();
 
             CompositeLogger = new();
             CompositeLogger.AddLogger(FileLogger);
             CompositeLogger.AddLogger(PageLogger);
+
+            _pageStartPos = Console.CursorTop;
         }
 
         public void Show()
@@ -28,27 +30,15 @@
 
         public void Dispose()
         {
-            int currentLine = Console.CursorTop;
+            int currentPos = Console.CursorTop;
 
-            for (int i = 0; i < _totalLines; i++)
+            for (int i = currentPos; i >= _pageStartPos; i--)
             {
-                Console.SetCursorPosition(0, currentLine - i - 1);
+                Console.SetCursorPosition(0, i);
                 Console.Write(new string(' ', Console.WindowWidth));
             }
 
-            Console.SetCursorPosition(0, currentLine - _totalLines);
-
-            _totalLines = 0;
-        }
-
-        private void AddLines(string message, bool confirm = false)
-        {
-            _totalLines += message.Length / Console.BufferWidth + 1;
-
-            if (confirm)
-            {
-                _totalLines += 2;
-            }
+            Console.SetCursorPosition(0, _pageStartPos);
         }
     }
 }

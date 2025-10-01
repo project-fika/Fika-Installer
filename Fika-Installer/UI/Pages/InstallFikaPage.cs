@@ -15,15 +15,14 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            SptInstance sptInstance = new(installDir, CompositeLogger);
-            SptInstaller sptInstaller = new(installDir, sptInstance, CompositeLogger);
+            SptInstaller sptInstaller = new(installDir, CompositeLogger);
 
-            if (!sptInstaller.InstallSptRequirements())
+            if (!sptInstaller.InstallSptRequirements(installDir))
             {
                 return;
             }
 
-            FikaInstaller fikaInstaller = new(installDir, sptInstance, CompositeLogger);
+            FikaInstaller fikaInstaller = new(installDir, CompositeLogger);
 
             if (!fikaInstaller.InstallRelease(fikaCoreRelease))
             {

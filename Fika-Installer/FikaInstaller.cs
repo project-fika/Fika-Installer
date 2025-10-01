@@ -1,17 +1,13 @@
 ﻿using Fika_Installer.Models;
 using Fika_Installer.Models.GitHub;
-using Fika_Installer.Spt;
 using Fika_Installer.Utils;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 namespace Fika_Installer
 {
-    public partial class FikaInstaller(string installDir, SptInstance sptInstance, CompositeLogger logger)
+    public partial class FikaInstaller(string installDir, CompositeLogger logger)
     {
-        private string _installDir = installDir;
-        private SptInstance _sptInstance = sptInstance;
-        private CompositeLogger _logger = logger;
-
         [GeneratedRegex(@"Compatible with EFT ([\d.]+)", RegexOptions.IgnoreCase)]
         private static partial Regex CompatibleWithEftVersionRegex();
 
@@ -25,23 +21,22 @@ namespace Fika_Installer
             }
 
             string? compatibleEftVersion = GetCompatibleEftVersionFromRelease(gitHubRelease);
-            string? eftVersion = _sptInstance.EftVersion;
+            string? eftVersion = GetEftVersion();
 
             if (!string.IsNullOrEmpty(compatibleEftVersion) && !string.IsNullOrEmpty(eftVersion))
             {
                 if (compatibleEftVersion != eftVersion)
                 {
-                    _logger?.Error($"{gitHubRelease.Name} is not compatible with your Escape From Tarkov version.");
-                    _logger?.Log("");
-                    _logger?.Error($"Your version:         {eftVersion}");
-                    _logger?.Error($"Compatible version:   {compatibleEftVersion}", true);
+                    logger?.Error($"{gitHubRelease.Name} is not compatible with your Escape From Tarkov version.");
+                    logger?.Error($"Your version:         {eftVersion}");
+                    logger?.Error($"Compatible version:   {compatibleEftVersion}", true);
 
                     return false;
                 }
             }
             else
             {
-                _logger?.Warning($"Could not verify compatibility of {gitHubRelease.Name} with your Escape From Tarkov version.");
+                logger?.Warning($"Could not verify compatibility of {gitHubRelease.Name} with your Escape From Tarkov version.");
             }
 
             GitHubAsset? asset = gitHubRelease.Assets.FirstOrDefault(asset => asset.Name.Contains(fikaRelease.Name));
@@ -61,7 +56,7 @@ namespace Fika_Installer
             string assetReleaseName = asset.Name;
             string releaseZipFilePath = Path.Combine(tempDir, assetReleaseName);
 
-            if (!ExtractRelease(releaseZipFilePath, _installDir))
+            if (!ExtractRelease(releaseZipFilePath, installDir))
             {
                 return false;
             }
@@ -71,9 +66,9 @@ namespace Fika_Installer
 
         public bool UninstallFika()
         {
-            string bepInExPluginsPath = Path.Combine(_installDir, @"BepInEx\plugins");
-            string bepInExConfigPath = Path.Combine(_installDir, @"BepInEx\config");
-            string userModsPath = Path.Combine(_installDir, @"user\mods");
+            string bepInExPluginsPath = Path.Combine(installDir, @"BepInEx\plugins");
+            string bepInExConfigPath = Path.Combine(installDir, @"BepInEx\config");
+            string userModsPath = Path.Combine(installDir, @"user\mods");
 
             string[] filesToDelete =
             [
@@ -91,7 +86,7 @@ namespace Fika_Installer
                     if (File.Exists(file))
                     {
                         string fileName = Path.GetFileName(file);
-                        _logger?.Log($"Removing {fileName}...");
+                        logger?.Log($"Removing {fileName}...");
 
                         File.Delete(file);
                     }
@@ -99,7 +94,7 @@ namespace Fika_Installer
                     if (Directory.Exists(file))
                     {
                         string folderName = Path.GetFileName(file);
-                        _logger?.Log($"Removing {folderName}...");
+                        logger?.Log($"Removing {folderName}...");
 
                         Directory.Delete(file, true);
                     }
@@ -107,7 +102,7 @@ namespace Fika_Installer
             }
             catch (Exception ex)
             {
-                _logger?.Error($"An error occurred during uninstalling Fika: {ex.Message}", true);
+                logger?.Error($"An error occurred during uninstalling Fika: {ex.Message}", true);
                 return false;
             }
 
@@ -116,13 +111,21 @@ namespace Fika_Installer
 
         public void ApplyFirewallRules()
         {
-            _logger?.Log("Applying Fika firewall rules...");
+            logger?.Log("Applying Fika firewall rules...");
 
-            string sptServerPath = Path.Combine(_sptInstance.SptPath, SptConstants.ServerExeName);
-            FwUtils.CreateFirewallRule("Fika (SPT) - TCP 6969", "Inbound", "TCP", "6969", sptServerPath);
+            string sptServerPath = Path.Combine(installDir, SptConstants.ServerExeName);
 
-            string escapeFromTarkovPath = Path.Combine(_installDir, EftConstants.GameExeName);
-            FwUtils.CreateFirewallRule("Fika (Core) - UDP 25565", "Inbound", "UDP", "25565", escapeFromTarkovPath);
+            if (File.Exists(sptServerPath))
+            {
+                FwUtils.CreateFirewallRule("Fika (SPT) - TCP 6969", "Inbound", "TCP", "6969", sptServerPath);
+            }
+
+            string escapeFromTarkovPath = Path.Combine(installDir, EftConstants.GameExeName);
+
+            if (File.Exists(escapeFromTarkovPath))
+            {
+                FwUtils.CreateFirewallRule("Fika (Core) - UDP 25565", "Inbound", "UDP", "25565", escapeFromTarkovPath);
+            }
         }
 
         public string? GetCompatibleEftVersionFromRelease(GitHubRelease gitHubRelease)
@@ -137,19 +140,36 @@ namespace Fika_Installer
             return null;
         }
 
+        private string? GetEftVersion()
+        {
+            string eftExePath = Path.Combine(installDir, EftConstants.GameExeName);
+
+            if (File.Exists(eftExePath))
+            {
+                FileVersionInfo? tarkovVersionInfo = FileVersionInfo.GetVersionInfo(eftExePath);
+
+                if (tarkovVersionInfo.FileVersion != null)
+                {
+                    return tarkovVersionInfo.FileVersion;
+                }
+            }
+
+            return null;
+        }
+
         private bool DownloadRelease(GitHubAsset asset, string outputDir)
         {
             string assetName = asset.Name;
             string assetUrl = asset.BrowserDownloadUrl;
 
-            _logger?.Log($"Downloading {assetName}...");
+            logger?.Log($"Downloading {assetName}...");
 
             string outputPath = Path.Combine(outputDir, assetName);
-            bool downloadResult = FileUtils.DownloadFileWithProgress(assetUrl, outputPath, _logger);
+            bool downloadResult = FileUtils.DownloadFileWithProgress(assetUrl, outputPath, logger);
 
             if (!downloadResult)
             {
-                _logger?.Error($"An error occurred while downloading {assetName}.", true);
+                logger?.Error($"An error occurred while downloading {assetName}.", true);
             }
 
             return downloadResult;
@@ -161,14 +181,14 @@ namespace Fika_Installer
             {
                 string fileName = Path.GetFileName(releasePath);
 
-                _logger?.Log($"Extracting {fileName}...");
-                FileUtils.ExtractZip(releasePath, outputDir, _logger);
+                logger?.Log($"Extracting {fileName}...");
+                FileUtils.ExtractZip(releasePath, outputDir, logger);
 
                 return true;
             }
             catch (Exception ex)
             {
-                _logger?.Error($"An error occurred when extracting the ZIP archive: {ex.Message}", true);
+                logger?.Error($"An error occurred when extracting the ZIP archive: {ex.Message}", true);
             }
 
             return false;

@@ -5,18 +5,20 @@
         public string Message { get; }
         public List<MenuChoice> Choices { get; }
 
-        private int _totalLines = 0;
         private int _paginationIndex = 0;
+        private int _menuStartPos = 0;
 
         public Menu(List<MenuChoice> choices)
         {
             Choices = choices;
+            _menuStartPos = Console.CursorTop;
         }
 
         public Menu(string message, List<MenuChoice> choices)
         {
             Message = message;
             Choices = choices;
+            _menuStartPos = Console.CursorTop;
         }
 
         public MenuChoice Show()
@@ -30,7 +32,6 @@
                 {
                     Console.WriteLine(Message);
                     Console.WriteLine();
-                    _totalLines += 2;
                 }
 
                 int remaining = Choices.Count - _paginationIndex;
@@ -41,13 +42,11 @@
                 {
                     string choiceText = Choices[_paginationIndex + i].Text;
                     Console.WriteLine($"[{i + 1}] {choiceText}");
-                    _totalLines++;
                 }
 
                 if (paging)
                 {
                     Console.WriteLine($"[{nextChoiceNumber}] Next");
-                    _totalLines++;
                 }
 
                 ConsoleKeyInfo keyInfoPressed = Console.ReadKey(true);
@@ -92,17 +91,15 @@
 
         private void ClearMenu()
         {
-            int currentLine = Console.CursorTop;
+            int currentPos = Console.CursorTop;
 
-            for (int i = 0; i < _totalLines; i++)
+            for (int i = currentPos; i >= _menuStartPos; i--)
             {
-                Console.SetCursorPosition(0, currentLine - i - 1);
+                Console.SetCursorPosition(0, i);
                 Console.Write(new string(' ', Console.WindowWidth));
             }
 
-            Console.SetCursorPosition(0, currentLine - _totalLines);
-
-            _totalLines = 0;
+            Console.SetCursorPosition(0, _menuStartPos);
         }
     }
 }

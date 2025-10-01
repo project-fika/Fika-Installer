@@ -4,18 +4,16 @@ using SharpHDiffPatch.Core;
 
 namespace Fika_Installer.Spt
 {
-    public class SptInstaller(string installDir, SptInstance sptInstance, CompositeLogger? logger)
+    public class SptInstaller(string sptDir, CompositeLogger? logger)
     {
-        private string _installDir = installDir;
-        private SptInstance _sptInstance = sptInstance;
-        private string _sptPatchesDir = Path.Combine(installDir, @"SPT_Data\Launcher\Patches");
-        private CompositeLogger? _logger = logger;
+        //private string _sptPatchesDir = Path.Combine(installDir, @"SPT_Data\Launcher\Patches");
 
-        public bool InstallSpt(InstallMethod installType, bool headless = false)
+        public bool InstallSpt(string installDir, InstallMethod installType, bool headless = false)
         {
             List<string> excludeFiles =
             [   "FikaInstallerTemp",
                 "Fika-Installer.exe",
+                "fika-installer.log",
                 "SPTInstaller.exe",
                 "Logs"
             ];
@@ -36,21 +34,21 @@ namespace Fika_Installer.Spt
             {
                 excludeFiles.Add("EscapeFromTarkov_Data");
 
-                string escapeFromTarkovDataPath = Path.Combine(_sptInstance.SptPath, "EscapeFromTarkov_Data");
-                string escapeFromTarkovDataFikaPath = Path.Combine(_installDir, "EscapeFromTarkov_Data");
+                string escapeFromTarkovDataPath = Path.Combine(sptDir, "EscapeFromTarkov_Data");
+                string escapeFromTarkovDataFikaPath = Path.Combine(installDir, "EscapeFromTarkov_Data");
 
-                _logger?.Log("Creating symlink...");
+                logger?.Log("Creating symlink...");
 
-                if (!FileUtils.CreateFolderSymlink(escapeFromTarkovDataPath, escapeFromTarkovDataFikaPath, _logger))
+                if (!FileUtils.CreateFolderSymlink(escapeFromTarkovDataPath, escapeFromTarkovDataFikaPath, logger))
                 {
-                    _logger?.Error($"An error occurred when creating the symlink.", true);
+                    logger?.Error($"An error occurred when creating the symlink.", true);
                     return false;
                 }
             }
 
-            _logger?.Log("Copying SPT folder...");
+            logger?.Log("Copying SPT folder...");
 
-            if (!FileUtils.CopyFolderWithProgress(_sptInstance.SptPath, _installDir, excludeFiles, _logger))
+            if (!FileUtils.CopyFolderWithProgress(sptDir, installDir, excludeFiles, logger))
             {
                 return false;
             }
@@ -58,21 +56,21 @@ namespace Fika_Installer.Spt
             return true;
         }
 
-        public bool InstallSptRequirements()
+        public bool InstallSptRequirements(string installDir)
         {
-            _logger?.Log("Applying SPT patches...");
+            logger?.Log("Applying SPT patches...");
 
-            if (!ApplyPatches())
+            if (!ApplyPatches(installDir))
             {
                 logger?.Error("An error occurred when applying SPT patches. Please verify your SPT installation.", true);
                 return false;
             }
 
-            _logger?.Log("Cleaning up files...");
+            logger?.Log("Cleaning up files...");
 
-            if (!CleanupEftFiles())
+            if (!CleanupEftFiles(installDir))
             {
-                _logger?.Error("An error occurred when cleaning up files.", true);
+                logger?.Error("An error occurred when cleaning up files.", true);
                 return false;
             }
 
@@ -85,11 +83,13 @@ namespace Fika_Installer.Spt
          * AUTHORS:
          * waffle.lord
          */
-        public bool ApplyPatches()
+        public bool ApplyPatches(string installDir)
         {
+            string sptPatchesDir = Path.Combine(installDir, @"SPT_Data\Launcher\Patches");
+
             try
             {
-                string[] patchesPath = Directory.GetDirectories(_sptPatchesDir);
+                string[] patchesPath = Directory.GetDirectories(sptPatchesDir);
 
                 foreach (string patchPath in patchesPath)
                 {
@@ -106,7 +106,7 @@ namespace Fika_Installer.Spt
                         var relativefile = file.FullName.Substring(patchPath.Length).TrimStart('\\', '/');
 
                         // create a target file from the relative patch file while utilizing targetpath as the root directory.
-                        target = new FileInfo(Path.Combine(_installDir, relativefile.Replace(".delta", "")));
+                        target = new FileInfo(Path.Combine(installDir, relativefile.Replace(".delta", "")));
 
                         if (!ApplyPatch(target.FullName, file.FullName))
                         {
@@ -117,7 +117,7 @@ namespace Fika_Installer.Spt
             }
             catch (Exception ex)
             {
-                _logger?.Error(ex.Message);
+                logger?.Error(ex.Message);
                 return false;
             }
 
@@ -149,14 +149,14 @@ namespace Fika_Installer.Spt
             }
             catch
             {
-                _logger?.Error($"Failed to patch: {targetFile}!");
+                logger?.Error($"Failed to patch: {targetFile}!");
                 return false;
             }
 
             return true;
         }
 
-        public bool CleanupEftFiles()
+        public bool CleanupEftFiles(string installDir)
         {
             string[] filesToCleanup =
             [
@@ -173,7 +173,7 @@ namespace Fika_Installer.Spt
             {
                 foreach (string file in filesToCleanup)
                 {
-                    string filePath = Path.Combine(_installDir, file);
+                    string filePath = Path.Combine(installDir, file);
 
                     if (Directory.Exists(filePath))
                     {
@@ -188,7 +188,7 @@ namespace Fika_Installer.Spt
             }
             catch (Exception ex)
             {
-                _logger?.Error(ex.Message);
+                logger?.Error(ex.Message);
 
                 return false;
             }

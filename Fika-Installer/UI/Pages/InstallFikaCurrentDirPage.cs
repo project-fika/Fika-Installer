@@ -1,6 +1,5 @@
 ﻿using Fika_Installer.Models;
 using Fika_Installer.Spt;
-using System.Text.Json.Nodes;
 
 namespace Fika_Installer.UI.Pages
 {
@@ -8,15 +7,9 @@ namespace Fika_Installer.UI.Pages
     {
         public override void OnShow()
         {
-            SptInstance? sptInstance;
-
             bool isSptInstalled = SptUtils.IsSptInstalled(installDir);
 
-            if (isSptInstalled)
-            {
-                sptInstance = new(installDir, CompositeLogger);
-            }
-            else
+            if (!isSptInstalled)
             {
                 BrowseSptFolderPage browseSptFolderPage = new(FileLogger);
                 browseSptFolderPage.Show();
@@ -26,46 +19,32 @@ namespace Fika_Installer.UI.Pages
                     return;
                 }
 
-                sptInstance = new(browseSptFolderPage.Result, CompositeLogger);
-            }
+                Menu installMethodMenu = menuFactory.CreateInstallMethodMenu();
+                MenuChoice installTypeChoice = installMethodMenu.Show();
 
-            SptInstaller sptInstaller = new(installDir, sptInstance, CompositeLogger);
+                if (Enum.TryParse(installTypeChoice.Text, out InstallMethod installType))
+                {
+                    SptInstaller selectedSptInstaller = new(browseSptFolderPage.Result, CompositeLogger);
 
-            Menu installMethodMenu = menuFactory.CreateInstallMethodMenu();
-            MenuChoice installTypeChoice = installMethodMenu.Show();
-
-            if (Enum.TryParse(installTypeChoice.Text, out InstallMethod installType))
-            {
-                if (!sptInstaller.InstallSpt(installType))
+                    if (!selectedSptInstaller.InstallSpt(installDir, installType))
+                    {
+                        return;
+                    }
+                }
+                else
                 {
                     return;
                 }
-
-                // Change directory to installed SPT directory
-                sptInstance = new(installDir, CompositeLogger);
-
-                JsonObject? launcherConfig = sptInstance.GetLauncherConfig();
-
-                if (launcherConfig != null)
-                {
-                    launcherConfig["IsDevMode"] = true;
-                    launcherConfig["GamePath"] = installDir;
-                    launcherConfig["Server"]["Url"] = "https://127.0.0.1:6969";
-
-                    sptInstance.SetLauncherConfig(launcherConfig);
-                }
             }
-            else
+
+            SptInstaller sptInstaller = new(installDir, CompositeLogger);
+
+            if (!sptInstaller.InstallSptRequirements(installDir))
             {
                 return;
             }
 
-            if (!sptInstaller.InstallSptRequirements())
-            {
-                return;
-            }
-
-            FikaInstaller fikaInstaller = new(installDir, sptInstance, CompositeLogger);
+            FikaInstaller fikaInstaller = new(installDir, CompositeLogger);
 
             if (!fikaInstaller.InstallRelease(fikaCoreRelease))
             {

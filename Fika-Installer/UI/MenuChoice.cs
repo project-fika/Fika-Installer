@@ -4,6 +4,7 @@
     {
         public string Id { get; }
         public string Text { get; }
+
         private readonly Action _action;
 
         public MenuChoice(string text, Action action, string id = "")

@@ -15,13 +15,14 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            SptInstance sptInstance = new(installDir, CompositeLogger);
-            FikaInstaller fikaInstaller = new(installDir, sptInstance, CompositeLogger);
+            FikaInstaller fikaInstaller = new(installDir, CompositeLogger);
 
             if (!fikaInstaller.UninstallFika())
             {
                 return;
             }
+
+            SptInstance sptInstance = new(installDir, CompositeLogger);
 
             JsonObject? launcherConfig = sptInstance.GetLauncherConfig();
 
