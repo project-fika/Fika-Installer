@@ -4,10 +4,8 @@ using SharpHDiffPatch.Core;
 
 namespace Fika_Installer.Spt
 {
-    public class SptInstaller(string sptDir, CompositeLogger? logger)
+    public class SptInstaller(string sptDir)
     {
-        //private string _sptPatchesDir = Path.Combine(installDir, @"SPT_Data\Launcher\Patches");
-
         public bool InstallSpt(string installDir, InstallMethod installType, bool headless = false)
         {
             List<string> excludeFiles =
@@ -37,18 +35,18 @@ namespace Fika_Installer.Spt
                 string escapeFromTarkovDataPath = Path.Combine(sptDir, "EscapeFromTarkov_Data");
                 string escapeFromTarkovDataFikaPath = Path.Combine(installDir, "EscapeFromTarkov_Data");
 
-                logger?.Log("Creating symlink...");
+                Logger.Log("Creating symlink...");
 
-                if (!FileUtils.CreateFolderSymlink(escapeFromTarkovDataPath, escapeFromTarkovDataFikaPath, logger))
+                if (!FileUtils.CreateFolderSymlink(escapeFromTarkovDataPath, escapeFromTarkovDataFikaPath))
                 {
-                    logger?.Error($"An error occurred when creating the symlink.", true);
+                    Logger.Error($"An error occurred when creating the symlink.", true);
                     return false;
                 }
             }
 
-            logger?.Log("Copying SPT folder...");
+            Logger.Log("Copying SPT folder...");
 
-            if (!FileUtils.CopyFolderWithProgress(sptDir, installDir, excludeFiles, logger))
+            if (!FileUtils.CopyFolderWithProgress(sptDir, installDir, excludeFiles))
             {
                 return false;
             }
@@ -58,19 +56,19 @@ namespace Fika_Installer.Spt
 
         public bool InstallSptRequirements(string installDir)
         {
-            logger?.Log("Applying SPT patches...");
+            Logger.Log("Applying SPT patches...");
 
             if (!ApplyPatches(installDir))
             {
-                logger?.Error("An error occurred when applying SPT patches. Please verify your SPT installation.", true);
+                Logger.Error("An error occurred when applying SPT patches. Please verify your SPT installation.", true);
                 return false;
             }
 
-            logger?.Log("Cleaning up files...");
+            Logger.Log("Cleaning up files...");
 
             if (!CleanupEftFiles(installDir))
             {
-                logger?.Error("An error occurred when cleaning up files.", true);
+                Logger.Error("An error occurred when cleaning up files.", true);
                 return false;
             }
 
@@ -117,7 +115,7 @@ namespace Fika_Installer.Spt
             }
             catch (Exception ex)
             {
-                logger?.Error(ex.Message);
+                Logger.Error(ex.Message);
                 return false;
             }
 
@@ -149,7 +147,7 @@ namespace Fika_Installer.Spt
             }
             catch
             {
-                logger?.Error($"Failed to patch: {targetFile}!");
+                Logger.Error($"Failed to patch: {targetFile}!");
                 return false;
             }
 
@@ -188,7 +186,7 @@ namespace Fika_Installer.Spt
             }
             catch (Exception ex)
             {
-                logger?.Error(ex.Message);
+                Logger.Error(ex.Message);
 
                 return false;
             }

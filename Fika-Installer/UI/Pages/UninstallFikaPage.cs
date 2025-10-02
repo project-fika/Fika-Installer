@@ -3,7 +3,7 @@ using System.Text.Json.Nodes;
 
 namespace Fika_Installer.UI.Pages
 {
-    public class UninstallFikaPage(MenuFactory menuFactory, string installDir, ILogger logger) : Page(logger)
+    public class UninstallFikaPage(MenuFactory menuFactory, string installDir) : Page
     {
         public override void OnShow()
         {
@@ -15,14 +15,14 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            FikaInstaller fikaInstaller = new(installDir, CompositeLogger);
+            FikaInstaller fikaInstaller = new(installDir);
 
             if (!fikaInstaller.UninstallFika())
             {
                 return;
             }
 
-            SptInstance sptInstance = new(installDir, CompositeLogger);
+            SptInstance sptInstance = new(installDir);
 
             JsonObject? launcherConfig = sptInstance.GetLauncherConfig();
 
@@ -35,7 +35,7 @@ namespace Fika_Installer.UI.Pages
                 sptInstance.SetLauncherConfig(launcherConfig);
             }
 
-            CompositeLogger.Success("Fika uninstalled successfully!", true);
+            Logger.Success("Fika uninstalled successfully!", true);
         }
     }
 }

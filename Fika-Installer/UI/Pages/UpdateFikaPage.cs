@@ -2,11 +2,11 @@
 
 namespace Fika_Installer.UI.Pages
 {
-    public class UpdateFikaPage(string installDir, FikaRelease fikaCoreRelease, FikaRelease fikaServerRelease, ILogger logger) : Page(logger)
+    public class UpdateFikaPage(string installDir, FikaRelease fikaCoreRelease, FikaRelease fikaServerRelease) : Page
     {
         public override void OnShow()
         {
-            FikaInstaller fikaInstaller = new(installDir, CompositeLogger);
+            FikaInstaller fikaInstaller = new(installDir);
 
             if (!fikaInstaller.InstallRelease(fikaCoreRelease))
             {
@@ -18,7 +18,7 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            CompositeLogger.Success("Fika updated successfully!", true);
+            Logger.Success("Fika updated successfully!", true);
         }
     }
 }

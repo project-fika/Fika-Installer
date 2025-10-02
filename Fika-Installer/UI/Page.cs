@@ -2,21 +2,10 @@
 {
     public abstract class Page
     {
-        public ILogger FileLogger { get; set; }
-        public IPageLogger PageLogger { get; set; }
-        public CompositeLogger CompositeLogger { get; private set; }
-
         private int _pageStartPos = 0;
 
-        public Page(ILogger logger)
+        public Page()
         {
-            FileLogger = logger;
-            PageLogger = new PageLogger();
-
-            CompositeLogger = new();
-            CompositeLogger.AddLogger(FileLogger);
-            CompositeLogger.AddLogger(PageLogger);
-
             _pageStartPos = Console.CursorTop;
         }
 

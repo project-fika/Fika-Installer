@@ -8,7 +8,14 @@ namespace Fika_Installer
         [STAThread]
         static void Main(string[] args)
         {
-            Logger logger = new();
+            string installerDir = InstallerConstants.InstallerDir;
+
+            FileLogger logger = new(installerDir);
+            Logger.AddLogger(logger);
+
+            PageLogger pageLogger = new();
+            Logger.AddLogger(pageLogger);
+
             logger.Log("Fika-Installer Start");
 
             Console.Title = InstallerConstants.VersionString;
@@ -16,12 +23,11 @@ namespace Fika_Installer
 
             Header.Show();
 
-            string installerDirectory = InstallerConstants.InstallerDir;
             FikaRelease fikaCoreRelease = FikaConstants.FikaReleases["Fika.Core"];
             FikaRelease fikaServerRelease = FikaConstants.FikaReleases["Fika.Server"];
             FikaRelease fikaHeadlessRelease = FikaConstants.FikaReleases["Fika.Headless"];
 
-            MenuFactory menuFactory = new(installerDirectory, fikaCoreRelease, fikaServerRelease, fikaHeadlessRelease, logger);
+            MenuFactory menuFactory = new(installerDir, fikaCoreRelease, fikaServerRelease, fikaHeadlessRelease);
 
             while (true)
             {

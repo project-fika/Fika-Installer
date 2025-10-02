@@ -2,11 +2,11 @@
 
 namespace Fika_Installer.UI.Pages
 {
-    public class UpdateFikaHeadlessPage(string installDir, FikaRelease fikaCoreRelease, FikaRelease fikaHeadlessRelease, ILogger logger) : Page(logger)
+    public class UpdateFikaHeadlessPage(string installDir, FikaRelease fikaCoreRelease, FikaRelease fikaHeadlessRelease) : Page
     {
         public override void OnShow()
         {
-            FikaInstaller fikaInstaller = new(installDir, CompositeLogger);
+            FikaInstaller fikaInstaller = new(installDir);
 
             if (!fikaInstaller.InstallRelease(fikaHeadlessRelease))
             {
@@ -18,7 +18,7 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            CompositeLogger.Success("Fika Headless updated successfully!", true);
+            Logger.Success("Fika Headless updated successfully!", true);
         }
     }
 }

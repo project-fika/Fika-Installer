@@ -2,7 +2,7 @@
 
 namespace Fika_Installer
 {
-    public interface ILogger
+    public interface IFileLogger
     {
         void Log(string message);
         void Success(string message);
@@ -10,20 +10,20 @@ namespace Fika_Installer
         void Error(string message);
     }
 
-    public interface IPageLogger : ILogger
+    public interface IPageLogger : IFileLogger
     {
         void Confirm(string message, bool confirm = false);
         void Success(string message, bool confirm = false);
         void Error(string message, bool confirm = false);
     }
 
-    public class Logger : ILogger
+    public class FileLogger : IFileLogger
     {
         private readonly string _logFilePath;
 
-        public Logger()
+        public FileLogger(string dir)
         {
-            _logFilePath = Path.Combine(InstallerConstants.InstallerDir, "fika-installer.log");
+            _logFilePath = Path.Combine(dir, "fika-installer.log");
         }
 
         public void Log(string message)
@@ -102,16 +102,16 @@ namespace Fika_Installer
         }
     }
 
-    public class CompositeLogger : ILogger
+    public static class Logger
     {
-        private readonly List<ILogger> _loggers = [];
+        private static readonly List<IFileLogger> _loggers = [];
 
-        public void AddLogger(ILogger logger)
+        public static void AddLogger(IFileLogger logger)
         {
             _loggers.Add(logger);
         }
 
-        public void Log(string message)
+        public static void Log(string message)
         {
             foreach (var logger in _loggers)
             {
@@ -126,7 +126,7 @@ namespace Fika_Installer
             }
         }
 
-        public void Confirm(string message)
+        public static void Confirm(string message)
         {
             foreach (var logger in _loggers)
             {
@@ -141,12 +141,12 @@ namespace Fika_Installer
             }
         }
 
-        public void Success(string message)
+        public static void Success(string message)
         {
             Success(message, false);
         }
 
-        public void Success(string message, bool confirm = false)
+        public static void Success(string message, bool confirm = false)
         {
             foreach (var logger in _loggers)
             {
@@ -161,7 +161,7 @@ namespace Fika_Installer
             }
         }
 
-        public void Warning(string message)
+        public static void Warning(string message)
         {
             foreach (var logger in _loggers)
             {
@@ -176,12 +176,12 @@ namespace Fika_Installer
             }
         }
 
-        public void Error(string message)
+        public static void Error(string message)
         {
             Error(message, false);
         }
 
-        public void Error(string message, bool confirm = false)
+        public static void Error(string message, bool confirm = false)
         {
             foreach (var logger in _loggers)
             {

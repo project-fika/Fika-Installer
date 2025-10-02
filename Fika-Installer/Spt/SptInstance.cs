@@ -8,19 +8,16 @@ namespace Fika_Installer.Spt
     {
         private string _profilesPath;
         private string _launcherConfigPath;
-        private CompositeLogger? _logger;
 
         public string SptPath { get; private set; }
         public string ServerExePath { get; private set; }
         public string EftExePath { get; private set; }
-        public string EftVersion { get; private set; } = "";
         public List<SptProfile> Profiles { get; private set; } = [];
 
-        public SptInstance(string sptPath, CompositeLogger? logger)
+        public SptInstance(string sptPath)
         {
             _profilesPath = Path.Combine(sptPath, @"user\profiles");
             _launcherConfigPath = Path.Combine(sptPath, @"user\launcher\config.json");
-            _logger = logger;
 
             SptPath = sptPath;
             ServerExePath = Path.Combine(sptPath, SptConstants.ServerExeName);
@@ -57,7 +54,7 @@ namespace Fika_Installer.Spt
             {
                 try
                 {
-                    JsonObject? profile = JsonUtils.DeserializeFromFile(sptProfilePath, _logger);
+                    JsonObject? profile = JsonUtils.DeserializeFromFile(sptProfilePath);
 
                     if (profile != null)
                     {
@@ -79,7 +76,7 @@ namespace Fika_Installer.Spt
                 }
                 catch (Exception ex)
                 {
-                    _logger?.Error($"Failed to read profile: {sptProfilePath}. {ex.Message}");
+                    Logger.Error($"Failed to read profile: {sptProfilePath}. {ex.Message}");
                 }
             }
 
@@ -100,7 +97,7 @@ namespace Fika_Installer.Spt
         {
             if (File.Exists(_launcherConfigPath))
             {
-                JsonObject? launcherConfig = JsonUtils.DeserializeFromFile(_launcherConfigPath, _logger);
+                JsonObject? launcherConfig = JsonUtils.DeserializeFromFile(_launcherConfigPath);
 
                 return launcherConfig;
             }
@@ -112,7 +109,7 @@ namespace Fika_Installer.Spt
         {
             try
             {
-                JsonUtils.SerializeToFile(_launcherConfigPath, launcherConfig, _logger);
+                JsonUtils.SerializeToFile(_launcherConfigPath, launcherConfig);
 
                 return true;
             }

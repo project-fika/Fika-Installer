@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace Fika_Installer
 {
-    public partial class FikaInstaller(string installDir, CompositeLogger logger)
+    public partial class FikaInstaller(string installDir)
     {
         [GeneratedRegex(@"Compatible with EFT ([\d.]+)", RegexOptions.IgnoreCase)]
         private static partial Regex CompatibleWithEftVersionRegex();
@@ -27,16 +27,16 @@ namespace Fika_Installer
             {
                 if (compatibleEftVersion != eftVersion)
                 {
-                    logger?.Error($"{gitHubRelease.Name} is not compatible with your Escape From Tarkov version.");
-                    logger?.Error($"Your version:         {eftVersion}");
-                    logger?.Error($"Compatible version:   {compatibleEftVersion}", true);
+                    Logger.Error($"{gitHubRelease.Name} is not compatible with your Escape From Tarkov version.");
+                    Logger.Error($"Your version:         {eftVersion}");
+                    Logger.Error($"Compatible version:   {compatibleEftVersion}", true);
 
                     return false;
                 }
             }
             else
             {
-                logger?.Warning($"Could not verify compatibility of {gitHubRelease.Name} with your Escape From Tarkov version.");
+                Logger.Warning($"Could not verify compatibility of {gitHubRelease.Name} with your Escape From Tarkov version.");
             }
 
             GitHubAsset? asset = gitHubRelease.Assets.FirstOrDefault(asset => asset.Name.Contains(fikaRelease.Name));
@@ -86,7 +86,7 @@ namespace Fika_Installer
                     if (File.Exists(file))
                     {
                         string fileName = Path.GetFileName(file);
-                        logger?.Log($"Removing {fileName}...");
+                        Logger.Log($"Removing {fileName}...");
 
                         File.Delete(file);
                     }
@@ -94,7 +94,7 @@ namespace Fika_Installer
                     if (Directory.Exists(file))
                     {
                         string folderName = Path.GetFileName(file);
-                        logger?.Log($"Removing {folderName}...");
+                        Logger.Log($"Removing {folderName}...");
 
                         Directory.Delete(file, true);
                     }
@@ -102,7 +102,7 @@ namespace Fika_Installer
             }
             catch (Exception ex)
             {
-                logger?.Error($"An error occurred during uninstalling Fika: {ex.Message}", true);
+                Logger.Error($"An error occurred during uninstalling Fika: {ex.Message}", true);
                 return false;
             }
 
@@ -111,7 +111,7 @@ namespace Fika_Installer
 
         public void ApplyFirewallRules()
         {
-            logger?.Log("Applying Fika firewall rules...");
+            Logger.Log("Applying Fika firewall rules...");
 
             string sptServerPath = Path.Combine(installDir, SptConstants.ServerExeName);
 
@@ -162,14 +162,14 @@ namespace Fika_Installer
             string assetName = asset.Name;
             string assetUrl = asset.BrowserDownloadUrl;
 
-            logger?.Log($"Downloading {assetName}...");
+            Logger.Log($"Downloading {assetName}...");
 
             string outputPath = Path.Combine(outputDir, assetName);
-            bool downloadResult = FileUtils.DownloadFileWithProgress(assetUrl, outputPath, logger);
+            bool downloadResult = FileUtils.DownloadFileWithProgress(assetUrl, outputPath);
 
             if (!downloadResult)
             {
-                logger?.Error($"An error occurred while downloading {assetName}.", true);
+                Logger.Error($"An error occurred while downloading {assetName}.", true);
             }
 
             return downloadResult;
@@ -181,14 +181,14 @@ namespace Fika_Installer
             {
                 string fileName = Path.GetFileName(releasePath);
 
-                logger?.Log($"Extracting {fileName}...");
-                FileUtils.ExtractZip(releasePath, outputDir, logger);
+                Logger.Log($"Extracting {fileName}...");
+                FileUtils.ExtractZip(releasePath, outputDir);
 
                 return true;
             }
             catch (Exception ex)
             {
-                logger?.Error($"An error occurred when extracting the ZIP archive: {ex.Message}", true);
+                Logger.Error($"An error occurred when extracting the ZIP archive: {ex.Message}", true);
             }
 
             return false;

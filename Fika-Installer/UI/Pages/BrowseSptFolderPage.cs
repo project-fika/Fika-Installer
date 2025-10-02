@@ -3,13 +3,13 @@ using Fika_Installer.Utils;
 
 namespace Fika_Installer.UI.Pages
 {
-    public class BrowseSptFolderPage(ILogger logger) : Page(logger)
+    public class BrowseSptFolderPage : Page
     {
         public string? Result;
 
         public override void OnShow()
         {
-            CompositeLogger.Confirm("SPT not detected. Press ENTER to browse for your SPT folder.");
+            Logger.Confirm("SPT not detected. Press ENTER to browse for your SPT folder.");
 
             string sptDir = FileUtils.BrowseFolder("Please select your SPT installation folder.");
 
@@ -20,7 +20,7 @@ namespace Fika_Installer.UI.Pages
 
             if (!SptUtils.IsSptInstalled(sptDir))
             {
-                CompositeLogger.Error("The selected folder does not contain a valid SPT installation.", true);
+                Logger.Error("The selected folder does not contain a valid SPT installation.", true);
                 return;
             }
 
