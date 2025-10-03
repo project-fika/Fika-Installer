@@ -2,7 +2,7 @@
 
 namespace Fika_Installer
 {
-    public interface IFileLogger
+    public interface ILogger
     {
         void Log(string message);
         void Success(string message);
@@ -10,21 +10,16 @@ namespace Fika_Installer
         void Error(string message);
     }
 
-    public interface IPageLogger : IFileLogger
+    public interface IPageLogger : ILogger
     {
         void Confirm(string message, bool confirm = false);
         void Success(string message, bool confirm = false);
         void Error(string message, bool confirm = false);
     }
 
-    public class FileLogger : IFileLogger
+    public class FileLogger(string dir) : ILogger
     {
-        private readonly string _logFilePath;
-
-        public FileLogger(string dir)
-        {
-            _logFilePath = Path.Combine(dir, "fika-installer.log");
-        }
+        private readonly string _logFilePath = Path.Combine(dir, "fika-installer.log");
 
         public void Log(string message)
         {
@@ -104,9 +99,9 @@ namespace Fika_Installer
 
     public static class Logger
     {
-        private static readonly List<IFileLogger> _loggers = [];
+        private static readonly List<ILogger> _loggers = [];
 
-        public static void AddLogger(IFileLogger logger)
+        public static void AddLogger(ILogger logger)
         {
             _loggers.Add(logger);
         }
