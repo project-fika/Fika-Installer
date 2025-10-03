@@ -5,24 +5,24 @@
         public string Message { get; }
         public List<MenuChoice> Choices { get; }
 
-        private int _paginationIndex = 0;
         private int _menuStartPos = 0;
+        private int _paginationIndex = 0;
 
         public Menu(List<MenuChoice> choices)
         {
             Choices = choices;
-            _menuStartPos = Console.CursorTop;
         }
 
         public Menu(string message, List<MenuChoice> choices)
         {
             Message = message;
             Choices = choices;
-            _menuStartPos = Console.CursorTop;
         }
 
         public MenuChoice Show()
         {
+            _menuStartPos = Console.CursorTop;
+
             while (true)
             {
                 bool paging = Choices.Count > 9;

@@ -4,13 +4,10 @@
     {
         private int _pageStartPos = 0;
 
-        public Page()
-        {
-            _pageStartPos = Console.CursorTop;
-        }
-
         public void Show()
         {
+            _pageStartPos = Console.CursorTop;
+
             OnShow();
             Dispose();
         }

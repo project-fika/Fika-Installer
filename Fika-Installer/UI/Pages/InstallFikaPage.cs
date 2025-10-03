@@ -1,5 +1,6 @@
 ﻿using Fika_Installer.Models;
 using Fika_Installer.Spt;
+using Fika_Installer.Utils;
 
 namespace Fika_Installer.UI.Pages
 {
@@ -11,7 +12,7 @@ namespace Fika_Installer.UI.Pages
 
             if (!isSptInstalled)
             {
-                Logger.Error("SPT not found. Please place Fika-Installer inside your SPT directory.", true);
+                ConUtils.WriteError("SPT not found. Please place Fika-Installer inside your SPT directory.", true);
                 return;
             }
 

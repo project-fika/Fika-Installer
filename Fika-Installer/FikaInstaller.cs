@@ -9,7 +9,7 @@ namespace Fika_Installer
     public partial class FikaInstaller(string installDir)
     {
         [GeneratedRegex(@"Compatible with EFT ([\d.]+)", RegexOptions.IgnoreCase)]
-        private static partial Regex CompatibleWithEftVersionRegex();
+        private partial Regex CompatibleWithEftVersionRegex();
 
         public bool InstallRelease(FikaRelease fikaRelease)
         {
@@ -21,14 +21,14 @@ namespace Fika_Installer
             }
 
             string? compatibleEftVersion = GetCompatibleEftVersionFromRelease(gitHubRelease);
-            string? eftVersion = GetEftVersion();
+            string? currentEftVersion = GetEftVersion();
 
-            if (!string.IsNullOrEmpty(compatibleEftVersion) && !string.IsNullOrEmpty(eftVersion))
+            if (!string.IsNullOrEmpty(compatibleEftVersion) && !string.IsNullOrEmpty(currentEftVersion))
             {
-                if (compatibleEftVersion != eftVersion)
+                if (compatibleEftVersion != currentEftVersion)
                 {
                     Logger.Error($"{gitHubRelease.Name} is not compatible with your Escape From Tarkov version.");
-                    Logger.Error($"Your version:         {eftVersion}");
+                    Logger.Error($"Your version:         {currentEftVersion}");
                     Logger.Error($"Compatible version:   {compatibleEftVersion}", true);
 
                     return false;
@@ -102,7 +102,7 @@ namespace Fika_Installer
             }
             catch (Exception ex)
             {
-                Logger.Error($"An error occurred during uninstalling Fika: {ex.Message}", true);
+                Logger.Error($"An error occurred while uninstalling Fika: {ex.Message}", true);
                 return false;
             }
 

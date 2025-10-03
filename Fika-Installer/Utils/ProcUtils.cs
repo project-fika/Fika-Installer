@@ -6,7 +6,7 @@ namespace Fika_Installer.Utils
     {
         public static bool ExecuteSilent(string path, string args)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo
+            ProcessStartInfo startInfo = new()
             {
                 FileName = path,
                 WorkingDirectory = Path.GetDirectoryName(path),
@@ -15,9 +15,19 @@ namespace Fika_Installer.Utils
                 CreateNoWindow = true
             };
 
-            Process process = new();
-            process.StartInfo = startInfo;
-            process.Start();
+            Process process = new()
+            {
+                StartInfo = startInfo
+            };
+
+            try
+            {
+                process.Start();
+            }
+            catch 
+            { 
+                return false;
+            }
 
             process.WaitForExit();
 
