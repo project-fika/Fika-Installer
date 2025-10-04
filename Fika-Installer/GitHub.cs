@@ -23,7 +23,7 @@ namespace Fika_Installer
 
         public static string GetHttpContent(string url)
         {
-            using (HttpClient client = new HttpClient())
+            using (HttpClient client = new())
             {
                 client.DefaultRequestHeaders.UserAgent.ParseAdd("FikaInstaller");
 

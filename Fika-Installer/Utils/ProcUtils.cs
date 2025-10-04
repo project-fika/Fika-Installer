@@ -24,8 +24,8 @@ namespace Fika_Installer.Utils
             {
                 process.Start();
             }
-            catch 
-            { 
+            catch
+            {
                 return false;
             }
 
