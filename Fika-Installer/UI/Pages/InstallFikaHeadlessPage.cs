@@ -91,7 +91,7 @@ namespace Fika_Installer.UI.Pages
 
             if (!isSptInstalled)
             {
-                SptInstaller selectedSptInstaller = new(sptInstance.SptPath);
+                SptInstaller selectedSptInstaller = new(sptInstance.GamePath);
 
                 if (!selectedSptInstaller.InstallSpt(installDir, _installMethod, true))
                 {

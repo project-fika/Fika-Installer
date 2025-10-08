@@ -23,6 +23,7 @@ namespace Fika_Installer
             string? compatibleEftVersion = GetCompatibleEftVersionFromRelease(gitHubRelease);
             string? currentEftVersion = GetEftVersion();
 
+            /*
             if (!string.IsNullOrEmpty(compatibleEftVersion) && !string.IsNullOrEmpty(currentEftVersion))
             {
                 if (compatibleEftVersion != currentEftVersion)
@@ -38,7 +39,7 @@ namespace Fika_Installer
             {
                 Logger.Warning($"Could not verify compatibility of {gitHubRelease.Name} with your Escape From Tarkov version.");
             }
-
+            */
             GitHubAsset? asset = gitHubRelease.Assets.FirstOrDefault(asset => asset.Name.Contains(fikaRelease.Name));
 
             if (asset == null)
@@ -68,7 +69,7 @@ namespace Fika_Installer
         {
             string bepInExPluginsPath = Path.Combine(installDir, @"BepInEx\plugins");
             string bepInExConfigPath = Path.Combine(installDir, @"BepInEx\config");
-            string userModsPath = Path.Combine(installDir, @"user\mods");
+            string userModsPath = Path.Combine(installDir, @"SPT\user\mods");
 
             string[] filesToDelete =
             [
@@ -113,7 +114,8 @@ namespace Fika_Installer
         {
             Logger.Log("Applying Fika firewall rules...");
 
-            string sptServerPath = Path.Combine(installDir, SptConstants.ServerExeName);
+            string sptPath = Path.Combine(installDir, "SPT");
+            string sptServerPath = Path.Combine(sptPath, SptConstants.ServerExeName);
 
             if (File.Exists(sptServerPath))
             {

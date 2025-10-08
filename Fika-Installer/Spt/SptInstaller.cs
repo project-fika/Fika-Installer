@@ -20,20 +20,22 @@ namespace Fika_Installer.Spt
             {
                 excludeFiles.AddRange(
                 [
-                    SptConstants.ServerExeName,
-                    SptConstants.LauncherExeName,
-                    @"SPT_Data\Server",
-                    @"SPT_Data\Launcher\Locales",
-                    "user",
+                    @$"SPT\{SptConstants.ServerExeName}",
+                    @$"SPT\{SptConstants.LauncherExeName}",
+                    @"SPT\SPT_Data\Server",
+                    @"SPT\SPT_Data\Launcher\Locales",
+                    @"SPT\user",
                 ]);
             }
 
             if (installType == InstallMethod.Symlink)
             {
-                excludeFiles.Add("EscapeFromTarkov_Data");
+                string eftDataFolderName = "EscapeFromTarkov_Data";
+                
+                excludeFiles.Add(eftDataFolderName);
 
-                string escapeFromTarkovDataPath = Path.Combine(sptDir, "EscapeFromTarkov_Data");
-                string escapeFromTarkovDataFikaPath = Path.Combine(installDir, "EscapeFromTarkov_Data");
+                string escapeFromTarkovDataPath = Path.Combine(sptDir, eftDataFolderName);
+                string escapeFromTarkovDataFikaPath = Path.Combine(installDir, eftDataFolderName);
 
                 Logger.Log("Creating symlink...");
 
@@ -83,7 +85,7 @@ namespace Fika_Installer.Spt
          */
         public bool ApplyPatches(string installDir)
         {
-            string sptPatchesDir = Path.Combine(installDir, @"SPT_Data\Launcher\Patches");
+            string sptPatchesDir = Path.Combine(installDir, @"SPT\SPT_Data\Launcher\Patches");
 
             try
             {

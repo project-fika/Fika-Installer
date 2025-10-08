@@ -11,20 +11,20 @@ namespace Fika_Installer.UI.Pages
         {
             ConUtils.WriteConfirm("SPT not detected. Press ENTER to browse for your SPT folder.");
 
-            string sptDir = FileUtils.BrowseFolder("Please select your SPT installation folder.");
+            string selectedFolderPath = FileUtils.BrowseFolder("Please select your SPT installation folder.");
 
-            if (string.IsNullOrEmpty(sptDir))
+            if (string.IsNullOrEmpty(selectedFolderPath))
             {
                 return;
             }
 
-            if (!SptUtils.IsSptInstalled(sptDir))
+            if (!SptUtils.IsSptInstalled(selectedFolderPath))
             {
                 ConUtils.WriteError("The selected folder does not contain a valid SPT installation.", true);
                 return;
             }
 
-            Result = sptDir;
+            Result = selectedFolderPath;
         }
     }
 }
