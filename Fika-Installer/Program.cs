@@ -1,5 +1,4 @@
-﻿using Fika_Installer.Models;
-using Fika_Installer.UI;
+﻿using Fika_Installer.UI;
 
 namespace Fika_Installer
 {
@@ -23,11 +22,7 @@ namespace Fika_Installer
 
             Header.Show();
 
-            FikaRelease fikaCoreRelease = FikaConstants.FikaReleases["Fika.Core"];
-            FikaRelease fikaServerRelease = FikaConstants.FikaReleases["Fika.Server"];
-            FikaRelease fikaHeadlessRelease = FikaConstants.FikaReleases["Fika.Headless"];
-
-            MenuFactory menuFactory = new(installerDir, fikaCoreRelease, fikaServerRelease, fikaHeadlessRelease);
+            MenuFactory menuFactory = new(installerDir);
 
             while (true)
             {

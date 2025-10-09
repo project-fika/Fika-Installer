@@ -1,10 +1,11 @@
 ﻿using Fika_Installer.Models;
+using Fika_Installer.Models.Fika;
 using Fika_Installer.Spt;
 using System.Text.Json.Nodes;
 
 namespace Fika_Installer.UI.Pages
 {
-    public class InstallFikaCurrentDirPage(MenuFactory menuFactory, string installDir, FikaRelease fikaCoreRelease, FikaRelease fikaServerRelease) : Page
+    public class InstallFikaCurrentDirPage(MenuFactory menuFactory, string installDir, List<FikaRelease> releaseList) : Page
     {
         public override void OnShow()
         {
@@ -59,14 +60,12 @@ namespace Fika_Installer.UI.Pages
 
             FikaInstaller fikaInstaller = new(installDir);
 
-            if (!fikaInstaller.InstallRelease(fikaCoreRelease))
+            foreach (FikaRelease release in releaseList)
             {
-                return;
-            }
-
-            if (!fikaInstaller.InstallRelease(fikaServerRelease))
-            {
-                return;
+                if (!fikaInstaller.InstallRelease(release))
+                {
+                    return;
+                }
             }
 
             fikaInstaller.ApplyFirewallRules();

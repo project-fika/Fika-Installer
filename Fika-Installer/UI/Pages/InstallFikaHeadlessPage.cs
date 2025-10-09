@@ -1,10 +1,11 @@
 ﻿using Fika_Installer.Models;
+using Fika_Installer.Models.Fika;
 using Fika_Installer.Models.Spt;
 using Fika_Installer.Spt;
 
 namespace Fika_Installer.UI.Pages
 {
-    public class InstallFikaHeadlessPage(MenuFactory menuFactory, string installDir, FikaRelease fikaCoreRelease, FikaRelease fikaHeadlessRelease) : Page
+    public class InstallFikaHeadlessPage(MenuFactory menuFactory, string installDir, List<FikaRelease> releaseList) : Page
     {
         private bool _createHeadlessProfile = false;
         private string? _headlessProfileId;
@@ -68,15 +69,13 @@ namespace Fika_Installer.UI.Pages
 
             if (_createHeadlessProfile)
             {
-                SptProfile? headlessProfile = fikaHeadless.CreateHeadlessProfile();
+                _headlessProfileId = fikaHeadless.CreateHeadlessProfile();
 
-                if (headlessProfile == null)
+                if (string.IsNullOrEmpty(_headlessProfileId))
                 {
                     Logger.Error("An error occurred while creating the headless profile. Please check the SPT Server logs.", true);
                     return;
                 }
-
-                _headlessProfileId = headlessProfile.ProfileId;
             }
 
             if (string.IsNullOrEmpty(_headlessProfileId))
@@ -84,7 +83,7 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            if (!fikaHeadless.CopyProfileScript(_headlessProfileId, installDir))
+            if (!fikaHeadless.CopyHeadlessConfig(_headlessProfileId, installDir))
             {
                 return;
             }
@@ -108,14 +107,12 @@ namespace Fika_Installer.UI.Pages
 
             FikaInstaller fikaInstaller = new(installDir);
 
-            if (!fikaInstaller.InstallRelease(fikaHeadlessRelease))
+            foreach (FikaRelease release in releaseList)
             {
-                return;
-            }
-
-            if (!fikaInstaller.InstallRelease(fikaCoreRelease))
-            {
-                return;
+                if (!fikaInstaller.InstallRelease(release))
+                {
+                    return;
+                }
             }
 
             fikaInstaller.ApplyFirewallRules();

@@ -1,4 +1,4 @@
-﻿using Fika_Installer.Models;
+﻿using Fika_Installer.Models.Fika;
 using Fika_Installer.Models.GitHub;
 using Fika_Installer.Utils;
 using System.Diagnostics;
@@ -22,7 +22,7 @@ namespace Fika_Installer
 
             string? compatibleEftVersion = GetCompatibleEftVersionFromRelease(gitHubRelease);
             string? currentEftVersion = GetEftVersion();
-            
+
             if (!string.IsNullOrEmpty(compatibleEftVersion) && !string.IsNullOrEmpty(currentEftVersion))
             {
                 if (compatibleEftVersion != currentEftVersion)
@@ -34,11 +34,7 @@ namespace Fika_Installer
                     return false;
                 }
             }
-            else
-            {
-                Logger.Warning($"Could not verify compatibility of {gitHubRelease.Name} with your Escape From Tarkov version.");
-            }
-            
+
             GitHubAsset? asset = gitHubRelease.Assets.FirstOrDefault(asset => asset.Name.Contains(fikaRelease.Name));
 
             if (asset == null)

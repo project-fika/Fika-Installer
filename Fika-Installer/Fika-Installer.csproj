@@ -25,6 +25,12 @@
   </Target>
 
   <ItemGroup>
+    <Compile Remove="Build\**" />
+    <EmbeddedResource Remove="Build\**" />
+    <None Remove="Build\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="SharpHDiffPatch.Core" Version="2.3.3" />
   </ItemGroup>
 </Project>

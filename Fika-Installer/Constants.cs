@@ -1,4 +1,4 @@
-﻿using Fika_Installer.Models;
+﻿using Fika_Installer.Models.Fika;
 using System.Reflection;
 
 namespace Fika_Installer
@@ -14,14 +14,25 @@ namespace Fika_Installer
         public static readonly string InstallerTempDir = Path.Combine(InstallerDir, "FikaInstallerTemp");
     }
 
-    public static class FikaConstants
+    public static class FikaReleaseList
     {
-        public static readonly Dictionary<string, FikaRelease> FikaReleases = new()
-        {
-            { "Fika.Core", new("Fika.Release", "https://api.github.com/repos/project-fika/Fika-Plugin/releases/latest") },
-            { "Fika.Headless", new("Fika.Headless", "https://api.github.com/repos/project-fika/Fika-Headless/releases/latest") },
-            { "Fika.Server", new("fika-server", "https://api.github.com/repos/project-fika/Fika-Server/releases/latest") }
-        };
+        private static readonly FikaRelease _fikaCoreRelease = new("Fika.Release", "https://api.github.com/repos/project-fika/Fika-Plugin/releases/latest");
+        private static readonly FikaRelease _fikaHeadlessRelease = new("Fika.Headless", "https://api.github.com/repos/project-fika/Fika-Headless/releases/latest");
+        private static readonly FikaRelease _fikaServerRelease = new("fika-server", "https://api.github.com/repos/project-fika/Fika-Server/releases/latest");
+        private static readonly FikaRelease _fikaHeadlessManagerRelease = new("Fika.Headless.Manager", "https://api.github.com/repos/project-fika/Fika-Headless-Manager/releases/latest");
+
+        public static readonly List<FikaRelease> StandardFika =
+        [
+            _fikaCoreRelease,
+            _fikaServerRelease
+        ];
+
+        public static readonly List<FikaRelease> HeadlessFika =
+        [
+            _fikaCoreRelease,
+            _fikaHeadlessRelease,
+            _fikaHeadlessManagerRelease
+        ];
     }
 
     public static class SptConstants

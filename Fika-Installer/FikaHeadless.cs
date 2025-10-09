@@ -1,5 +1,4 @@
-﻿using Fika_Installer.Models;
-using Fika_Installer.Models.Spt;
+﻿using Fika_Installer.Models.Fika;
 using Fika_Installer.Spt;
 using Fika_Installer.Utils;
 using System.Diagnostics;
@@ -13,7 +12,10 @@ namespace Fika_Installer
         private string _fikaServerModPath;
         private string _fikaServerScriptsFolder;
         private string _fikaServerConfigPath;
+        private SptServer _sptServer;
+        private int _headlessProfileCount;
         private string? _headlessProfileId;
+        private JsonObject? _fikaServerConfig;
 
         public FikaHeadless(SptInstance sptInstance)
         {
@@ -21,13 +23,16 @@ namespace Fika_Installer
             _fikaServerModPath = Path.Combine(_sptInstance.SptPath, @"user\mods\fika-server");
             _fikaServerScriptsFolder = Path.Combine(_fikaServerModPath, @"assets\scripts");
             _fikaServerConfigPath = Path.Combine(_fikaServerModPath, @"assets\configs\fika.jsonc");
+            _sptServer = new(sptInstance);
+            _headlessProfileCount = _sptInstance.GetHeadlessProfiles().Count;
         }
 
-        public SptProfile? CreateHeadlessProfile()
+        public string? CreateHeadlessProfile()
         {
             string sptProcessName = "SPT.Server";
             bool sptServerRunning = Process.GetProcessesByName(sptProcessName).Length != 0;
 
+            /* Make sure SPT server is not running */
             if (sptServerRunning)
             {
                 Logger.Warning("SPT Server is currently running. Please close it to continue the installation.");
@@ -39,106 +44,88 @@ namespace Fika_Installer
                 sptServerRunning = Process.GetProcessesByName(sptProcessName).Length != 0;
             }
 
-            if (!IsFikaServerConfigFound())
-            {
-                Logger.Log("Generating Fika config file... This may take a moment.");
+            _fikaServerConfig = LoadFikaServerConfig();
 
-                MatchAction serverIsRunningMatchAction = new(
-                    @"Server is running",
-                    (process, match) =>
-                    {
-                        if (!process.HasExited)
-                        {
-                            process.Kill();
-                        }
-                    });
-
-                SptServer generateFikaCfgSptServer = new(_sptInstance);
-
-                generateFikaCfgSptServer.AddMatchAction(serverIsRunningMatchAction);
-                generateFikaCfgSptServer.KillAfter = TimeSpan.FromMinutes(2);
-
-                generateFikaCfgSptServer.Start();
-
-                if (!serverIsRunningMatchAction.Success)
-                {
-                    return null;
-                }
-
-                if (!IsFikaServerConfigFound())
-                {
-                    return null;
-                }
-            }
-
-            JsonObject? fikaServerConfig = JsonUtils.DeserializeFromFile(_fikaServerConfigPath);
-
-            if (fikaServerConfig == null)
+            if (_fikaServerConfig == null)
             {
                 return null;
             }
 
-            int headlessProfileCount = _sptInstance.GetHeadlessProfiles().Count;
+            /* Ensure that we set the headless amount to the current value to avoid generating multiple headless profiles */
+            SetHeadlessAmount(_fikaServerConfig, _headlessProfileCount);
 
-            fikaServerConfig["headless"]["profiles"]["amount"] = headlessProfileCount + 1;
+            JsonNode? httpConfig = _fikaServerConfig["server"]?["SPT"]?["http"];
+            string? ip = httpConfig?["ip"]?.GetValue<string>();
+            int? port = httpConfig?["port"]?.GetValue<int>();
+            string? apiKey = _fikaServerConfig["server"]?["apiKey"]?.GetValue<string>();
 
-            if (!JsonUtils.SerializeToFile(_fikaServerConfigPath, fikaServerConfig))
+            if (string.IsNullOrEmpty(ip) || port == null || string.IsNullOrEmpty(apiKey))
             {
+                Logger.Error("Invalid configuration in Fika Server config file.");
                 return null;
             }
 
-            Logger.Log("Creating headless profile... This may take a moment.");
-
-            MatchAction createHeadlessProfileMatchAction = new(
-                @"Start_headless_([^.]+)",
-                (process, match) =>
-                {
-                    _headlessProfileId = match.Groups[1].Value;
-
-                    if (!process.HasExited)
-                    {
-                        process.Kill();
-                    }
-                });
-
-            SptServer createHeadlessProfileSptServer = new(_sptInstance);
-
-            createHeadlessProfileSptServer.AddMatchAction(createHeadlessProfileMatchAction);
-            createHeadlessProfileSptServer.KillAfter = TimeSpan.FromMinutes(2);
-
-            createHeadlessProfileSptServer.Start();
-
-            if (!createHeadlessProfileMatchAction.Success)
+            if (ip == "0.0.0.0")
             {
+                ip = "127.0.0.1";
+            }
+
+            Logger.Log("Creating headless profile...");
+
+            /* Start SPT Server and test the connection */
+            _sptServer.Start();
+
+            FikaRequestHandler fikaRequestHandler = new($"https://{ip}:{port}", apiKey);
+
+            if (!fikaRequestHandler.TestConnection(TimeSpan.FromMinutes(1)))
+            {
+                Logger.Error("Connection to SPT Server failed.");
                 return null;
             }
+
+            /* Create headless profile and stop SPT Server */
+
+            CreateHeadlessProfileResponse createHeadlessProfileResponse;
+
+            try
+            {
+                createHeadlessProfileResponse = fikaRequestHandler.CreateHeadlessProfile();
+                _headlessProfileId = createHeadlessProfileResponse.Id;
+            }
+            catch(Exception ex)
+            {
+                Logger.Error($"An error occurred when requesting CreateHeadlessProfile. {ex.Message}");
+            }
+
+            Thread.Sleep(TimeSpan.FromSeconds(1));
+
+            _sptServer.Stop();
 
             if (string.IsNullOrEmpty(_headlessProfileId))
             {
                 return null;
             }
 
-            _sptInstance.LoadProfiles();
+            /* Increase the headless profile amount */
+            SetHeadlessAmount(_fikaServerConfig, _headlessProfileCount + 1);
 
-            SptProfile? headlessProfile = _sptInstance.GetProfile(_headlessProfileId);
-
-            return headlessProfile;
+            return _headlessProfileId;
         }
 
-        public bool CopyProfileScript(string profileId, string destPath)
+        public bool CopyHeadlessConfig(string profileId, string destPath)
         {
-            string headlessProfileStartScript = $"Start_headless_{profileId}.ps1";
+            string headlessConfigFileName = "HeadlessConfig.json";
+            string headlessConfigDirPath = Path.Combine(_fikaServerScriptsFolder, profileId);
+            string headlessConfigPath = Path.Combine(headlessConfigDirPath, headlessConfigFileName);
 
-            string headlessProfileStartScriptPath = Path.Combine(_fikaServerScriptsFolder, headlessProfileStartScript);
-
-            if (File.Exists(headlessProfileStartScriptPath))
+            if (File.Exists(headlessConfigPath))
             {
-                string headlessProfileStartScriptDestPath = Path.Combine(destPath, headlessProfileStartScript);
-                File.Copy(headlessProfileStartScriptPath, headlessProfileStartScriptDestPath, true);
+                string headlessConfigDestPath = Path.Combine(destPath, headlessConfigFileName);
+                File.Copy(headlessConfigPath, headlessConfigDestPath, true);
             }
             else
             {
-                Logger.Error($"Couldn't find {headlessProfileStartScript}!", true);
+                Logger.Error($"Couldn't find HeadlessConfig.json for profile id {profileId}!", true);
                 return false;
             }
 
@@ -151,9 +138,60 @@ namespace Fika_Installer
             return Directory.Exists(_fikaServerModPath);
         }
 
-        public bool IsFikaServerConfigFound()
+        private JsonObject? LoadFikaServerConfig()
+        {
+            if (!IsFikaServerConfigFound())
+            {
+                Logger.Log("Generating Fika config file...");
+
+                _sptServer.Start();
+
+                bool fikaConfigCreated = WaitForFikaConfigCreate(TimeSpan.FromMinutes(1));
+
+                _sptServer.Stop();
+
+                if (!fikaConfigCreated)
+                {
+                    Logger.Error("Fika Server config file was not found.");
+                    return null;
+                }
+            }
+
+            return JsonUtils.DeserializeFromFile(_fikaServerConfigPath);
+        }
+
+        private bool SetHeadlessAmount(JsonObject fikaServerConfig, int amount)
+        {
+            fikaServerConfig["headless"]["profiles"]["amount"] = amount;
+
+            return JsonUtils.SerializeToFile(_fikaServerConfigPath, fikaServerConfig);
+        }
+
+        private bool IsFikaServerConfigFound()
         {
             return File.Exists(_fikaServerConfigPath);
+        }
+
+        private bool WaitForFikaConfigCreate(TimeSpan timeout)
+        {
+            TimeSpan checkInterval = TimeSpan.FromMilliseconds(500);
+
+            DateTime startTime = DateTime.Now;
+
+            while (!IsFikaServerConfigFound())
+            {
+                Thread.Sleep(checkInterval);
+
+                if (DateTime.Now - startTime > timeout)
+                {
+                    return false;
+                }
+            }
+
+            // Extra sleep time to ensure the file is fully saved
+            Thread.Sleep(TimeSpan.FromSeconds(1));
+
+            return true;
         }
     }
 }

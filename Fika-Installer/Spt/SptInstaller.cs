@@ -31,7 +31,7 @@ namespace Fika_Installer.Spt
             if (installType == InstallMethod.Symlink)
             {
                 string eftDataFolderName = "EscapeFromTarkov_Data";
-                
+
                 excludeFiles.Add(eftDataFolderName);
 
                 string escapeFromTarkovDataPath = Path.Combine(sptDir, eftDataFolderName);

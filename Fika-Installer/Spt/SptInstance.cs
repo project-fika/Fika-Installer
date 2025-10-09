@@ -62,13 +62,12 @@ namespace Fika_Installer.Spt
 
                         string? id = profile["info"]?["id"]?.GetValue<string>();
                         string? username = profile["info"]?["username"]?.GetValue<string>();
-                        string? password = profile["info"]?["password"]?.GetValue<string>();
 
-                        if (id != null && username != null && password != null)
+                        if (id != null && username != null)
                         {
-                            headless = password == "fika-headless";
+                            headless = username.StartsWith("headless_");
 
-                            SptProfile sptProfile = new(id, username, password, headless);
+                            SptProfile sptProfile = new(id, username, headless);
 
                             return sptProfile;
                         }
