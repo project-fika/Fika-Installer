@@ -1,4 +1,5 @@
 ﻿using Fika_Installer.Models.Fika;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
@@ -17,7 +18,7 @@ namespace Fika_Installer
 
             _httpClient = new(handler);
             _httpClient.BaseAddress = new Uri(url);
-            _httpClient.DefaultRequestHeaders.Add("Auth", apiKey);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
             _httpClient.DefaultRequestHeaders.Add("requestcompressed", "0");
         }
 
@@ -52,12 +53,12 @@ namespace Fika_Installer
 
         public CreateHeadlessProfileResponse CreateHeadlessProfile()
         {
-            return PostJson<object, CreateHeadlessProfileResponse>("/post/createheadlessprofile", null);
+            return PostJson<object, CreateHeadlessProfileResponse>("fika/api/createheadlessprofile", null);
         }
 
         public bool Ping()
         {
-            return GetNoBodyResponse("/get/heartbeat");
+            return GetNoBodyResponse("fika/api/heartbeat");
         }
 
         private byte[] EncodeBody<T>(T o)
