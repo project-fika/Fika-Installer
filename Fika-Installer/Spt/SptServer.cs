@@ -14,7 +14,7 @@ namespace Fika_Installer.Spt
                 FileName = ExePath,
                 WorkingDirectory = Path.GetDirectoryName(ExePath),
                 UseShellExecute = false,
-                CreateNoWindow = false
+                CreateNoWindow = true
             };
 
             Process = new()

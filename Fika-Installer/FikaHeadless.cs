@@ -15,7 +15,6 @@ namespace Fika_Installer
         private SptServer _sptServer;
         private int _headlessProfileCount;
         private string? _headlessProfileId;
-        private JsonObject? _fikaServerConfig;
 
         public FikaHeadless(SptInstance sptInstance)
         {
@@ -44,20 +43,20 @@ namespace Fika_Installer
                 sptServerRunning = Process.GetProcessesByName(sptProcessName).Length != 0;
             }
 
-            _fikaServerConfig = LoadFikaServerConfig();
+            JsonObject? fikaServerConfig = LoadFikaServerConfig();
 
-            if (_fikaServerConfig == null)
+            if (fikaServerConfig == null)
             {
                 return null;
             }
 
             /* Ensure that we set the headless amount to the current value to avoid generating multiple headless profiles */
-            SetHeadlessAmount(_fikaServerConfig, _headlessProfileCount);
+            SetHeadlessAmount(fikaServerConfig, _headlessProfileCount);
 
-            JsonNode? httpConfig = _fikaServerConfig["server"]?["SPT"]?["http"];
+            JsonNode? httpConfig = fikaServerConfig["server"]?["SPT"]?["http"];
             string? ip = httpConfig?["ip"]?.GetValue<string>();
             int? port = httpConfig?["port"]?.GetValue<int>();
-            string? apiKey = _fikaServerConfig["server"]?["apiKey"]?.GetValue<string>();
+            string? apiKey = fikaServerConfig["server"]?["apiKey"]?.GetValue<string>();
 
             if (string.IsNullOrEmpty(ip) || port == null || string.IsNullOrEmpty(apiKey))
             {
@@ -84,7 +83,6 @@ namespace Fika_Installer
             }
 
             /* Create headless profile and stop SPT Server */
-
             CreateHeadlessProfileResponse createHeadlessProfileResponse;
 
             try
@@ -107,7 +105,7 @@ namespace Fika_Installer
             }
 
             /* Increase the headless profile amount */
-            SetHeadlessAmount(_fikaServerConfig, _headlessProfileCount + 1);
+            SetHeadlessAmount(fikaServerConfig, _headlessProfileCount + 1);
 
             return _headlessProfileId;
         }
