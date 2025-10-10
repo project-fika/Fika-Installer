@@ -95,9 +95,10 @@ namespace Fika_Installer.Fika
                 Logger.Error($"An error occurred when requesting CreateHeadlessProfile. {ex.Message}");
             }
 
-            _sptServer.Stop();
-
+            // Might not be necessary
             Thread.Sleep(TimeSpan.FromSeconds(1));
+
+            _sptServer.Stop();
 
             if (string.IsNullOrEmpty(_headlessProfileId))
             {
