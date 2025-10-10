@@ -1,6 +1,5 @@
 ﻿using Fika_Installer.Fika;
 using Fika_Installer.Models;
-using Fika_Installer.Models.Fika;
 using Fika_Installer.Models.Spt;
 using Fika_Installer.Spt;
 

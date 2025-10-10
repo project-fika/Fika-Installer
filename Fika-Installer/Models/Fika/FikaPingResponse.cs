@@ -7,10 +7,10 @@ namespace Fika_Installer.Models.Fika
         Success,
         Failed
     }
-    
+
     public class FikaPingResponse(PingResult pingResult, HttpStatusCode httpStatusCode)
     {
-        public PingResult PingResult {  get; set; } = pingResult;
+        public PingResult PingResult { get; set; } = pingResult;
         public HttpStatusCode HttpStatusCode { get; set; } = httpStatusCode;
     }
 }

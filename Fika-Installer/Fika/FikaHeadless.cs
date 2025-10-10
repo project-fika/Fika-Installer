@@ -90,7 +90,7 @@ namespace Fika_Installer.Fika
                 createHeadlessProfileResponse = fikaRequestHandler.CreateHeadlessProfile();
                 _headlessProfileId = createHeadlessProfileResponse.Id;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Logger.Error($"An error occurred when requesting CreateHeadlessProfile. {ex.Message}");
             }

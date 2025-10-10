@@ -1,6 +1,4 @@
-﻿using Fika_Installer.Models.Fika;
-
-namespace Fika_Installer.UI.Pages
+﻿namespace Fika_Installer.UI.Pages
 {
     public class UpdateFikaPage(string installDir) : Page
     {

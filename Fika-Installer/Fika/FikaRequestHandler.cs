@@ -69,7 +69,7 @@ namespace Fika_Installer.Fika
             try
             {
                 HttpResponseMessage httpResponse = GetHttpResponse("fika/api/heartbeat");
-                
+
                 return new(PingResult.Success, httpResponse.StatusCode);
             }
             catch
