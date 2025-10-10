@@ -5,7 +5,7 @@ using System.Text.Json.Nodes;
 
 namespace Fika_Installer.UI.Pages
 {
-    public class InstallFikaCurrentDirPage(MenuFactory menuFactory, string installDir, List<FikaRelease> releaseList) : Page
+    public class InstallFikaCurrentDirPage(MenuFactory menuFactory, string installDir) : Page
     {
         public override void OnShow()
         {
@@ -60,12 +60,9 @@ namespace Fika_Installer.UI.Pages
 
             FikaInstaller fikaInstaller = new(installDir);
 
-            foreach (FikaRelease release in releaseList)
+            if (!fikaInstaller.InstallReleaseList(FikaReleaseLists.StandardFika))
             {
-                if (!fikaInstaller.InstallRelease(release))
-                {
-                    return;
-                }
+                return;
             }
 
             fikaInstaller.ApplyFirewallRules();

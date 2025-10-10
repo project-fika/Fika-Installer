@@ -2,18 +2,15 @@
 
 namespace Fika_Installer.UI.Pages
 {
-    public class UpdateFikaHeadlessPage(string installDir, List<FikaRelease> releaseList) : Page
+    public class UpdateFikaHeadlessPage(string installDir) : Page
     {
         public override void OnShow()
         {
             FikaInstaller fikaInstaller = new(installDir);
 
-            foreach (FikaRelease release in releaseList)
+            if (!fikaInstaller.InstallReleaseList(FikaReleaseLists.HeadlessFika))
             {
-                if (!fikaInstaller.InstallRelease(release))
-                {
-                    return;
-                }
+                return;
             }
 
             Logger.Success("Fika Headless updated successfully!", true);

@@ -7,28 +7,36 @@ namespace Fika_Installer
         [STAThread]
         static void Main(string[] args)
         {
-            string installerDir = InstallerConstants.InstallerDir;
+            SetupLoggers();
 
-            FileLogger logger = new(installerDir);
-            Logger.AddLogger(logger);
-
-            PageLogger pageLogger = new();
-            Logger.AddLogger(pageLogger);
-
-            logger.Log("Fika-Installer Start");
-
-            Console.Title = InstallerConstants.VersionString;
-            Console.CursorVisible = false;
+            SetupConsole();
 
             Header.Show();
 
-            MenuFactory menuFactory = new(installerDir);
+            MenuFactory menuFactory = new(Installer.CurrentDir);
 
             while (true)
             {
                 Menu mainMenu = menuFactory.CreateMainMenu();
                 mainMenu.Show();
             }
+        }
+
+        static void SetupLoggers()
+        {
+            string logFilePath = Path.Combine(Installer.CurrentDir, "fika-installer.log");
+
+            FileLogger fileLogger = new(logFilePath);
+            Logger.AddLogger(fileLogger);
+
+            PageLogger pageLogger = new();
+            Logger.AddLogger(pageLogger);
+        }
+
+        static void SetupConsole()
+        {
+            Console.Title = Installer.VersionString;
+            Console.CursorVisible = false;
         }
     }
 }

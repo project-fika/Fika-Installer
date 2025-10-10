@@ -4,7 +4,7 @@ using Fika_Installer.Utils;
 using System.Diagnostics;
 using System.Text.Json.Nodes;
 
-namespace Fika_Installer
+namespace Fika_Installer.Fika
 {
     public class FikaHeadless
     {

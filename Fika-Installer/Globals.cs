@@ -3,18 +3,18 @@ using System.Reflection;
 
 namespace Fika_Installer
 {
-    public static class InstallerConstants
+    public static class Installer
     {
         private static readonly string _versionMajor = Assembly.GetExecutingAssembly().GetName().Version.Major.ToString();
         private static readonly string _versionMinor = Assembly.GetExecutingAssembly().GetName().Version.Minor.ToString();
         private static readonly string _versionBuild = Assembly.GetExecutingAssembly().GetName().Version.Build.ToString();
 
         public static readonly string VersionString = $"Fika Installer v{_versionMajor}.{_versionMinor}.{_versionBuild}";
-        public static readonly string InstallerDir = Directory.GetCurrentDirectory();
-        public static readonly string InstallerTempDir = Path.Combine(InstallerDir, "FikaInstallerTemp");
+        public static readonly string CurrentDir = Directory.GetCurrentDirectory();
+        public static readonly string TempDir = Path.Combine(CurrentDir, "FikaInstallerTemp");
     }
 
-    public static class FikaReleaseList
+    public static class FikaReleaseLists
     {
         private static readonly FikaRelease _fikaCoreRelease = new("Fika.Release", "https://api.github.com/repos/project-fika/Fika-Plugin/releases/latest");
         private static readonly FikaRelease _fikaHeadlessRelease = new("Fika.Headless", "https://api.github.com/repos/project-fika/Fika-Headless/releases/latest");

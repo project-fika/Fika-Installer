@@ -2,18 +2,15 @@
 
 namespace Fika_Installer.UI.Pages
 {
-    public class UpdateFikaPage(string installDir, List<FikaRelease> releaseList) : Page
+    public class UpdateFikaPage(string installDir) : Page
     {
         public override void OnShow()
         {
             FikaInstaller fikaInstaller = new(installDir);
 
-            foreach (FikaRelease release in releaseList)
+            if (!fikaInstaller.InstallReleaseList(FikaReleaseLists.StandardFika))
             {
-                if (!fikaInstaller.InstallRelease(release))
-                {
-                    return;
-                }
+                return;
             }
 
             Logger.Success("Fika updated successfully!", true);

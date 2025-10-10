@@ -17,10 +17,8 @@ namespace Fika_Installer
         void Error(string message, bool confirm = false);
     }
 
-    public class FileLogger(string dir) : ILogger
+    public class FileLogger(string logFilePath) : ILogger
     {
-        private readonly string _logFilePath = Path.Combine(dir, "fika-installer.log");
-
         public void Log(string message)
         {
             WriteLog(message, "INFO");
@@ -48,7 +46,7 @@ namespace Fika_Installer
                 string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
                 string logEntry = $"{timestamp} [{severity}] {message}\r\n";
 
-                File.AppendAllText(_logFilePath, logEntry);
+                File.AppendAllText(logFilePath, logEntry);
             }
             catch { }
         }

@@ -1,11 +1,12 @@
-﻿using Fika_Installer.Models;
+﻿using Fika_Installer.Fika;
+using Fika_Installer.Models;
 using Fika_Installer.Models.Fika;
 using Fika_Installer.Models.Spt;
 using Fika_Installer.Spt;
 
 namespace Fika_Installer.UI.Pages
 {
-    public class InstallFikaHeadlessPage(MenuFactory menuFactory, string installDir, List<FikaRelease> releaseList) : Page
+    public class InstallFikaHeadlessPage(MenuFactory menuFactory, string installDir) : Page
     {
         private bool _createHeadlessProfile = false;
         private string? _headlessProfileId;
@@ -107,12 +108,9 @@ namespace Fika_Installer.UI.Pages
 
             FikaInstaller fikaInstaller = new(installDir);
 
-            foreach (FikaRelease release in releaseList)
+            if (!fikaInstaller.InstallReleaseList(FikaReleaseLists.HeadlessFika))
             {
-                if (!fikaInstaller.InstallRelease(release))
-                {
-                    return;
-                }
+                return;
             }
 
             fikaInstaller.ApplyFirewallRules();

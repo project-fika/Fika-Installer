@@ -4,7 +4,7 @@ using Fika_Installer.Utils;
 
 namespace Fika_Installer.UI.Pages
 {
-    public class InstallFikaPage(string installDir, List<FikaRelease> releaseList) : Page
+    public class InstallFikaPage(string installDir) : Page
     {
         public override void OnShow()
         {
@@ -25,12 +25,9 @@ namespace Fika_Installer.UI.Pages
 
             FikaInstaller fikaInstaller = new(installDir);
 
-            foreach (FikaRelease release in releaseList)
+            if (!fikaInstaller.InstallReleaseList(FikaReleaseLists.StandardFika))
             {
-                if (!fikaInstaller.InstallRelease(release))
-                {
-                    return;
-                }
+                return;
             }
 
             fikaInstaller.ApplyFirewallRules();

@@ -11,6 +11,19 @@ namespace Fika_Installer
         [GeneratedRegex(@"Compatible with EFT ([\d.]+)", RegexOptions.IgnoreCase)]
         private partial Regex CompatibleWithEftVersionRegex();
 
+        public bool InstallReleaseList(List<FikaRelease> fikaReleaseList)
+        {
+            foreach (FikaRelease release in fikaReleaseList)
+            {
+                if (!InstallRelease(release))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public bool InstallRelease(FikaRelease fikaRelease)
         {
             GitHubRelease? gitHubRelease = GitHub.GetReleaseFromUrl(fikaRelease.Url);
@@ -42,7 +55,7 @@ namespace Fika_Installer
                 return false;
             }
 
-            string tempDir = InstallerConstants.InstallerTempDir;
+            string tempDir = Installer.TempDir;
 
             if (!DownloadRelease(asset, tempDir))
             {
