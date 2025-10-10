@@ -9,19 +9,19 @@ namespace Fika_Installer.Spt
         private string _profilesPath;
         private string _launcherConfigPath;
 
+        public string GamePath { get; private set; }
         public string SptPath { get; private set; }
         public string ServerExePath { get; private set; }
-        public string EftExePath { get; private set; }
         public List<SptProfile> Profiles { get; private set; } = [];
 
-        public SptInstance(string sptPath)
+        public SptInstance(string path)
         {
-            _profilesPath = Path.Combine(sptPath, @"user\profiles");
-            _launcherConfigPath = Path.Combine(sptPath, @"user\launcher\config.json");
+            GamePath = path;
+            SptPath = Path.Combine(path, "SPT");
+            ServerExePath = Path.Combine(SptPath, SptConstants.ServerExeName);
 
-            SptPath = sptPath;
-            ServerExePath = Path.Combine(sptPath, SptConstants.ServerExeName);
-            EftExePath = Path.Combine(sptPath, EftConstants.GameExeName);
+            _profilesPath = Path.Combine(SptPath, @"user\profiles");
+            _launcherConfigPath = Path.Combine(SptPath, @"user\launcher\config.json");
 
             LoadProfiles();
         }
@@ -62,13 +62,12 @@ namespace Fika_Installer.Spt
 
                         string? id = profile["info"]?["id"]?.GetValue<string>();
                         string? username = profile["info"]?["username"]?.GetValue<string>();
-                        string? password = profile["info"]?["password"]?.GetValue<string>();
 
-                        if (id != null && username != null && password != null)
+                        if (id != null && username != null)
                         {
-                            headless = password == "fika-headless";
+                            headless = username.StartsWith("headless_");
 
-                            SptProfile sptProfile = new(id, username, password, headless);
+                            SptProfile sptProfile = new(id, username, headless);
 
                             return sptProfile;
                         }

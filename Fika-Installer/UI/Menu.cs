@@ -10,6 +10,7 @@
 
         public Menu(List<MenuChoice> choices)
         {
+            Message = "";
             Choices = choices;
         }
 

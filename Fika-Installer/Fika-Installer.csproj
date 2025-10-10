@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net9.0-windows</TargetFramework>
@@ -11,6 +10,25 @@
 	<ApplicationManifest>app.manifest</ApplicationManifest>
 	<AssemblyVersion>1.1.4</AssemblyVersion>
   </PropertyGroup>
+	
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+	<PublishSingleFile>true</PublishSingleFile>
+	<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+	<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+	<PublishDir>$(ProjectDir)Build\</PublishDir>
+  </PropertyGroup>
+
+  <Target Name="TriggerPublish" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="Publish" />
+  </Target>
+
+  <ItemGroup>
+    <Compile Remove="Build\**" />
+    <EmbeddedResource Remove="Build\**" />
+    <None Remove="Build\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="SharpHDiffPatch.Core" Version="2.3.3" />

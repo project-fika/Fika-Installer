@@ -1,4 +1,4 @@
-﻿using Fika_Installer.Models;
+﻿using Fika_Installer.Models.Fika;
 using Fika_Installer.Models.GitHub;
 using Fika_Installer.Utils;
 using System.Diagnostics;
@@ -10,6 +10,19 @@ namespace Fika_Installer
     {
         [GeneratedRegex(@"Compatible with EFT ([\d.]+)", RegexOptions.IgnoreCase)]
         private partial Regex CompatibleWithEftVersionRegex();
+
+        public bool InstallReleaseList(List<FikaRelease> fikaReleaseList)
+        {
+            foreach (FikaRelease release in fikaReleaseList)
+            {
+                if (!InstallRelease(release))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
 
         public bool InstallRelease(FikaRelease fikaRelease)
         {
@@ -34,19 +47,16 @@ namespace Fika_Installer
                     return false;
                 }
             }
-            else
-            {
-                Logger.Warning($"Could not verify compatibility of {gitHubRelease.Name} with your Escape From Tarkov version.");
-            }
 
-            GitHubAsset? asset = gitHubRelease.Assets.FirstOrDefault(asset => asset.Name.Contains(fikaRelease.Name));
+            // Ensure to grab the correct asset and file name ends with ".zip" for win release
+            GitHubAsset? asset = gitHubRelease.Assets.FirstOrDefault(asset => asset.Name.Contains(fikaRelease.Name) && asset.Name.EndsWith(".zip"));
 
             if (asset == null)
             {
                 return false;
             }
 
-            string tempDir = InstallerConstants.InstallerTempDir;
+            string tempDir = Installer.TempDir;
 
             if (!DownloadRelease(asset, tempDir))
             {
@@ -66,17 +76,18 @@ namespace Fika_Installer
 
         public bool UninstallFika()
         {
-            string bepInExPluginsPath = Path.Combine(installDir, @"BepInEx\plugins");
+            string fikaBepInExPluginsPath = Path.Combine(installDir, @"BepInEx\plugins\Fika");
             string bepInExConfigPath = Path.Combine(installDir, @"BepInEx\config");
-            string userModsPath = Path.Combine(installDir, @"user\mods");
+            string userModsPath = Path.Combine(installDir, @"SPT\user\mods");
 
             string[] filesToDelete =
             [
-                Path.Combine(bepInExPluginsPath, "Fika.Core.dll"),
-                Path.Combine(bepInExPluginsPath, "Fika.Headless.dll"),
+                fikaBepInExPluginsPath,
                 Path.Combine(bepInExConfigPath, "com.fika.core.cfg"),
                 Path.Combine(bepInExConfigPath, "com.fika.headless.cfg"),
                 Path.Combine(userModsPath, "fika-server"),
+                Path.Combine(installDir, "HeadlessConfig.json"),
+                Path.Combine(installDir, "FikaHeadlessManager.exe")
             ];
 
             try
@@ -113,7 +124,8 @@ namespace Fika_Installer
         {
             Logger.Log("Applying Fika firewall rules...");
 
-            string sptServerPath = Path.Combine(installDir, SptConstants.ServerExeName);
+            string sptPath = Path.Combine(installDir, "SPT");
+            string sptServerPath = Path.Combine(sptPath, SptConstants.ServerExeName);
 
             if (File.Exists(sptServerPath))
             {

@@ -9,31 +9,30 @@ namespace Fika_Installer.Spt
         public bool InstallSpt(string installDir, InstallMethod installType, bool headless = false)
         {
             List<string> excludeFiles =
-            [   "FikaInstallerTemp",
+            [   
+                "FikaInstallerTemp",
                 "Fika-Installer.exe",
                 "fika-installer.log",
                 "SPTInstaller.exe",
-                "Logs"
+                "Logs",
             ];
 
             if (headless)
             {
                 excludeFiles.AddRange(
                 [
-                    SptConstants.ServerExeName,
-                    SptConstants.LauncherExeName,
-                    @"SPT_Data\Server",
-                    @"SPT_Data\Launcher\Locales",
-                    "user",
+                    "SPT",
                 ]);
             }
 
             if (installType == InstallMethod.Symlink)
             {
-                excludeFiles.Add("EscapeFromTarkov_Data");
+                string eftDataFolderName = "EscapeFromTarkov_Data";
 
-                string escapeFromTarkovDataPath = Path.Combine(sptDir, "EscapeFromTarkov_Data");
-                string escapeFromTarkovDataFikaPath = Path.Combine(installDir, "EscapeFromTarkov_Data");
+                excludeFiles.Add(eftDataFolderName);
+
+                string escapeFromTarkovDataPath = Path.Combine(sptDir, eftDataFolderName);
+                string escapeFromTarkovDataFikaPath = Path.Combine(installDir, eftDataFolderName);
 
                 Logger.Log("Creating symlink...");
 
@@ -49,6 +48,17 @@ namespace Fika_Installer.Spt
             if (!FileUtils.CopyFolderWithProgress(sptDir, installDir, excludeFiles))
             {
                 return false;
+            }
+
+            if (headless)
+            {
+                string sptPatchesDir = Path.Combine(sptDir, @"SPT\SPT_Data\Launcher\Patches");
+                string sptPatchesDirDest = Path.Combine(installDir, @"SPT\SPT_Data\Launcher\Patches");
+
+                if (!FileUtils.CopyFolderWithProgress(sptPatchesDir, sptPatchesDirDest, []))
+                {
+                    return false;
+                }
             }
 
             return true;
@@ -83,7 +93,7 @@ namespace Fika_Installer.Spt
          */
         public bool ApplyPatches(string installDir)
         {
-            string sptPatchesDir = Path.Combine(installDir, @"SPT_Data\Launcher\Patches");
+            string sptPatchesDir = Path.Combine(installDir, @"SPT\SPT_Data\Launcher\Patches");
 
             try
             {

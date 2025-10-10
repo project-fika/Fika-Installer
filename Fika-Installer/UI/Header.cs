@@ -7,7 +7,7 @@
             Console.ForegroundColor = ConsoleColor.White;
             Console.BackgroundColor = ConsoleColor.Blue;
 
-            string fikaInstallerVersionString = InstallerConstants.VersionString;
+            string fikaInstallerVersionString = Installer.VersionString;
 
             int margin = 5;
             int headerBackgroundLength = fikaInstallerVersionString.Length + margin * 2;

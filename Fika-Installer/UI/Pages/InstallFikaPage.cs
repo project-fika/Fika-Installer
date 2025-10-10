@@ -1,10 +1,9 @@
-﻿using Fika_Installer.Models;
-using Fika_Installer.Spt;
+﻿using Fika_Installer.Spt;
 using Fika_Installer.Utils;
 
 namespace Fika_Installer.UI.Pages
 {
-    public class InstallFikaPage(string installDir, FikaRelease fikaCoreRelease, FikaRelease fikaServerRelease) : Page
+    public class InstallFikaPage(string installDir) : Page
     {
         public override void OnShow()
         {
@@ -25,12 +24,7 @@ namespace Fika_Installer.UI.Pages
 
             FikaInstaller fikaInstaller = new(installDir);
 
-            if (!fikaInstaller.InstallRelease(fikaCoreRelease))
-            {
-                return;
-            }
-
-            if (!fikaInstaller.InstallRelease(fikaServerRelease))
+            if (!fikaInstaller.InstallReleaseList(FikaReleaseLists.StandardFika))
             {
                 return;
             }

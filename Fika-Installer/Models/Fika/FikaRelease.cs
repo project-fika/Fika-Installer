@@ -1,4 +1,4 @@
-﻿namespace Fika_Installer.Models
+﻿namespace Fika_Installer.Models.Fika
 {
     public class FikaRelease(string releaseName, string releaseUrl)
     {

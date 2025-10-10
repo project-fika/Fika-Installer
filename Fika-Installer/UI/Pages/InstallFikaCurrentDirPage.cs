@@ -1,9 +1,10 @@
 ﻿using Fika_Installer.Models;
 using Fika_Installer.Spt;
+using System.Text.Json.Nodes;
 
 namespace Fika_Installer.UI.Pages
 {
-    public class InstallFikaCurrentDirPage(MenuFactory menuFactory, string installDir, FikaRelease fikaCoreRelease, FikaRelease fikaServerRelease) : Page
+    public class InstallFikaCurrentDirPage(MenuFactory menuFactory, string installDir) : Page
     {
         public override void OnShow()
         {
@@ -30,6 +31,18 @@ namespace Fika_Installer.UI.Pages
                     {
                         return;
                     }
+
+                    SptInstance sptInstance = new(installDir);
+                    JsonObject? launcherConfig = sptInstance.GetLauncherConfig();
+
+                    if (launcherConfig != null)
+                    {
+                        launcherConfig["IsDevMode"] = true;
+                        launcherConfig["GamePath"] = installDir;
+                        launcherConfig["Server"]["Url"] = "https://127.0.0.1:6969";
+
+                        sptInstance.SetLauncherConfig(launcherConfig);
+                    }
                 }
                 else
                 {
@@ -46,12 +59,7 @@ namespace Fika_Installer.UI.Pages
 
             FikaInstaller fikaInstaller = new(installDir);
 
-            if (!fikaInstaller.InstallRelease(fikaCoreRelease))
-            {
-                return;
-            }
-
-            if (!fikaInstaller.InstallRelease(fikaServerRelease))
+            if (!fikaInstaller.InstallReleaseList(FikaReleaseLists.StandardFika))
             {
                 return;
             }
