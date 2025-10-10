@@ -48,7 +48,8 @@ namespace Fika_Installer
                 }
             }
 
-            GitHubAsset? asset = gitHubRelease.Assets.FirstOrDefault(asset => asset.Name.Contains(fikaRelease.Name));
+            // Ensure to grab the correct asset and file name ends with ".zip" for win release
+            GitHubAsset? asset = gitHubRelease.Assets.FirstOrDefault(asset => asset.Name.Contains(fikaRelease.Name) && asset.Name.EndsWith(".zip"));
 
             if (asset == null)
             {
@@ -75,17 +76,18 @@ namespace Fika_Installer
 
         public bool UninstallFika()
         {
-            string bepInExPluginsPath = Path.Combine(installDir, @"BepInEx\plugins");
+            string fikaBepInExPluginsPath = Path.Combine(installDir, @"BepInEx\plugins\Fika");
             string bepInExConfigPath = Path.Combine(installDir, @"BepInEx\config");
             string userModsPath = Path.Combine(installDir, @"SPT\user\mods");
 
             string[] filesToDelete =
             [
-                Path.Combine(bepInExPluginsPath, "Fika.Core.dll"),
-                Path.Combine(bepInExPluginsPath, "Fika.Headless.dll"),
+                fikaBepInExPluginsPath,
                 Path.Combine(bepInExConfigPath, "com.fika.core.cfg"),
                 Path.Combine(bepInExConfigPath, "com.fika.headless.cfg"),
                 Path.Combine(userModsPath, "fika-server"),
+                Path.Combine(installDir, "HeadlessConfig.json"),
+                Path.Combine(installDir, "FikaHeadlessManager.exe")
             ];
 
             try

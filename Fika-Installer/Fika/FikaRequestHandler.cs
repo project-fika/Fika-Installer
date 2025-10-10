@@ -23,7 +23,7 @@ namespace Fika_Installer.Fika
             _httpClient.DefaultRequestHeaders.Add("requestcompressed", "0");
         }
 
-        public bool TestConnection(TimeSpan timeout)
+        public bool WaitForConnection(TimeSpan timeout)
         {
             TimeSpan checkInterval = TimeSpan.FromMilliseconds(500);
             DateTime startTime = DateTime.Now;

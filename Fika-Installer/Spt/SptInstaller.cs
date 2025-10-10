@@ -9,22 +9,19 @@ namespace Fika_Installer.Spt
         public bool InstallSpt(string installDir, InstallMethod installType, bool headless = false)
         {
             List<string> excludeFiles =
-            [   "FikaInstallerTemp",
+            [   
+                "FikaInstallerTemp",
                 "Fika-Installer.exe",
                 "fika-installer.log",
                 "SPTInstaller.exe",
-                "Logs"
+                "Logs",
             ];
 
             if (headless)
             {
                 excludeFiles.AddRange(
                 [
-                    @$"SPT\{SptConstants.ServerExeName}",
-                    @$"SPT\{SptConstants.LauncherExeName}",
-                    @"SPT\SPT_Data\Server",
-                    @"SPT\SPT_Data\Launcher\Locales",
-                    @"SPT\user",
+                    "SPT",
                 ]);
             }
 
@@ -51,6 +48,17 @@ namespace Fika_Installer.Spt
             if (!FileUtils.CopyFolderWithProgress(sptDir, installDir, excludeFiles))
             {
                 return false;
+            }
+
+            if (headless)
+            {
+                string sptPatchesDir = Path.Combine(sptDir, @"SPT\SPT_Data\Launcher\Patches");
+                string sptPatchesDirDest = Path.Combine(installDir, @"SPT\SPT_Data\Launcher\Patches");
+
+                if (!FileUtils.CopyFolderWithProgress(sptPatchesDir, sptPatchesDirDest, []))
+                {
+                    return false;
+                }
             }
 
             return true;

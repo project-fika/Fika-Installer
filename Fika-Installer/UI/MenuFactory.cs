@@ -6,8 +6,8 @@ namespace Fika_Installer.UI
 {
     public class MenuFactory(string installDir)
     {
-        private string _fikaCorePath = Path.Combine(installDir, @"BepInEx\plugins\Fika.Core.dll");
-        private string _fikaHeadlessPath = Path.Combine(installDir, @"BepInEx\plugins\Fika.Headless.dll");
+        private string _fikaCorePath = Path.Combine(installDir, @"BepInEx\plugins\Fika\Fika.Core.dll");
+        private string _fikaHeadlessPath = Path.Combine(installDir, @"BepInEx\plugins\Fika\Fika.Headless.dll");
 
         public Menu CreateMainMenu()
         {

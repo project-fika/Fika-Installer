@@ -76,27 +76,22 @@ namespace Fika_Installer.Fika
 
             FikaRequestHandler fikaRequestHandler = new($"https://{ip}:{port}", apiKey);
 
-            if (!fikaRequestHandler.TestConnection(TimeSpan.FromMinutes(1)))
+            if (!fikaRequestHandler.WaitForConnection(TimeSpan.FromMinutes(1)))
             {
                 Logger.Error("Connection to SPT Server failed.");
                 return null;
             }
 
             /* Create headless profile and stop SPT Server */
-            CreateHeadlessProfileResponse createHeadlessProfileResponse;
-
             try
             {
-                createHeadlessProfileResponse = fikaRequestHandler.CreateHeadlessProfile();
+                CreateHeadlessProfileResponse createHeadlessProfileResponse = fikaRequestHandler.CreateHeadlessProfile();
                 _headlessProfileId = createHeadlessProfileResponse.Id;
             }
             catch (Exception ex)
             {
                 Logger.Error($"An error occurred when requesting CreateHeadlessProfile. {ex.Message}");
             }
-
-            // Might not be necessary
-            Thread.Sleep(TimeSpan.FromSeconds(1));
 
             _sptServer.Stop();
 
