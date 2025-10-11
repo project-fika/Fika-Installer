@@ -1,6 +1,5 @@
 ﻿using Fika_Installer.Models.Fika;
 using System.Net;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
@@ -19,7 +18,7 @@ namespace Fika_Installer.Fika
 
             _httpClient = new(handler);
             _httpClient.BaseAddress = new Uri(url);
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+            _httpClient.DefaultRequestHeaders.Authorization = new("Bearer", apiKey);
             _httpClient.DefaultRequestHeaders.Add("requestcompressed", "0");
         }
 
@@ -36,13 +35,13 @@ namespace Fika_Installer.Fika
 
                 if (pingResponse.PingResult == PingResult.Success)
                 {
-                    switch (pingResponse.HttpStatusCode)
+                    if (pingResponse.HttpStatusCode == HttpStatusCode.OK)
                     {
-                        case HttpStatusCode.OK:
-                            success = true;
-                            break;
-                        default:
-                            return false;
+                        success = true;
+                    }
+                    else
+                    {
+                        return false;
                     }
                 }
 

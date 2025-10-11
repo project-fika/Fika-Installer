@@ -76,13 +76,13 @@ namespace Fika_Installer
 
         public bool UninstallFika()
         {
-            string fikaBepInExPluginsPath = Path.Combine(installDir, @"BepInEx\plugins\Fika");
+            string bepInExPluginsPath = Path.Combine(installDir, @"BepInEx\plugins");
             string bepInExConfigPath = Path.Combine(installDir, @"BepInEx\config");
             string userModsPath = Path.Combine(installDir, @"SPT\user\mods");
 
             string[] filesToDelete =
             [
-                fikaBepInExPluginsPath,
+                Path.Combine(bepInExPluginsPath, "Fika"),
                 Path.Combine(bepInExConfigPath, "com.fika.core.cfg"),
                 Path.Combine(bepInExConfigPath, "com.fika.headless.cfg"),
                 Path.Combine(userModsPath, "fika-server"),
