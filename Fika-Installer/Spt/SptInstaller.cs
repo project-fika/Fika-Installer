@@ -22,6 +22,8 @@ namespace Fika_Installer.Spt
                 excludeFiles.AddRange(
                 [
                     "SPT",
+                    "SPT.Launcher.lnk",
+                    "SPT.Server.lnk"
                 ]);
             }
 
@@ -43,7 +45,7 @@ namespace Fika_Installer.Spt
                 }
             }
 
-            Logger.Log("Copying SPT folder...");
+            Logger.Log("Copying client folder...");
 
             if (!FileUtils.CopyFolderWithProgress(sptDir, installDir, excludeFiles))
             {
@@ -71,6 +73,13 @@ namespace Fika_Installer.Spt
             if (!ApplyPatches(installDir))
             {
                 Logger.Error("An error occurred when applying SPT patches. Please verify your SPT installation.", true);
+                return false;
+            }
+
+            Logger.Log("Generating SPT shortcuts...");
+
+            if (!GenerateSptShortcuts(installDir))
+            {
                 return false;
             }
 
@@ -162,6 +171,50 @@ namespace Fika_Installer.Spt
             }
 
             return true;
+        }
+
+        public bool GenerateSptShortcuts(string installDir)
+        {
+            try
+            {   
+                string sptFolder = Path.Combine(installDir, "SPT");
+
+                string sptLauncherPath = Path.Combine(sptFolder, "SPT.Launcher.exe");
+
+                if (File.Exists(sptLauncherPath))
+                {
+                    string sptLauncherShortcutPath = Path.Combine(installDir, "SPT.Launcher.lnk");
+
+                    if (File.Exists(sptLauncherShortcutPath))
+                    {
+                        File.Delete(sptLauncherShortcutPath);
+                    }
+
+                    FileUtils.CreateShortcut(sptLauncherShortcutPath, sptLauncherPath, sptFolder, sptLauncherPath, "SPT Launcher");
+                }
+
+                string sptServerPath = Path.Combine(sptFolder, "SPT.Server.exe");
+
+                if (File.Exists(sptServerPath))
+                {
+                    string sptServerShortcutPath = Path.Combine(installDir, "SPT.Server.lnk");
+
+                    if (File.Exists(sptServerShortcutPath))
+                    {
+                        File.Delete(sptServerShortcutPath);
+                    }
+
+                    FileUtils.CreateShortcut(sptServerShortcutPath, sptServerPath, sptFolder, sptServerPath, "SPT Server");
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error($"Error when creating shortcut: {ex.Message}");
+
+                return false;
+            }
         }
 
         public bool CleanupEftFiles(string installDir)
