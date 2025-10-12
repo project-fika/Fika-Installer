@@ -1,4 +1,6 @@
-﻿using System.IO.Compression;
+﻿using IWshRuntimeLibrary;
+using System.IO.Compression;
+using File = System.IO.File;
 using ProgressBar = Fika_Installer.UI.ProgressBar;
 
 namespace Fika_Installer.Utils
@@ -180,6 +182,18 @@ namespace Fika_Installer.Utils
             }
 
             return true;
+        }
+
+        public static void CreateShortcut(string shortcutPath, string targetPath, string workingDir, string iconPath, string description)
+        {
+            WshShell shell = new();
+            IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(shortcutPath);
+
+            shortcut.TargetPath = targetPath;
+            shortcut.WorkingDirectory = workingDir;
+            shortcut.IconLocation = iconPath;
+            shortcut.Description = description;
+            shortcut.Save();
         }
     }
 }
