@@ -18,9 +18,9 @@ namespace Fika_Installer
     {
         public static readonly Dictionary<string, FikaRelease> FikaReleases = new()
         {
-            { "Fika.Core", new("Fika.Release", "https://api.github.com/repos/project-fika/Fika-Plugin/releases/latest") },
-            { "Fika.Headless", new("Fika.Headless", "https://api.github.com/repos/project-fika/Fika-Headless/releases/latest") },
-            { "Fika.Server", new("fika-server", "https://api.github.com/repos/project-fika/Fika-Server/releases/latest") }
+            { "Fika.Core", new("Fika.Release", "https://api.github.com/repos/project-fika/Fika-Plugin/releases/217775632") },
+            { "Fika.Headless", new("Fika.Headless", "https://api.github.com/repos/project-fika/Fika-Headless/releases/217775665") },
+            { "Fika.Server", new("fika-server", "https://api.github.com/repos/project-fika/Fika-Server/releases/217775652") }
         };
     }
 
