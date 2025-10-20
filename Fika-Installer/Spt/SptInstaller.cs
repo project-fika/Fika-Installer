@@ -1,6 +1,7 @@
 ﻿using Fika_Installer.Models;
 using Fika_Installer.Utils;
 using SharpHDiffPatch.Core;
+using System.Runtime.InteropServices;
 
 namespace Fika_Installer.Spt
 {
@@ -76,11 +77,14 @@ namespace Fika_Installer.Spt
                 return false;
             }
 
-            Logger.Log("Generating SPT shortcuts...");
-
-            if (!GenerateSptShortcuts(installDir))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                return false;
+                Logger.Log("Generating SPT shortcuts...");
+
+                if (!GenerateSptShortcuts(installDir))
+                {
+                    return false;
+                }
             }
 
             Logger.Log("Cleaning up files...");
@@ -124,6 +128,12 @@ namespace Fika_Installer.Spt
 
                         // create a target file from the relative patch file while utilizing targetpath as the root directory.
                         target = new FileInfo(Path.Combine(installDir, relativefile.Replace(".delta", "")));
+
+                        if (!File.Exists(target.FullName))
+                        {
+                            Logger.Warning($"Patch failed because target file does not exist: {target.Name}.");
+                            continue;
+                        }
 
                         if (!ApplyPatch(target.FullName, file.FullName))
                         {
