@@ -6,14 +6,13 @@ namespace Fika_Installer.UI.Pages
 {
     public partial class Methods
     {
-        public static void Uninstall(string installDir, InteractiveMode interactive)
+        public static void Uninstall(string installDir)
         {
             bool fikaDetected = File.Exists(Installer.FikaCorePath(installDir));
 
             if (!fikaDetected)
             {
-                Logger.Error("Fika not found. Please install Fika first.", interactive == InteractiveMode.Interactive);
-                if (interactive == InteractiveMode.NonInteractive) { Environment.Exit(1); }
+                Logger.Error("Fika not found. Please install Fika first.", true);
                 return;
             }
 
@@ -22,7 +21,6 @@ namespace Fika_Installer.UI.Pages
             if (!fikaInstaller.UninstallFika())
             {
                 Logger.Error("Installer failed.");
-                if (interactive == InteractiveMode.NonInteractive) { Environment.Exit(1); }
                 return;
             }
 
@@ -39,7 +37,7 @@ namespace Fika_Installer.UI.Pages
                 sptInstance.SetLauncherConfig(launcherConfig);
             }
 
-            Logger.Success("Fika uninstalled successfully!", interactive == InteractiveMode.Interactive);
+            Logger.Success("Fika uninstalled successfully!", true);
         }
     }
 
@@ -55,7 +53,7 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            Methods.Uninstall(installDir, Methods.InteractiveMode.Interactive);
+            Methods.Uninstall(installDir);
         }
     }
 }

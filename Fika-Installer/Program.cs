@@ -12,7 +12,35 @@ namespace Fika_Installer
             FileLogger fileLogger = new(logFilePath);
             Logger.AddLogger(fileLogger);
 
-            InitUI();
+            if (args.Length > 0)
+            {
+                Logger.SetInteractive(false);
+                Logger.Log($"Command-line arguments detected: {string.Join(' ', args)}");
+
+                switch (args[0].ToLower())
+                {
+                    case "install":
+                        Logger.Log("Starting installation");
+                        UI.Pages.Methods.Install(Installer.CurrentDir);
+                        break;
+                    case "uninstall":
+                        Logger.Log("Starting uninstallation");
+                        UI.Pages.Methods.Uninstall(Installer.CurrentDir);
+                        break;
+                    case "update":
+                        Logger.Log("Starting update");
+                        UI.Pages.Methods.Update(Installer.CurrentDir);
+                        break;
+                    default:
+                        Logger.Error($"Unknown command-line argument: {args[0]} - Supported arguments are: install, uninstall, update");
+                        break;
+                }
+            }
+            else
+            {
+                Logger.SetInteractive(true);
+                InitUI();
+            }
         }
 
         static void InitUI()
@@ -23,41 +51,14 @@ namespace Fika_Installer
             PageLogger pageLogger = new();
             Logger.AddLogger(pageLogger);
 
-            if (args.Length == 0)
+            Header.Show();
+
+            MenuFactory menuFactory = new(Installer.CurrentDir);
+
+            while (true)
             {
-                // No arguments provided, launch menu-based installer
-
-                Header.Show();
-
-                MenuFactory menuFactory = new(Installer.CurrentDir);
-
-                while (true)
-                {
-                    Menu mainMenu = menuFactory.CreateMainMenu();
-                    mainMenu.Show();
-                }
-            }
-            else
-            {
-                // Arguments provided, run requested mode directly without UI
-                switch (args[0].ToLower())
-                {
-                    case "install":
-                        Logger.Log("Starting installation");
-                        UI.Pages.Methods.Install(Installer.CurrentDir, UI.Pages.Methods.InteractiveMode.NonInteractive);
-                        break;
-                    case "uninstall":
-                        Logger.Log("Starting uninstallation");
-                        UI.Pages.Methods.Uninstall(Installer.CurrentDir, UI.Pages.Methods.InteractiveMode.NonInteractive);
-                        break;
-                    case "update":
-                        Logger.Log("Starting update");
-                        UI.Pages.Methods.Update(Installer.CurrentDir, UI.Pages.Methods.InteractiveMode.NonInteractive);
-                        break;
-                    default:
-                        Logger.Error($"Unknown command-line argument: {args[0]} - Supported arguments are: install, uninstall, update");
-                        break;
-                }
+                Menu mainMenu = menuFactory.CreateMainMenu();
+                mainMenu.Show();
             }
         }
     }

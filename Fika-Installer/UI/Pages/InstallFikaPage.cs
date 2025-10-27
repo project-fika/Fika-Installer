@@ -5,14 +5,13 @@ namespace Fika_Installer.UI.Pages
 {
     public partial class Methods
     {
-        public static void Install(string installDir, InteractiveMode interactive)
+        public static void Install(string installDir)
         {
             bool fikaDetected = File.Exists(Installer.FikaCorePath(installDir));
             
             if (fikaDetected)
             {
-                Logger.Error("Fika is already installed.", interactive == InteractiveMode.Interactive);
-                if (interactive == InteractiveMode.NonInteractive) { Environment.Exit(1); }
+                Logger.Error("Fika is already installed.", true);
                 return;
             }
 
@@ -20,8 +19,7 @@ namespace Fika_Installer.UI.Pages
 
             if (!isSptInstalled)
             {
-                Logger.Error("SPT not found. Please place Fika-Installer inside your SPT directory.", interactive == InteractiveMode.Interactive);
-                if (interactive == InteractiveMode.NonInteractive) { Environment.Exit(1); }
+                Logger.Error("SPT not found. Please place Fika-Installer inside your SPT directory.", true);
                 return;
             }
 
@@ -30,7 +28,6 @@ namespace Fika_Installer.UI.Pages
             if (!sptInstaller.InstallSptRequirements(installDir))
             {
                 Logger.Error("SPT Installer failed.");
-                if (interactive == InteractiveMode.NonInteractive) { Environment.Exit(1); }
                 return;
             }
 
@@ -39,13 +36,12 @@ namespace Fika_Installer.UI.Pages
             if (!fikaInstaller.InstallReleaseList(FikaReleaseLists.StandardFika))
             {
                 Logger.Error("Installer failed.");
-                if (interactive == InteractiveMode.NonInteractive) { Environment.Exit(1); }
                 return;
             }
 
             fikaInstaller.ApplyFirewallRules();
 
-            Logger.Success("Fika installed successfully!", interactive == InteractiveMode.Interactive);
+            Logger.Success("Fika installed successfully!", true);
         }
     }
 
@@ -53,7 +49,7 @@ namespace Fika_Installer.UI.Pages
     {
         public override void OnShow()
         {
-            Methods.Install(installDir, Methods.InteractiveMode.Interactive);
+            Methods.Install(installDir);
         }
     }
 }

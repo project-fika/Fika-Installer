@@ -98,10 +98,16 @@ namespace Fika_Installer
     public static class Logger
     {
         private static readonly List<ILogger> _loggers = [];
+        private static bool _isInteractive = false;
 
         public static void AddLogger(ILogger logger)
         {
             _loggers.Add(logger);
+        }
+
+        public static void SetInteractive(bool isInteractive)
+        {
+            _isInteractive = isInteractive;
         }
 
         public static void Log(string message)
@@ -145,7 +151,7 @@ namespace Fika_Installer
             {
                 if (logger is IPageLogger pageLogger)
                 {
-                    pageLogger.Success(message, confirm);
+                    pageLogger.Success(message, _isInteractive ? confirm : false);
                 }
                 else
                 {
@@ -180,13 +186,16 @@ namespace Fika_Installer
             {
                 if (logger is IPageLogger pageLogger)
                 {
-                    pageLogger.Error(message, confirm);
+                    pageLogger.Error(message, _isInteractive ? confirm : false);
                 }
                 else
                 {
                     logger.Error(message);
                 }
             }
+
+            // non-interactive, exit with error code
+            if (!_isInteractive) Environment.Exit(1);
         }
     }
 }

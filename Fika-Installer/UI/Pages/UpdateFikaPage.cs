@@ -6,14 +6,13 @@ namespace Fika_Installer.UI.Pages
 {
     public partial class Methods
     {
-        public static void Update(string installDir, InteractiveMode interactive)
+        public static void Update(string installDir)
         {
             bool fikaDetected = File.Exists(Installer.FikaCorePath(installDir));
 
             if (!fikaDetected)
             {
-                Logger.Error("Fika not found. Please install Fika first.", interactive == InteractiveMode.Interactive);
-                if (interactive == InteractiveMode.NonInteractive) { Environment.Exit(1); }
+                Logger.Error("Fika not found. Please install Fika first.", true);
                 return;
             }
 
@@ -22,11 +21,10 @@ namespace Fika_Installer.UI.Pages
             if (!fikaInstaller.InstallReleaseList(FikaReleaseLists.StandardFika))
             {
                 Logger.Error("Installer failed.");
-                if (interactive == InteractiveMode.NonInteractive) { Environment.Exit(1); }
                 return;
             }
 
-            Logger.Success("Fika updated successfully!", interactive == InteractiveMode.Interactive);
+            Logger.Success("Fika updated successfully!", true);
         }
     }
 
@@ -34,7 +32,7 @@ namespace Fika_Installer.UI.Pages
     {
         public override void OnShow()
         {
-            Methods.Update(installDir, Methods.InteractiveMode.Interactive);
+            Methods.Update(installDir);
         }
     }
 }
