@@ -84,6 +84,7 @@ namespace Fika_Installer.Spt
 
                 if (!GenerateSptShortcuts(installDir))
                 {
+                    Logger.Error("An error occurred when creating SPT shortcuts.", true);
                     return false;
                 }
             }
@@ -222,7 +223,7 @@ namespace Fika_Installer.Spt
             }
             catch (Exception ex)
             {
-                Logger.Error($"Error when creating shortcut: {ex.Message}");
+                Logger.Error(ex.Message);
 
                 return false;
             }
