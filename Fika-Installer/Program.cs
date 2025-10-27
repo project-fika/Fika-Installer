@@ -7,9 +7,21 @@ namespace Fika_Installer
         [STAThread]
         static void Main(string[] args)
         {
-            SetupLoggers();
+            string logFilePath = Path.Combine(Installer.CurrentDir, "fika-installer.log");
 
-            SetupConsole();
+            FileLogger fileLogger = new(logFilePath);
+            Logger.AddLogger(fileLogger);
+
+            InitUI();
+        }
+
+        static void InitUI()
+        {
+            Console.Title = Installer.VersionString;
+            Console.CursorVisible = false;
+
+            PageLogger pageLogger = new();
+            Logger.AddLogger(pageLogger);
 
             Header.Show();
 
@@ -20,23 +32,6 @@ namespace Fika_Installer
                 Menu mainMenu = menuFactory.CreateMainMenu();
                 mainMenu.Show();
             }
-        }
-
-        static void SetupLoggers()
-        {
-            string logFilePath = Path.Combine(Installer.CurrentDir, "fika-installer.log");
-
-            FileLogger fileLogger = new(logFilePath);
-            Logger.AddLogger(fileLogger);
-
-            PageLogger pageLogger = new();
-            Logger.AddLogger(pageLogger);
-        }
-
-        static void SetupConsole()
-        {
-            Console.Title = Installer.VersionString;
-            Console.CursorVisible = false;
         }
     }
 }
