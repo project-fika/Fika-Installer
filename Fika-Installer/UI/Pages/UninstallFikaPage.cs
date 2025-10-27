@@ -1,17 +1,19 @@
 ﻿using Fika_Installer.Spt;
+using Fika_Installer.Utils;
 using System.Text.Json.Nodes;
 
 namespace Fika_Installer.UI.Pages
 {
-    public class UninstallFikaPage(MenuFactory menuFactory, string installDir) : Page
+    public partial class Methods
     {
-        public override void OnShow()
+        public static void Uninstall(string installDir, InteractiveMode interactive)
         {
-            Menu uninstallFikaMenu = menuFactory.CreateConfirmUninstallFikaMenu();
-            MenuChoice selectedChoice = uninstallFikaMenu.Show();
+            bool fikaDetected = File.Exists(Installer.FikaCorePath(installDir));
 
-            if (selectedChoice.Text == "No")
+            if (!fikaDetected)
             {
+                Logger.Error("Fika not found. Please install Fika first.", interactive == InteractiveMode.Interactive);
+                if (interactive == InteractiveMode.NonInteractive) { Environment.Exit(1); }
                 return;
             }
 
@@ -19,6 +21,8 @@ namespace Fika_Installer.UI.Pages
 
             if (!fikaInstaller.UninstallFika())
             {
+                Logger.Error("Installer failed.");
+                if (interactive == InteractiveMode.NonInteractive) { Environment.Exit(1); }
                 return;
             }
 
@@ -35,7 +39,23 @@ namespace Fika_Installer.UI.Pages
                 sptInstance.SetLauncherConfig(launcherConfig);
             }
 
-            Logger.Success("Fika uninstalled successfully!", true);
+            Logger.Success("Fika uninstalled successfully!", interactive == InteractiveMode.Interactive);
+        }
+    }
+
+    public class UninstallFikaPage(MenuFactory menuFactory, string installDir) : Page
+    {
+        public override void OnShow()
+        {
+            Menu uninstallFikaMenu = menuFactory.CreateConfirmUninstallFikaMenu();
+            MenuChoice selectedChoice = uninstallFikaMenu.Show();
+
+            if (selectedChoice.Text == "No")
+            {
+                return;
+            }
+
+            Methods.Uninstall(installDir, Methods.InteractiveMode.Interactive);
         }
     }
 }

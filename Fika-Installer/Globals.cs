@@ -12,6 +12,14 @@ namespace Fika_Installer
         public static readonly string VersionString = $"Fika Installer v{_versionMajor}.{_versionMinor}.{_versionBuild}";
         public static readonly string CurrentDir = Directory.GetCurrentDirectory();
         public static readonly string TempDir = Path.Combine(CurrentDir, "FikaInstallerTemp");
+
+        public static string FikaCorePath(string installDir) {
+            return Path.Combine(installDir, @"BepInEx\plugins\Fika\Fika.Core.dll");
+        }
+        public static string FikaHeadlessPath(string installDir)
+        {
+            return Path.Combine(installDir, @"BepInEx\plugins\Fika\Fika.Headless.dll");
+        }
     }
 
     public static class FikaReleaseLists

@@ -23,14 +23,44 @@ namespace Fika_Installer
             PageLogger pageLogger = new();
             Logger.AddLogger(pageLogger);
 
-            Header.Show();
-
-            MenuFactory menuFactory = new(Installer.CurrentDir);
-
-            while (true)
+            if (args.Length == 0)
             {
-                Menu mainMenu = menuFactory.CreateMainMenu();
-                mainMenu.Show();
+                // No arguments provided, launch menu-based installer
+
+                Header.Show();
+
+                MenuFactory menuFactory = new(Installer.CurrentDir);
+
+                while (true)
+                {
+                    Menu mainMenu = menuFactory.CreateMainMenu();
+                    mainMenu.Show();
+                }
+            }
+            else
+            {
+                // Arguments provided, run requested mode directly without UI
+                switch (args[0].ToLower())
+                {
+                    case "install":
+                        Console.WriteLine("Starting installation");
+                        UI.Pages.Methods.Install(Installer.CurrentDir, UI.Pages.Methods.InteractiveMode.NonInteractive);
+                        break;
+                    case "uninstall":
+                        Console.WriteLine("Starting uninstallation");
+                        UI.Pages.Methods.Uninstall(Installer.CurrentDir, UI.Pages.Methods.InteractiveMode.NonInteractive);
+                        break;
+                    case "update":
+                        Console.WriteLine("Starting update");
+                        UI.Pages.Methods.Update(Installer.CurrentDir, UI.Pages.Methods.InteractiveMode.NonInteractive);
+                        break;
+                    default:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"Unknown command-line argument: {args[0]}");
+                        Console.ResetColor();
+                        Console.WriteLine("Unknown argument. Supported arguments are: install, uninstall, update");
+                        break;
+                }
             }
         }
     }
