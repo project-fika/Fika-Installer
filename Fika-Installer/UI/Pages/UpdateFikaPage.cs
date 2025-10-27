@@ -6,7 +6,7 @@ namespace Fika_Installer.UI.Pages
 {
     public partial class Methods
     {
-        public static void Update(string installDir)
+        public static void UpdateFika(string installDir)
         {
             bool fikaDetected = File.Exists(Installer.FikaCorePath(installDir));
 
@@ -32,7 +32,7 @@ namespace Fika_Installer.UI.Pages
     {
         public override void OnShow()
         {
-            Methods.Update(installDir);
+            Methods.UpdateFika(installDir);
         }
     }
 }
