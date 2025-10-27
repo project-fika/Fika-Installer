@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace Fika_Installer.Models.Fika
+namespace Fika_Installer.Models.Fika.Network
 {
     public enum PingResult
     {

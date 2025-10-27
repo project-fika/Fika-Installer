@@ -1,4 +1,4 @@
-﻿using Fika_Installer.Models.Fika;
+﻿using Fika_Installer.Models.Fika.Network;
 using System.Net;
 using System.Text;
 using System.Text.Json;

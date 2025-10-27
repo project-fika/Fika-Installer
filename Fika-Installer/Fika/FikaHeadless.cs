@@ -1,4 +1,4 @@
-﻿using Fika_Installer.Models.Fika;
+﻿using Fika_Installer.Models.Fika.Network;
 using Fika_Installer.Spt;
 using Fika_Installer.Utils;
 using System.Diagnostics;
@@ -85,7 +85,13 @@ namespace Fika_Installer.Fika
             /* Create headless profile and stop SPT Server */
             try
             {
-                CreateHeadlessProfileResponse createHeadlessProfileResponse = fikaRequestHandler.CreateHeadlessProfile();
+                CreateHeadlessProfileResponse? createHeadlessProfileResponse = fikaRequestHandler.CreateHeadlessProfile();
+
+                if (createHeadlessProfileResponse == null)
+                {
+                    return null;
+                }
+
                 _headlessProfileId = createHeadlessProfileResponse.Id;
             }
             catch (Exception ex)
@@ -151,7 +157,7 @@ namespace Fika_Installer.Fika
                 }
             }
 
-            return JsonUtils.DeserializeFromFile(_fikaServerConfigPath);
+            return JsonUtils.DeserializeFromFile<JsonObject>(_fikaServerConfigPath);
         }
 
         private bool SetHeadlessAmount(JsonObject fikaServerConfig, int amount)

@@ -13,5 +13,11 @@
 
             return sptServerFound && sptLauncherFound;
         }
+
+        public static bool IsSptFolderDetected(string path)
+        {
+            string sptFolder = Path.Combine(path, "SPT");
+            return Directory.Exists(sptFolder);
+        }
     }
 }

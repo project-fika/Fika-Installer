@@ -54,7 +54,7 @@ namespace Fika_Installer.Spt
             {
                 try
                 {
-                    JsonObject? profile = JsonUtils.DeserializeFromFile(sptProfilePath);
+                    JsonObject? profile = JsonUtils.DeserializeFromFile<JsonObject>(sptProfilePath);
 
                     if (profile != null)
                     {
@@ -96,7 +96,7 @@ namespace Fika_Installer.Spt
         {
             if (File.Exists(_launcherConfigPath))
             {
-                JsonObject? launcherConfig = JsonUtils.DeserializeFromFile(_launcherConfigPath);
+                JsonObject? launcherConfig = JsonUtils.DeserializeFromFile<JsonObject>(_launcherConfigPath);
 
                 return launcherConfig;
             }

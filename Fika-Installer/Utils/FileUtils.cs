@@ -76,7 +76,7 @@ namespace Fika_Installer.Utils
             catch (Exception ex)
             {
                 progressBar.Dispose();
-                Logger.Error($"An error occurred while copying the folder: {ex.Message}", true);
+                Logger.Error(ex.Message);
             }
 
             progressBar.Dispose();
@@ -156,16 +156,19 @@ namespace Fika_Installer.Utils
             return result;
         }
 
-        public static void ExtractZip(string zipFilePath, string outputDirectory)
+        public static bool ExtractZip(string zipFilePath, string outputDirectory)
         {
             try
             {
                 Directory.CreateDirectory(outputDirectory);
                 ZipFile.ExtractToDirectory(zipFilePath, outputDirectory, overwriteFiles: true);
+
+                return true;
             }
             catch (Exception ex)
             {
-                Logger.Log(ex.Message);
+                Logger.Error(ex.Message);
+                return false;
             }
         }
 
@@ -174,14 +177,15 @@ namespace Fika_Installer.Utils
             try
             {
                 Directory.CreateSymbolicLink(toPath, fromPath);
+
+                return true;
             }
             catch (Exception ex)
             {
-                Logger.Error($"An error occurred when creating the symlink: {ex.Message}");
+                Logger.Error(ex.Message);
+
                 return false;
             }
-
-            return true;
         }
 
         public static void CreateShortcut(string shortcutPath, string targetPath, string workingDir, string iconPath, string description)

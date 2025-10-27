@@ -38,7 +38,7 @@ namespace Fika_Installer.UI.Pages
 
             if (!fikaHeadless.IsFikaServerInstalled())
             {
-                Logger.Error("Fika-Server must be installed in the SPT folder before installing Fika-Headless.", true);
+                Logger.Error("Fika-Server must be installed before installing Fika-Headless.", true);
                 return;
             }
 

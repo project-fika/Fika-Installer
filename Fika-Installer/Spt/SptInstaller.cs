@@ -50,6 +50,7 @@ namespace Fika_Installer.Spt
 
             if (!FileUtils.CopyFolderWithProgress(sptDir, installDir, excludeFiles))
             {
+                Logger.Error("An error occurred when copying the client files.", true);
                 return false;
             }
 
@@ -186,7 +187,7 @@ namespace Fika_Installer.Spt
         public bool GenerateSptShortcuts(string installDir)
         {
             try
-            {   
+            {
                 string sptFolder = Path.Combine(installDir, "SPT");
 
                 string sptLauncherPath = Path.Combine(sptFolder, "SPT.Launcher.exe");

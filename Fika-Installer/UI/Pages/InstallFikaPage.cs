@@ -7,6 +7,7 @@ namespace Fika_Installer.UI.Pages
     {
         public override void OnShow()
         {
+
             bool isSptInstalled = SptUtils.IsSptInstalled(installDir);
 
             if (!isSptInstalled)
