@@ -43,22 +43,19 @@ namespace Fika_Installer
                 switch (args[0].ToLower())
                 {
                     case "install":
-                        Console.WriteLine("Starting installation");
+                        Logger.Log("Starting installation");
                         UI.Pages.Methods.Install(Installer.CurrentDir, UI.Pages.Methods.InteractiveMode.NonInteractive);
                         break;
                     case "uninstall":
-                        Console.WriteLine("Starting uninstallation");
+                        Logger.Log("Starting uninstallation");
                         UI.Pages.Methods.Uninstall(Installer.CurrentDir, UI.Pages.Methods.InteractiveMode.NonInteractive);
                         break;
                     case "update":
-                        Console.WriteLine("Starting update");
+                        Logger.Log("Starting update");
                         UI.Pages.Methods.Update(Installer.CurrentDir, UI.Pages.Methods.InteractiveMode.NonInteractive);
                         break;
                     default:
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"Unknown command-line argument: {args[0]}");
-                        Console.ResetColor();
-                        Console.WriteLine("Unknown argument. Supported arguments are: install, uninstall, update");
+                        Logger.Error($"Unknown command-line argument: {args[0]} - Supported arguments are: install, uninstall, update");
                         break;
                 }
             }
