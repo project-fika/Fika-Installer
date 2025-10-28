@@ -128,20 +128,7 @@ namespace Fika_Installer
         {
             Logger.Log("Applying Fika firewall rules...");
 
-            string sptPath = Path.Combine(installDir, "SPT");
-            string sptServerPath = Path.Combine(sptPath, SptConstants.ServerExeName);
-
-            if (File.Exists(sptServerPath))
-            {
-                FwUtils.CreateFirewallRule("Fika (SPT) - TCP 6969", "Inbound", "TCP", "6969", sptServerPath);
-            }
-
-            string escapeFromTarkovPath = Path.Combine(installDir, EftConstants.GameExeName);
-
-            if (File.Exists(escapeFromTarkovPath))
-            {
-                FwUtils.CreateFirewallRule("Fika (Core) - UDP 25565", "Inbound", "UDP", "25565", escapeFromTarkovPath);
-            }
+            FwUtils.CreateFirewallRules(installDir);
         }
 
         public string? GetCompatibleEftVersionFromRelease(GitHubRelease gitHubRelease)

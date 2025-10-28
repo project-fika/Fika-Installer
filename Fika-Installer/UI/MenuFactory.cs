@@ -6,14 +6,11 @@ namespace Fika_Installer.UI
 {
     public class MenuFactory(string installDir)
     {
-        private string _fikaCorePath = Path.Combine(installDir, @"BepInEx\plugins\Fika\Fika.Core.dll");
-        private string _fikaHeadlessPath = Path.Combine(installDir, @"BepInEx\plugins\Fika\Fika.Headless.dll");
-
         public Menu CreateMainMenu()
         {
             List<MenuChoice> mainMenuChoices = [];
 
-            bool fikaDetected = File.Exists(_fikaCorePath);
+            bool fikaDetected = File.Exists(Installer.FikaCorePath(installDir));
 
             if (fikaDetected)
             {
@@ -47,7 +44,7 @@ namespace Fika_Installer.UI
         {
             List<MenuChoice> advancedMenuChoices = [];
 
-            bool fikaHeadlessDetected = File.Exists(_fikaHeadlessPath);
+            bool fikaHeadlessDetected = File.Exists(Installer.FikaHeadlessPath(installDir));
 
             if (fikaHeadlessDetected)
             {
@@ -64,7 +61,7 @@ namespace Fika_Installer.UI
                 advancedMenuChoices.Add(installFikaHeadlessChoice);
             }
 
-            bool fikaCoreDetected = File.Exists(_fikaCorePath);
+            bool fikaCoreDetected = File.Exists(Installer.FikaCorePath(installDir));
 
             if (!fikaCoreDetected)
             {

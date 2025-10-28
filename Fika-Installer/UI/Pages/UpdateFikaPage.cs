@@ -1,17 +1,38 @@
-﻿namespace Fika_Installer.UI.Pages
+﻿using Fika_Installer.Spt;
+using Fika_Installer.Utils;
+using System.Text.Json.Nodes;
+
+namespace Fika_Installer.UI.Pages
 {
-    public class UpdateFikaPage(string installDir) : Page
+    public partial class Methods
     {
-        public override void OnShow()
+        public static void UpdateFika(string installDir)
         {
+            bool fikaDetected = File.Exists(Installer.FikaCorePath(installDir));
+
+            if (!fikaDetected)
+            {
+                Logger.Error("Fika not found. Please install Fika first.", true);
+                return;
+            }
+
             FikaInstaller fikaInstaller = new(installDir);
 
             if (!fikaInstaller.InstallReleaseList(FikaReleaseLists.StandardFika))
             {
+                Logger.Error("Installer failed.");
                 return;
             }
 
             Logger.Success("Fika updated successfully!", true);
+        }
+    }
+
+    public class UpdateFikaPage(string installDir) : Page
+    {
+        public override void OnShow()
+        {
+            Methods.UpdateFika(installDir);
         }
     }
 }

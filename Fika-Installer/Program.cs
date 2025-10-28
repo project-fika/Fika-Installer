@@ -1,4 +1,6 @@
-﻿using Fika_Installer.UI;
+﻿using Fika_Installer.Models;
+using Fika_Installer.UI;
+using Fika_Installer.Utils;
 
 namespace Fika_Installer
 {
@@ -12,17 +14,27 @@ namespace Fika_Installer
             FileLogger fileLogger = new(logFilePath);
             Logger.AddLogger(fileLogger);
 
-            InitUI();
+            PageLogger pageLogger = new();
+            Logger.AddLogger(pageLogger);
+
+            Console.Title = Installer.VersionString;
+            Console.CursorVisible = false;
+
+            if (args.Length > 0)
+            {
+                Logger.SetInteractive(false);
+                Logger.Log($"Command-line arguments detected: {string.Join(' ', args)}");
+                CLI.Parse(args);
+            }
+            else
+            {
+                Logger.SetInteractive(true);
+                InitUI();
+            }
         }
 
         static void InitUI()
         {
-            Console.Title = Installer.VersionString;
-            Console.CursorVisible = false;
-
-            PageLogger pageLogger = new();
-            Logger.AddLogger(pageLogger);
-
             Header.Show();
 
             MenuFactory menuFactory = new(Installer.CurrentDir);
