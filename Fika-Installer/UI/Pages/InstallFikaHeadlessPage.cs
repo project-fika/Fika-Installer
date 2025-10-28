@@ -125,6 +125,8 @@ namespace Fika_Installer.UI.Pages
                     return;
                 }
             }
+
+            Methods.InstallHeadless(installDir, _headlessProfileId, isSptInstalled ? null : _installMethod);
         }
     }
 }
