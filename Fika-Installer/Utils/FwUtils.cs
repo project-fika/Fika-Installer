@@ -37,15 +37,21 @@ namespace Fika_Installer.Utils
             bool requiresElevation = false;
             foreach (var rule in ruleset)
             {
-                bool ruleAlreadySet = ProcUtils.ExecuteSilent(
-                    "powershell.exe",
-                    $"{_powershellCmd} \"Get-NetFirewallRule -DisplayName '{rule.displayName}'\""
-                );
+                string firewallCmd = $@"
+                    $existingRule = Get-NetFirewallRule -DisplayName '{rule.displayName}' |
+                    Get-NetFirewallApplicationFilter |
+                    Where-Object {{ $_.Program -eq '{rule.program}' }}
+                    
+                    if (-not $existingRule) {{ throw 'Not Found' }}
+                ";
+                var ruleAlreadySet = ProcUtils.ExecuteSilent("powershell.exe", $"{_powershellCmd} \"{firewallCmd}\"");
+                
                 if (!ruleAlreadySet)
                 {
                     requiresElevation = true;
                     break;
                 }
+
             }
 
             if (requiresElevation || force)
