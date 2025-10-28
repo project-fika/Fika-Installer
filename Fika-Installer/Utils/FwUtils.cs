@@ -4,7 +4,7 @@ namespace Fika_Installer.Utils
 {
     public static class FwUtils
     {
-        private const string _powershellCmd = "-NoProfile -ExecutionPolicy Bypass";
+        private const string _powershellCmd = "-NoProfile -ExecutionPolicy Bypass -Command";
 
         public record FirewallRule(
             string DisplayName,
@@ -42,7 +42,15 @@ namespace Fika_Installer.Utils
                     if (-not $existingRule) {{ throw 'Not Found' }}
                 ";
 
-                var ruleAlreadySet = ProcUtils.ExecuteSilent("powershell.exe", $"{_powershellCmd} \"{firewallCmd}\"");
+                Process? powershellProcess = ProcUtils.Execute("powershell.exe", $"{_powershellCmd} \"{firewallCmd}\"", ProcessWindowStyle.Hidden);
+
+                if (powershellProcess == null)
+                {
+                    Logger.Error("Failed to verify firewall rules.");
+                    return;
+                }
+
+                bool ruleAlreadySet = powershellProcess.ExitCode == 0;
 
                 if (!ruleAlreadySet || force)
                 {
@@ -51,30 +59,22 @@ namespace Fika_Installer.Utils
                         string firewallRuleArgs = $"\"{rule.DisplayName}\" \"{rule.Direction}\" \"{rule.Protocol}\" \"{rule.Port}\" \"{rule.Program}\"";
                         
                         Logger.Log($"Creating firewall rule: {firewallRuleArgs}...");
-                        
-                        Process? process = Process.Start(new ProcessStartInfo
-                        {
-                            FileName = Application.ExecutablePath,
-                            Arguments = $"create-firewall-rules {firewallRuleArgs}",
-                            Verb = "runas",
-                            UseShellExecute = true
-                        });
 
-                        if (process == null)
+                        Process? elevatedProcess = ProcUtils.Execute(Application.ExecutablePath, $"create-firewall-rule {firewallRuleArgs}", ProcessWindowStyle.Minimized, true);
+
+                        if (elevatedProcess == null)
                         {
                             Logger.Error("Failed to start elevated process for firewall rule creation.", true);
                             return;
                         }
 
-                        process.WaitForExit();
-
-                        if (process.ExitCode == 0)
+                        if (elevatedProcess.ExitCode == 0)
                         {
                             Logger.Log("Firewall rule created successfully.");
                         }
                         else
                         {
-                            Logger.Error($"Failed to create firewall rule. Elevated process returned exit code {process.ExitCode}.", true);
+                            Logger.Error($"Failed to create firewall rule. Elevated process returned exit code {elevatedProcess.ExitCode}.", true);
                             return;
                         }
                     }
@@ -100,7 +100,7 @@ namespace Fika_Installer.Utils
                     New-NetFirewallRule -DisplayName '{displayName}' -Direction {direction} -Protocol {protocol} -LocalPort {port} -Program '{program}' -Action Allow -Enabled True -Profile Any
             ";
 
-            ProcUtils.ExecuteSilent("powershell.exe", $"{_powershellCmd} -Command \"{firewallCmd}\"");
+            ProcUtils.Execute("powershell.exe", $"{_powershellCmd} \"{firewallCmd}\"", ProcessWindowStyle.Hidden, true);
         }
     }
 }

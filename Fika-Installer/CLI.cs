@@ -1,4 +1,5 @@
 ﻿using Fika_Installer.Models.Enums;
+using Fika_Installer.Utils;
 
 namespace Fika_Installer
 {
@@ -15,17 +16,17 @@ namespace Fika_Installer
             Console.WriteLine();
 
             Console.WriteLine("Supported arguments:");
-            Console.WriteLine("  install fika [-path spt_path] [-method HardCopy, Symlink]");
-            Console.WriteLine("  install headless [-path spt_path] [-method HardCopy, Symlink] [-profileId headless_profile_id]");
+            Console.WriteLine("  install fika [--path spt_path] [--method HardCopy, Symlink]");
+            Console.WriteLine("  install headless [--path spt_path] [--method <HardCopy> <Symlink>] [--profileId headless_profile_id]");
             Console.WriteLine("  uninstall");
             Console.WriteLine("  update fika");
             Console.WriteLine("  update headless");
             Console.WriteLine();
 
             Console.WriteLine("Optional arguments:");
-            Console.WriteLine("-path is the EFT/SPT folder path to copy the files from to create a duplicate instance.");
-            Console.WriteLine("-method is the install method (HardCopy or Symlink). Only works if -path is defined.");
-            Console.WriteLine("-profileId is the headless profile id. If not specified, a new headless profile will be created.");
+            Console.WriteLine("--path is the EFT/SPT folder path to copy the files from to create a duplicate instance.");
+            Console.WriteLine("--method is the install method (HardCopy or Symlink). Only works if -path is defined.");
+            Console.WriteLine("--profileId is the headless profile id. If not specified, a new headless profile will be created.");
 
             if (message != null)
             {
@@ -62,7 +63,7 @@ namespace Fika_Installer
 
                         switch (param)
                         {
-                            case "-path":
+                            case "--path":
                                 if (paramValue != null && Directory.Exists(paramValue)) 
                                 {
                                     sptFolder = paramValue;
@@ -70,7 +71,7 @@ namespace Fika_Installer
 
                                 i++;
                                 break;
-                            case "-method":
+                            case "--method":
                                 if (paramValue != null && !Enum.TryParse(paramValue, out installMethod))
                                 {
                                     Logger.Error("Invalid install method argument. Supported arguments: HardCopy, Symlink");
@@ -79,7 +80,7 @@ namespace Fika_Installer
 
                                 i++;
                                 break;
-                            case "-profileid":
+                            case "--profileid":
                                 if (paramValue != null && paramValue.Length == 24)
                                 {
                                     headlessProfileId = paramValue;
@@ -135,14 +136,14 @@ namespace Fika_Installer
                     break; // end update
 
                 // internal use only
-                case "create-firewall-rules":
+                case "create-firewall-rule":
                     if (args.Length < 2)
                     {
-                        PrintHelp("create-firewall-rules command requires install directory argument.");
+                        PrintHelp("create-firewall-rule command requires install directory argument.");
                     }
 
                     Console.WriteLine("Creating firewall rule...");
-                    Utils.FwUtils.CreateFirewallRule(args[1], args[2], args[3], args[4], args[5]);
+                    FwUtils.CreateFirewallRule(args[1], args[2], args[3], args[4], args[5]);
                     break;
 
                 case "help":
