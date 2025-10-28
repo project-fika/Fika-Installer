@@ -33,7 +33,7 @@ namespace Fika_Installer
             //   wrong-argument cases are very unlikely to be automated.
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey(true);
-            Terminate(1);
+            Environment.Exit(0);
         }
 
         public static void Parse(string[] args)
@@ -104,46 +104,18 @@ namespace Fika_Installer
                     }
                     break; // end update
 
+                // internal use only
+                case "create-firewall-rules":
+                    if (args.Length < 2) PrintHelp("create-firewall-rules command requires install directory argument");
+                    Console.WriteLine("Creating firewall rules..."); // No Logger here, as this is the helper process
+                    Utils.FwUtils.ElevatedSetRules(args[1]);
+                    break;
+
                 default:
                     PrintHelp($"Unknown command-line argument: {args[0]}");
                     break;
             }
-            Terminate();
-        }
-
-        public static void Terminate(int code = 0)
-        {
-            /*
-             * This is important:
-             * Since this process is self-elevating (because of firewall rules),
-             * if it is called by any other process, that process *can not* know
-             * when fika-installer has finished, unless it is polling the log file.
-             * 
-             * Because of this, as a temporary workaround, we log a default "Closing" message
-             * both on errors as well as on normal termination, so that external
-             * processes can monitor the log file for this message to detect termination.
-             * 
-             * Ideally, we'd only elevate when needed, meaning when we create firewall rules.
-             * This could be done like this:
-             * - keep track of whether firewall rules have been created (fika-installer.json with {"firewallRulesCreated": true} ?)
-             * - when firewall rules should be created, check for that flag first and if needed:
-             * - re-launch self with elevation:
-                var psi = new ProcessStartInfo
-                {
-                  FileName = Application.ExecutablePath,
-                  Arguments = "create-firewall-rules",
-                  Verb = "runas",
-                  UseShellExecute = true
-                };
-                Process.Start(psi);
-             * - create-firewall-rules is a new CLI argument that only creates the firewall rules and then exits
-             * 
-             * This preserves the functionality without forcing elevation all the time,
-             * which is a better user experience, generally better practice and allows fika-installer to be
-             * used programmatically without as much headache.
-             */
-            Logger.Log("Closing");
-            Environment.Exit(code);
+            Environment.Exit(0);
         }
     }
 }
