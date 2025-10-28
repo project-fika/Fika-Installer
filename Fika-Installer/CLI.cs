@@ -16,7 +16,7 @@ namespace Fika_Installer
             Console.WriteLine();
 
             Console.WriteLine("Supported arguments:");
-            Console.WriteLine("  install fika [--path spt_path] [--method HardCopy, Symlink]");
+            Console.WriteLine("  install fika [--path spt_path] [--method <HardCopy> <Symlink>]");
             Console.WriteLine("  install headless [--path spt_path] [--method <HardCopy> <Symlink>] [--profileId headless_profile_id]");
             Console.WriteLine("  uninstall");
             Console.WriteLine("  update fika");
