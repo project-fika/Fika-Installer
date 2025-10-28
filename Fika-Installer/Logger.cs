@@ -195,7 +195,7 @@ namespace Fika_Installer
             }
 
             // non-interactive, exit with error code
-            if (!_isInteractive) Environment.Exit(1);
+            if (!_isInteractive) CLI.Terminate(1);
         }
     }
 }
