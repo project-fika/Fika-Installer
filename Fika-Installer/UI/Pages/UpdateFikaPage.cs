@@ -1,13 +1,11 @@
-﻿using Fika_Installer.Spt;
-using Fika_Installer.Utils;
-using System.Text.Json.Nodes;
-
-namespace Fika_Installer.UI.Pages
+﻿namespace Fika_Installer.UI.Pages
 {
-    public partial class Methods
+    public partial class PageFunctions
     {
         public static void UpdateFika(string installDir)
         {
+            Logger.Log("Updating Fika...");
+
             bool fikaDetected = File.Exists(Installer.FikaCorePath(installDir));
 
             if (!fikaDetected)
@@ -32,7 +30,7 @@ namespace Fika_Installer.UI.Pages
     {
         public override void OnShow()
         {
-            Methods.UpdateFika(installDir);
+            PageFunctions.UpdateFika(installDir);
         }
     }
 }

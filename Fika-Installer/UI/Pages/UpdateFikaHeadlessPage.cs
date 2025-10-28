@@ -1,9 +1,11 @@
 ﻿namespace Fika_Installer.UI.Pages
 {
-    public partial class Methods
+    public partial class PageFunctions
     {
         public static void UpdateHeadless(string installDir)
         {
+            Logger.Log("Updating Fika Headless...");
+
             bool fikaDetected = File.Exists(Installer.FikaCorePath(installDir));
 
             if (!fikaDetected)
@@ -30,7 +32,7 @@
         {
             FikaInstaller fikaInstaller = new(installDir);
 
-            Methods.UpdateHeadless(installDir);
+            PageFunctions.UpdateHeadless(installDir);
         }
     }
 }

@@ -91,7 +91,8 @@ namespace Fika_Installer
                 Path.Combine(bepInExConfigPath, "com.fika.headless.cfg"),
                 Path.Combine(userModsPath, "fika-server"),
                 Path.Combine(installDir, "HeadlessConfig.json"),
-                Path.Combine(installDir, "FikaHeadlessManager.exe")
+                Path.Combine(installDir, "FikaHeadlessManager.exe"),
+                Path.Combine(installDir, "FikaInstallerTemp")
             ];
 
             try
@@ -122,13 +123,6 @@ namespace Fika_Installer
             }
 
             return true;
-        }
-
-        public void ApplyFirewallRules()
-        {
-            Logger.Log("Applying Fika firewall rules...");
-
-            FwUtils.CreateFirewallRules(installDir);
         }
 
         public string? GetCompatibleEftVersionFromRelease(GitHubRelease gitHubRelease)
@@ -169,7 +163,7 @@ namespace Fika_Installer
 
             string outputPath = Path.Combine(outputDir, assetName);
 
-            return FileUtils.DownloadFileWithProgress(assetUrl, outputPath);
+            return FileUtils.DownloadFile(assetUrl, outputPath, Logger.IsInteractive);
         }
 
         private bool ExtractRelease(string releasePath, string outputDir)

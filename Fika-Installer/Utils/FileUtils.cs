@@ -24,7 +24,7 @@ namespace Fika_Installer.Utils
             return string.Empty;
         }
 
-        public static bool CopyFolderWithProgress(string sourcePath, string destinationPath, List<string> exclusions)
+        public static bool CopyFolder(string sourcePath, string destinationPath, List<string> exclusions, bool showProgress = false)
         {
             bool result = false;
 
@@ -42,7 +42,12 @@ namespace Fika_Installer.Utils
             int totalFiles = allFiles.Count;
             int filesCopied = 0;
 
-            ProgressBar progressBar = new();
+            ProgressBar? progressBar = null;
+
+            if (showProgress)
+            {
+                progressBar = new();
+            }
 
             try
             {
@@ -58,9 +63,12 @@ namespace Fika_Installer.Utils
                         continue;
                     }
 
-                    string message = $"Copying: {fileName}";
-                    double progress = (double)filesCopied / totalFiles;
-                    progressBar.Draw(message, progress);
+                    if (showProgress)
+                    {
+                        string message = $"Copying: {fileName}";
+                        double progress = (double)filesCopied / totalFiles;
+                        progressBar?.Draw(message, progress);
+                    }
 
                     if (!Directory.Exists(destDir))
                     {
@@ -75,20 +83,25 @@ namespace Fika_Installer.Utils
             }
             catch (Exception ex)
             {
-                progressBar.Dispose();
+                progressBar?.Dispose();
                 Logger.Error(ex.Message);
             }
 
-            progressBar.Dispose();
+            progressBar?.Dispose();
 
             return result;
         }
 
-        public static bool DownloadFileWithProgress(string downloadUrl, string outputPath)
+        public static bool DownloadFile(string downloadUrl, string outputPath, bool showProgress = false)
         {
             bool result = false;
 
-            ProgressBar progressBar = new();
+            ProgressBar? progressBar = null;
+
+            if (showProgress)
+            {
+                progressBar = new();
+            }
 
             try
             {
@@ -132,10 +145,10 @@ namespace Fika_Installer.Utils
                                     fileStream.Write(buffer, 0, read);
                                     totalRead += read;
 
-                                    if (totalBytes.HasValue)
+                                    if (totalBytes.HasValue && showProgress)
                                     {
                                         double progress = (double)totalRead / totalBytes.Value;
-                                        progressBar.Draw($"Downloading: {fileName}", progress);
+                                        progressBar?.Draw($"Downloading: {fileName}", progress);
                                     }
                                 }
                             }
@@ -147,11 +160,11 @@ namespace Fika_Installer.Utils
             }
             catch (Exception ex)
             {
-                progressBar.Dispose();
+                progressBar?.Dispose();
                 Logger.Error(ex.Message);
             }
 
-            progressBar.Dispose();
+            progressBar?.Dispose();
 
             return result;
         }

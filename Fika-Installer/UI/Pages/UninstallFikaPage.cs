@@ -1,13 +1,14 @@
 ﻿using Fika_Installer.Spt;
-using Fika_Installer.Utils;
 using System.Text.Json.Nodes;
 
 namespace Fika_Installer.UI.Pages
 {
-    public partial class Methods
+    public partial class PageFunctions
     {
-        public static void Uninstall(string installDir)
+        public static void UninstallFika(string installDir)
         {
+            Logger.Log("Uninstalling Fika...");
+
             bool fikaDetected = File.Exists(Installer.FikaCorePath(installDir));
 
             if (!fikaDetected)
@@ -20,7 +21,7 @@ namespace Fika_Installer.UI.Pages
 
             if (!fikaInstaller.UninstallFika())
             {
-                Logger.Error("Installer failed.");
+                Logger.Error("An error occurred during uninstallation.", true);
                 return;
             }
 
@@ -48,12 +49,10 @@ namespace Fika_Installer.UI.Pages
             Menu uninstallFikaMenu = menuFactory.CreateConfirmUninstallFikaMenu();
             MenuChoice selectedChoice = uninstallFikaMenu.Show();
 
-            if (selectedChoice.Text == "No")
+            if (selectedChoice.Text == "Yes")
             {
-                return;
+                PageFunctions.UninstallFika(installDir);
             }
-
-            Methods.Uninstall(installDir);
         }
     }
 }

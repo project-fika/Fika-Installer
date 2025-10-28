@@ -1,4 +1,6 @@
-﻿using Fika_Installer.Models.Fika.Network;
+﻿using Fika_Installer.Models.Enums;
+using Fika_Installer.Models.Fika;
+using Fika_Installer.Models.Fika.Network;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -33,7 +35,7 @@ namespace Fika_Installer.Fika
             {
                 FikaPingResponse pingResponse = Ping();
 
-                if (pingResponse.PingResult == PingResult.Success)
+                if (pingResponse.PingResult == FikaPingResult.Success)
                 {
                     if (pingResponse.HttpStatusCode == HttpStatusCode.OK)
                     {
@@ -69,11 +71,11 @@ namespace Fika_Installer.Fika
             {
                 HttpResponseMessage httpResponse = GetHttpResponse("fika/api/heartbeat");
 
-                return new(PingResult.Success, httpResponse.StatusCode);
+                return new(FikaPingResult.Success, httpResponse.StatusCode);
             }
             catch
             {
-                return new(PingResult.Failed, HttpStatusCode.RequestTimeout);
+                return new(FikaPingResult.Failed, HttpStatusCode.RequestTimeout);
             }
         }
 

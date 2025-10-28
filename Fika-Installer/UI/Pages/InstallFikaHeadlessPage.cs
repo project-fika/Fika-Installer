@@ -1,16 +1,29 @@
 ﻿using Fika_Installer.Fika;
-using Fika_Installer.Models;
+using Fika_Installer.Models.Enums;
 using Fika_Installer.Models.Spt;
 using Fika_Installer.Spt;
+using Fika_Installer.Utils;
 
 namespace Fika_Installer.UI.Pages
 {
-    public partial class Methods
+    public partial class PageFunctions
     {
-        public static void InstallHeadless(string installDir, string? headlessProfileId, InstallMethod? installMethod)
+        public static void InstallHeadless(string installDir, string sptFolder, string? headlessProfileId, InstallMethod installMethod)
         {
-            SptInstance sptInstance = new(installDir);
+            Logger.Log("Installing Fika Headless...");
+
+            SptInstance sptInstance;
+
             bool isSptInstalled = SptUtils.IsSptInstalled(installDir);
+
+            if (isSptInstalled)
+            {
+                sptInstance = new(installDir);
+            }
+            else
+            {
+                sptInstance = new(sptFolder);
+            }
 
             FikaHeadless fikaHeadless = new(sptInstance);
 
@@ -30,6 +43,7 @@ namespace Fika_Installer.UI.Pages
                     return;
                 }
             }
+
             if (string.IsNullOrEmpty(headlessProfileId))
             {
                 Logger.Error("Headless profile ID unexpectedly null.", true);
@@ -44,9 +58,9 @@ namespace Fika_Installer.UI.Pages
 
             if (!isSptInstalled)
             {
-                SptInstaller selectedSptInstaller = new(sptInstance.GamePath);
+                SptInstaller selectedSptInstaller = new(sptFolder);
 
-                if (!selectedSptInstaller.InstallSpt(installDir, installMethod ?? InstallMethod.HardCopy, true))
+                if (!selectedSptInstaller.InstallSpt(installDir, installMethod, true))
                 {
                     return;
                 }
@@ -66,7 +80,7 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            fikaInstaller.ApplyFirewallRules();
+            FwUtils.CreateFirewallRules(installDir);
 
             Logger.Success("Fika Headless installed successfully!", true);
         }
@@ -75,11 +89,11 @@ namespace Fika_Installer.UI.Pages
     public class InstallFikaHeadlessPage(MenuFactory menuFactory, string installDir) : Page
     {
         private string? _headlessProfileId;
-        private InstallMethod _installMethod;
 
         public override void OnShow()
         {
             SptInstance? sptInstance;
+            InstallMethod installMethod = InstallMethod.HardCopy;
 
             bool isSptInstalled = SptUtils.IsSptInstalled(installDir);
 
@@ -97,9 +111,8 @@ namespace Fika_Installer.UI.Pages
                     return;
                 }
 
-                installDir = browseSptFolderPage.Result;
-                sptInstance = new(installDir);
-            }            
+                sptInstance = new(browseSptFolderPage.Result);
+            }
 
             List<SptProfile> sptProfiles = sptInstance.GetHeadlessProfiles();
 
@@ -120,13 +133,14 @@ namespace Fika_Installer.UI.Pages
                 Menu installMethodMenu = menuFactory.CreateInstallMethodMenu();
                 MenuChoice installMethodMenuChoice = installMethodMenu.Show();
 
-                if (!Enum.TryParse(installMethodMenuChoice.Text, out _installMethod))
+                if (!Enum.TryParse(installMethodMenuChoice.Text, out installMethod))
                 {
+                    // This should never happen
                     return;
                 }
             }
 
-            Methods.InstallHeadless(installDir, _headlessProfileId, isSptInstalled ? null : _installMethod);
+            PageFunctions.InstallHeadless(installDir, sptInstance.ClientPath, _headlessProfileId, installMethod);
         }
     }
 }

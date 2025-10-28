@@ -1,14 +1,17 @@
-﻿using Fika_Installer.Spt;
+﻿using Fika_Installer.Models.Enums;
+using Fika_Installer.Spt;
 using Fika_Installer.Utils;
 
 namespace Fika_Installer.UI.Pages
 {
-    public partial class Methods
+    public partial class PageFunctions
     {
         public static void InstallFika(string installDir)
         {
+            Logger.Log("Installing Fika...");
+
             bool fikaDetected = File.Exists(Installer.FikaCorePath(installDir));
-            
+
             if (fikaDetected)
             {
                 Logger.Error("Fika is already installed.", true);
@@ -39,7 +42,7 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            fikaInstaller.ApplyFirewallRules();
+            FwUtils.CreateFirewallRules(installDir);
 
             Logger.Success("Fika installed successfully!", true);
         }
@@ -49,7 +52,7 @@ namespace Fika_Installer.UI.Pages
     {
         public override void OnShow()
         {
-            Methods.InstallFika(installDir);
+            PageFunctions.InstallFika(installDir);
         }
     }
 }

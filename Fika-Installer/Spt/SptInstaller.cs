@@ -1,4 +1,4 @@
-﻿using Fika_Installer.Models;
+﻿using Fika_Installer.Models.Enums;
 using Fika_Installer.Utils;
 using SharpHDiffPatch.Core;
 using System.Runtime.InteropServices;
@@ -48,7 +48,7 @@ namespace Fika_Installer.Spt
 
             Logger.Log("Copying client folder...");
 
-            if (!FileUtils.CopyFolderWithProgress(sptDir, installDir, excludeFiles))
+            if (!FileUtils.CopyFolder(sptDir, installDir, excludeFiles, Logger.IsInteractive))
             {
                 Logger.Error("An error occurred when copying the client files.", true);
                 return false;
@@ -59,7 +59,7 @@ namespace Fika_Installer.Spt
                 string sptPatchesDir = Path.Combine(sptDir, @"SPT\SPT_Data\Launcher\Patches");
                 string sptPatchesDirDest = Path.Combine(installDir, @"SPT\SPT_Data\Launcher\Patches");
 
-                if (!FileUtils.CopyFolderWithProgress(sptPatchesDir, sptPatchesDirDest, []))
+                if (!FileUtils.CopyFolder(sptPatchesDir, sptPatchesDirDest, [], Logger.IsInteractive))
                 {
                     return false;
                 }

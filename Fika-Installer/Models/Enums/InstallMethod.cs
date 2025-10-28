@@ -1,4 +1,4 @@
-﻿namespace Fika_Installer.Models
+﻿namespace Fika_Installer.Models.Enums
 {
     public enum InstallMethod
     {

@@ -1,4 +1,4 @@
-﻿using Fika_Installer.Models;
+﻿using Fika_Installer.Models.Enums;
 
 namespace Fika_Installer
 {
@@ -14,13 +14,14 @@ namespace Fika_Installer
             Console.WriteLine("Fika Installer CLI");
             Console.WriteLine("");
             Console.WriteLine("Supported arguments:");
-            Console.WriteLine("  install fika");
-            Console.WriteLine("  install headless [headlessProfileId] [installMethod]");
-            Console.WriteLine("    headlessProfileId: optional, if not provided (or \"new\") a new profile will be created");
-            Console.WriteLine("    installMethod: optional, either: hardcopy, symlink");
+            Console.WriteLine("  install fika [-path spt_path] [-method HardCopy, Symlink]");
+            Console.WriteLine("  install headless [-path spt_path] [-method HardCopy, Symlink] [-profileId headless_profile_id]");
             Console.WriteLine("  uninstall");
             Console.WriteLine("  update fika");
             Console.WriteLine("  update headless");
+            Console.WriteLine();
+            Console.WriteLine("-path and -method are optional arguments. It will be assumed that Fika-Installer is inside the EFT/SPT root directory if not specified.");
+            Console.WriteLine("-profileId is an optional argument. A new headless profile will be created if not specified.");
 
             if (message != null)
             {
@@ -28,11 +29,6 @@ namespace Fika_Installer
                 Console.WriteLine(message);
             }
 
-            // Pause to allow user to read
-            // Normally, for automated use, Exit(1) is preferred, but
-            //   wrong-argument cases are very unlikely to be automated.
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadKey(true);
             Environment.Exit(0);
         }
 
@@ -41,80 +37,119 @@ namespace Fika_Installer
             switch (args[0].ToLower())
             {
                 case "install":
-                    Logger.Log("Starting installation");
-                    if (args.Length < 2) PrintHelp("Install command requires argument; supported arguments: fika, headless");
+                    if (args.Length < 2)
+                    {
+                        PrintHelp("Install command requires argument. Supported arguments: fika, headless");
+                    }
+
+                    string sptFolder = Installer.CurrentDir;
+                    InstallMethod installMethod = InstallMethod.HardCopy;
+                    string? headlessProfileId = null;
+
+                    for (int i = 0; i < args.Length; i++)
+                    {
+                        string param = args[i].ToLower();
+                        string? paramValue = null;
+                        
+                        if (i < args.Length - 1)
+                        {
+                            paramValue = args[i + 1];
+                        }
+
+                        switch (param)
+                        {
+                            case "-path":
+                                if (paramValue != null && Directory.Exists(paramValue)) 
+                                {
+                                    sptFolder = paramValue;
+                                } 
+
+                                i++;
+                                break;
+                            case "-method":
+                                if (paramValue != null && !Enum.TryParse(paramValue, out installMethod))
+                                {
+                                    Logger.Error("Invalid install method argument. Supported arguments: HardCopy, Symlink");
+                                    break;
+                                }
+
+                                i++;
+                                break;
+                            case "-profileid":
+                                if (paramValue != null && paramValue.Length == 24)
+                                {
+                                    headlessProfileId = paramValue;
+                                }
+
+                                i++;
+                                break;
+                        }
+                    }
+
                     switch (args[1].ToLower())
                     {
                         case "fika":
-                            Logger.Log("Installing: fika");
-                            UI.Pages.Methods.InstallFika(Installer.CurrentDir);
+                            if (Installer.CurrentDir == sptFolder)
+                            {
+                                UI.Pages.PageFunctions.InstallFika(Installer.CurrentDir);
+                            }
+                            else
+                            {
+                                UI.Pages.PageFunctions.InstallFikaCurrentDir(Installer.CurrentDir, sptFolder, installMethod);
+                            }
                             break;
                         case "headless":
-                            Logger.Log("Installing: headless");
-                            string? headlessProfileId = null;
-                            if (args.Length >= 3)
-                            {
-                                headlessProfileId = args[2];
-                            }
-                            InstallMethod? installMethod = null;
-                            if (args.Length >= 4)
-                            {
-                                switch (args[3])
-                                {
-                                    case "hardcopy":
-                                        installMethod = InstallMethod.HardCopy;
-                                        break;
-                                    case "symlink":
-                                        installMethod = InstallMethod.Symlink;
-                                        break;
-                                    default:
-                                        Logger.Error("Invalid install method argument; supported arguments: hardcopy, symlink");
-                                        break;
-                                }
-                            }
-                            UI.Pages.Methods.InstallHeadless(Installer.CurrentDir, headlessProfileId, installMethod);
+                            UI.Pages.PageFunctions.InstallHeadless(Installer.CurrentDir, sptFolder, headlessProfileId, installMethod);
                             break;
                         default:
-                            PrintHelp("Invalid install argument; supported arguments: fika, headles");
+                            PrintHelp("Invalid install argument. Supported arguments: fika, headless");
                             break;
                     }
                     break; // end install
 
                 case "uninstall":
-                    Logger.Log("Starting uninstallation");
-                    UI.Pages.Methods.Uninstall(Installer.CurrentDir);
+                    UI.Pages.PageFunctions.UninstallFika(Installer.CurrentDir);
                     break; // end uninstall
 
                 case "update":
-                    Logger.Log("Starting update");
-                    if (args.Length < 2) PrintHelp("Update command requires argument; supported arguments: fika, headless");
+                    if (args.Length < 2)
+                    {
+                        PrintHelp("Update command requires argument. Supported arguments: fika, headless");
+                    }
                     switch (args[1].ToLower())
                     {
                         case "fika":
-                            Logger.Log("Updating: fika");
-                            UI.Pages.Methods.UpdateFika(Installer.CurrentDir);
+                            UI.Pages.PageFunctions.UpdateFika(Installer.CurrentDir);
                             break;
                         case "headless":
-                            Logger.Log("Updating: headless");
-                            UI.Pages.Methods.UpdateHeadless(Installer.CurrentDir);
+                            UI.Pages.PageFunctions.UpdateHeadless(Installer.CurrentDir);
                             break;
                         default:
-                            PrintHelp("Update command requires argument; supported arguments: fika, headless");
+                            PrintHelp("Update command requires argument. Supported arguments: fika, headless");
                             break;
                     }
                     break; // end update
 
                 // internal use only
                 case "create-firewall-rules":
-                    if (args.Length < 2) PrintHelp("create-firewall-rules command requires install directory argument");
-                    Console.WriteLine("Creating firewall rules..."); // No Logger here, as this is the helper process
-                    Utils.FwUtils.ElevatedSetRules(args[1]);
+                    if (args.Length < 2)
+                    {
+                        PrintHelp("create-firewall-rules command requires install directory argument.");
+                    }
+
+                    Console.WriteLine("Creating firewall rules...");
+                    Utils.FwUtils.CreateFirewallRule(args[1], args[2], args[3], args[4], args[5]);
+                    break;
+
+                case "help":
+                    PrintHelp();
                     break;
 
                 default:
                     PrintHelp($"Unknown command-line argument: {args[0]}");
                     break;
             }
+
             Environment.Exit(0);
         }
     }
