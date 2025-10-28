@@ -24,9 +24,9 @@ namespace Fika_Installer
             Console.WriteLine();
 
             Console.WriteLine("Optional arguments:");
-            Console.WriteLine("--path is the EFT/SPT folder path to copy the files from to create a duplicate instance.");
-            Console.WriteLine("--method is the install method (HardCopy or Symlink). Only works if -path is defined.");
-            Console.WriteLine("--profileId is the headless profile id. If not specified, a new headless profile will be created.");
+            Console.WriteLine("  --path is the EFT/SPT folder path to copy the files from to create a duplicate instance.");
+            Console.WriteLine("  --method is the install method (HardCopy or Symlink). Only works if -path is defined.");
+            Console.WriteLine("  --profileId is the headless profile id. If not specified, a new headless profile will be created.");
 
             if (message != null)
             {
