@@ -14,6 +14,12 @@ namespace Fika_Installer
             FileLogger fileLogger = new(logFilePath);
             Logger.AddLogger(fileLogger);
 
+            PageLogger pageLogger = new();
+            Logger.AddLogger(pageLogger);
+
+            Console.Title = Installer.VersionString;
+            Console.CursorVisible = false;
+
             if (args.Length > 0)
             {
                 Logger.SetInteractive(false);
@@ -29,12 +35,6 @@ namespace Fika_Installer
 
         static void InitUI()
         {
-            Console.Title = Installer.VersionString;
-            Console.CursorVisible = false;
-
-            PageLogger pageLogger = new();
-            Logger.AddLogger(pageLogger);
-
             Header.Show();
 
             MenuFactory menuFactory = new(Installer.CurrentDir);
