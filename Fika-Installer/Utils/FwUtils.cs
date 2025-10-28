@@ -4,29 +4,25 @@ namespace Fika_Installer.Utils
 {
     public static class FwUtils
     {
-        private record FirewallRuleset(
-            int version, 
-            (
-                string displayName,
-                string direction,
-                string protocol,
-                string port,
-                string program
-            )[] rules
+        private const string _powershellCmd = "-NoProfile -ExecutionPolicy Bypass";
+
+        public record FirewallRule (
+            string displayName,
+            string direction,
+            string protocol,
+            string port,
+            string program
         );
 
-        private static FirewallRuleset FirewallRules(string installDir)
+        private static FirewallRule[] FirewallRules(string installDir)
         {
             // Define the firewall rules needed for Fika
             // Version number is checked against current saved state; increment version number to
             //  force (re-)creation of (new) rules
-            return new FirewallRuleset(
-                version: 1,
-                [
-                    ("Fika (SPT) - TCP 6969", "Inbound", "TCP", "6969", Path.Combine(installDir, "SPT", SptConstants.ServerExeName)),
-                    ("Fika (Core) - UDP 25565", "Inbound", "UDP", "25565", Path.Combine(installDir, EftConstants.GameExeName))
-                ]
-            );
+            return new FirewallRule[] {
+                new("Fika (SPT) - TCP 6969", "Inbound", "TCP", "6969", Path.Combine(installDir, "SPT", SptConstants.ServerExeName)),
+                new("Fika (Core) - UDP 25565", "Inbound", "UDP", "25565", Path.Combine(installDir, EftConstants.GameExeName))
+            };
         }
 
         /// <summary>
@@ -35,8 +31,24 @@ namespace Fika_Installer.Utils
         /// </summary>
         public static void CreateFirewallRules(string installDir, bool force = false)
         {
-            FirewallRuleset ruleset = FirewallRules(installDir);
-            if (StateUtils.GetValue<int>("fw_rules_version") < ruleset.version || force)
+            FirewallRule[] ruleset = FirewallRules(installDir);
+
+            Logger.Log("Checking existing firewall rules...");
+            bool requiresElevation = false;
+            foreach (var rule in ruleset)
+            {
+                bool ruleAlreadySet = ProcUtils.ExecuteSilent(
+                    "powershell.exe",
+                    $"{_powershellCmd} \"Get-NetFirewallRule -DisplayName '{rule.displayName}'\""
+                );
+                if (!ruleAlreadySet)
+                {
+                    requiresElevation = true;
+                    break;
+                }
+            }
+
+            if (requiresElevation || force)
             {
                 Logger.Log("Firewall rules confirmed to need creation.");
                 try
@@ -49,7 +61,7 @@ namespace Fika_Installer.Utils
                         Verb = "runas",
                         UseShellExecute = true
                     });
-                    
+
                     if (process == null)
                     {
                         throw new Exception("Failed to start elevated process for firewall rule creation.");
@@ -70,7 +82,6 @@ namespace Fika_Installer.Utils
                 {
                     Logger.Error($"Failed to create firewall rules: {ex.Message}", true);
                 }
-                StateUtils.SetValue<int>("fw_rules_version", ruleset.version);
             }
             else
             {
@@ -84,8 +95,8 @@ namespace Fika_Installer.Utils
         /// </summary>
         public static void ElevatedSetRules(string installDir)
         {
-            FirewallRuleset ruleset = FirewallRules(installDir);
-            foreach (var rule in ruleset.rules)
+            FirewallRule[] ruleset = FirewallRules(installDir);
+            foreach (var rule in ruleset)
             {
                 Console.WriteLine($"Creating firewall rule: {rule.displayName}");
                 CreateFirewallRule(
@@ -100,7 +111,6 @@ namespace Fika_Installer.Utils
 
         private static void CreateFirewallRule(string displayName, string direction, string protocol, string port, string program = "")
         {
-            string powershellCmd = $"-NoProfile -ExecutionPolicy Bypass";
             string firewallCmd = $@"
                 $existingRule = Get-NetFirewallRule -DisplayName '{displayName}' -ErrorAction SilentlyContinue |
                 Get-NetFirewallApplicationFilter |
@@ -111,7 +121,7 @@ namespace Fika_Installer.Utils
                 }}
             ";
 
-            ProcUtils.ExecuteSilent("powershell.exe", $"{powershellCmd} -Command \"{firewallCmd}\"");
+            ProcUtils.ExecuteSilent("powershell.exe", $"{_powershellCmd} -Command \"{firewallCmd}\"");
         }
     }
 }
