@@ -12,7 +12,8 @@ namespace Fika_Installer
             }
 
             Console.WriteLine("Fika Installer CLI");
-            Console.WriteLine("");
+            Console.WriteLine();
+
             Console.WriteLine("Supported arguments:");
             Console.WriteLine("  install fika [-path spt_path] [-method HardCopy, Symlink]");
             Console.WriteLine("  install headless [-path spt_path] [-method HardCopy, Symlink] [-profileId headless_profile_id]");
@@ -20,8 +21,11 @@ namespace Fika_Installer
             Console.WriteLine("  update fika");
             Console.WriteLine("  update headless");
             Console.WriteLine();
-            Console.WriteLine("-path and -method are optional arguments. It will be assumed that Fika-Installer is inside the EFT/SPT root directory if not specified.");
-            Console.WriteLine("-profileId is an optional argument. A new headless profile will be created if not specified.");
+
+            Console.WriteLine("Optional arguments:");
+            Console.WriteLine("-path is the EFT/SPT folder path to copy the files from to create a duplicate instance.");
+            Console.WriteLine("-method is the install method (HardCopy or Symlink). Only works if -path is defined.");
+            Console.WriteLine("-profileId is the headless profile id. If not specified, a new headless profile will be created.");
 
             if (message != null)
             {
@@ -137,7 +141,7 @@ namespace Fika_Installer
                         PrintHelp("create-firewall-rules command requires install directory argument.");
                     }
 
-                    Console.WriteLine("Creating firewall rules...");
+                    Console.WriteLine("Creating firewall rule...");
                     Utils.FwUtils.CreateFirewallRule(args[1], args[2], args[3], args[4], args[5]);
                     break;
 
