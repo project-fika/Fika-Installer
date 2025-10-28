@@ -20,7 +20,7 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            if (headlessProfileId == null)
+            if (headlessProfileId == null || headlessProfileId == "new")
             {
                 headlessProfileId = fikaHeadless.CreateHeadlessProfile();
 

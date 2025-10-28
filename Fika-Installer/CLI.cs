@@ -16,7 +16,7 @@ namespace Fika_Installer
             Console.WriteLine("Supported arguments:");
             Console.WriteLine("  install fika");
             Console.WriteLine("  install headless [headlessProfileId] [installMethod]");
-            Console.WriteLine("    headlessProfileId: optional, if not provided a new profile will be created");
+            Console.WriteLine("    headlessProfileId: optional, if not provided (or \"new\") a new profile will be created");
             Console.WriteLine("    installMethod: optional, either: hardcopy, symlink");
             Console.WriteLine("  uninstall");
             Console.WriteLine("  update fika");
@@ -125,8 +125,8 @@ namespace Fika_Installer
              * 
              * Ideally, we'd only elevate when needed, meaning when we create firewall rules.
              * This could be done like this:
-             * - keep track of whether firewall rules have been created (fika-installer.json with "firewallRulesCreated": true ?)
-             * - when firewall rules should be created, check for this flag first and if needed:
+             * - keep track of whether firewall rules have been created (fika-installer.json with {"firewallRulesCreated": true} ?)
+             * - when firewall rules should be created, check for that flag first and if needed:
              * - re-launch self with elevation:
                 var psi = new ProcessStartInfo
                 {
