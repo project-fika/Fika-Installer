@@ -64,6 +64,9 @@
 
         private void Erase(int left, int top, int length)
         {
+            // setting cursor position when not owning the console will break
+            if (Logger.IsInteractive == false) return;
+
             int consoleWidth = Console.BufferWidth;
 
             // Prevent setting cursor outside of bounds

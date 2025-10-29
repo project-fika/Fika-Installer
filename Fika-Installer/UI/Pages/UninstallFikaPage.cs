@@ -1,26 +1,24 @@
 ﻿using Fika_Installer.Spt;
+using Fika_Installer.Utils;
 using System.Text.Json.Nodes;
 
 namespace Fika_Installer.UI.Pages
 {
-    public class UninstallFikaPage(MenuFactory menuFactory, string installDir) : Page
+    public partial class PageFunctions
     {
-        public override void OnShow()
+        public static void UninstallFika(string installDir)
         {
-            Menu uninstallFikaMenu = menuFactory.CreateConfirmUninstallFikaMenu();
-            MenuChoice selectedChoice = uninstallFikaMenu.Show();
-
-            if (selectedChoice.Text == "No")
-            {
-                return;
-            }
+            Logger.Log("Uninstalling Fika...");
 
             FikaInstaller fikaInstaller = new(installDir);
 
             if (!fikaInstaller.UninstallFika())
             {
+                Logger.Error("An error occurred during uninstallation.", true);
                 return;
             }
+
+            FwUtils.RemoveFirewallRules(installDir);
 
             SptInstance sptInstance = new(installDir);
 
@@ -36,6 +34,20 @@ namespace Fika_Installer.UI.Pages
             }
 
             Logger.Success("Fika uninstalled successfully!", true);
+        }
+    }
+
+    public class UninstallFikaPage(MenuFactory menuFactory, string installDir) : Page
+    {
+        public override void OnShow()
+        {
+            Menu uninstallFikaMenu = menuFactory.CreateConfirmUninstallFikaMenu();
+            MenuChoice selectedChoice = uninstallFikaMenu.Show();
+
+            if (selectedChoice.Text == "Yes")
+            {
+                PageFunctions.UninstallFika(installDir);
+            }
         }
     }
 }

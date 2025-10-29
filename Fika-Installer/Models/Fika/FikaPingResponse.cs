@@ -1,16 +1,11 @@
-﻿using System.Net;
+﻿using Fika_Installer.Models.Enums;
+using System.Net;
 
 namespace Fika_Installer.Models.Fika
 {
-    public enum PingResult
+    public class FikaPingResponse(FikaPingResult pingResult, HttpStatusCode httpStatusCode)
     {
-        Success,
-        Failed
-    }
-
-    public class FikaPingResponse(PingResult pingResult, HttpStatusCode httpStatusCode)
-    {
-        public PingResult PingResult { get; set; } = pingResult;
+        public FikaPingResult PingResult { get; set; } = pingResult;
         public HttpStatusCode HttpStatusCode { get; set; } = httpStatusCode;
     }
 }

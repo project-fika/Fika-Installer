@@ -1,4 +1,5 @@
 ﻿using IWshRuntimeLibrary;
+using System.Diagnostics;
 using System.IO.Compression;
 using File = System.IO.File;
 using ProgressBar = Fika_Installer.UI.ProgressBar;
@@ -24,7 +25,7 @@ namespace Fika_Installer.Utils
             return string.Empty;
         }
 
-        public static bool CopyFolderWithProgress(string sourcePath, string destinationPath, List<string> exclusions)
+        public static bool CopyFolder(string sourcePath, string destinationPath, List<string> exclusions, bool showProgress = false)
         {
             bool result = false;
 
@@ -42,7 +43,12 @@ namespace Fika_Installer.Utils
             int totalFiles = allFiles.Count;
             int filesCopied = 0;
 
-            ProgressBar progressBar = new();
+            ProgressBar? progressBar = null;
+
+            if (showProgress)
+            {
+                progressBar = new();
+            }
 
             try
             {
@@ -58,9 +64,12 @@ namespace Fika_Installer.Utils
                         continue;
                     }
 
-                    string message = $"Copying: {fileName}";
-                    double progress = (double)filesCopied / totalFiles;
-                    progressBar.Draw(message, progress);
+                    if (showProgress)
+                    {
+                        string message = $"Copying: {fileName}";
+                        double progress = (double)filesCopied / totalFiles;
+                        progressBar?.Draw(message, progress);
+                    }
 
                     if (!Directory.Exists(destDir))
                     {
@@ -75,20 +84,25 @@ namespace Fika_Installer.Utils
             }
             catch (Exception ex)
             {
-                progressBar.Dispose();
-                Logger.Error($"An error occurred while copying the folder: {ex.Message}", true);
+                progressBar?.Dispose();
+                Logger.Error(ex.Message);
             }
 
-            progressBar.Dispose();
+            progressBar?.Dispose();
 
             return result;
         }
 
-        public static bool DownloadFileWithProgress(string downloadUrl, string outputPath)
+        public static bool DownloadFile(string downloadUrl, string outputPath, bool showProgress = false)
         {
             bool result = false;
 
-            ProgressBar progressBar = new();
+            ProgressBar? progressBar = null;
+
+            if (showProgress)
+            {
+                progressBar = new();
+            }
 
             try
             {
@@ -132,10 +146,10 @@ namespace Fika_Installer.Utils
                                     fileStream.Write(buffer, 0, read);
                                     totalRead += read;
 
-                                    if (totalBytes.HasValue)
+                                    if (totalBytes.HasValue && showProgress)
                                     {
                                         double progress = (double)totalRead / totalBytes.Value;
-                                        progressBar.Draw($"Downloading: {fileName}", progress);
+                                        progressBar?.Draw($"Downloading: {fileName}", progress);
                                     }
                                 }
                             }
@@ -147,41 +161,65 @@ namespace Fika_Installer.Utils
             }
             catch (Exception ex)
             {
-                progressBar.Dispose();
+                progressBar?.Dispose();
                 Logger.Error(ex.Message);
             }
 
-            progressBar.Dispose();
+            progressBar?.Dispose();
 
             return result;
         }
 
-        public static void ExtractZip(string zipFilePath, string outputDirectory)
+        public static bool ExtractZip(string zipFilePath, string outputDirectory)
         {
             try
             {
                 Directory.CreateDirectory(outputDirectory);
                 ZipFile.ExtractToDirectory(zipFilePath, outputDirectory, overwriteFiles: true);
+
+                return true;
             }
             catch (Exception ex)
             {
-                Logger.Log(ex.Message);
+                Logger.Error(ex.Message);
+                return false;
             }
         }
 
         public static bool CreateFolderSymlink(string fromPath, string toPath)
         {
+            if (SecUtils.IsRunAsAdmin())
+            {
+                return CreateFolderSymlinkElevated(fromPath, toPath);
+            }
+            else
+            {
+                Process? processElevated = ProcUtils.Execute(Application.ExecutablePath, $"create-symlink \"{fromPath}\" \"{toPath}\"", ProcessWindowStyle.Minimized, true);
+
+                if (processElevated == null)
+                {
+                    Logger.Error("Failed to run elevated process.");
+                    return false;
+                }
+
+                return processElevated.ExitCode == 0;
+            }
+        }
+
+        public static bool CreateFolderSymlinkElevated(string fromPath, string toPath)
+        {
             try
             {
                 Directory.CreateSymbolicLink(toPath, fromPath);
+
+                return true;
             }
             catch (Exception ex)
             {
-                Logger.Error($"An error occurred when creating the symlink: {ex.Message}");
+                Logger.Error(ex.Message);
+
                 return false;
             }
-
-            return true;
         }
 
         public static void CreateShortcut(string shortcutPath, string targetPath, string workingDir, string iconPath, string description)

@@ -9,14 +9,14 @@ namespace Fika_Installer.Spt
         private string _profilesPath;
         private string _launcherConfigPath;
 
-        public string GamePath { get; private set; }
+        public string ClientPath { get; private set; }
         public string SptPath { get; private set; }
         public string ServerExePath { get; private set; }
         public List<SptProfile> Profiles { get; private set; } = [];
 
         public SptInstance(string path)
         {
-            GamePath = path;
+            ClientPath = path;
             SptPath = Path.Combine(path, "SPT");
             ServerExePath = Path.Combine(SptPath, SptConstants.ServerExeName);
 
@@ -54,7 +54,7 @@ namespace Fika_Installer.Spt
             {
                 try
                 {
-                    JsonObject? profile = JsonUtils.DeserializeFromFile(sptProfilePath);
+                    JsonObject? profile = JsonUtils.DeserializeFromFile<JsonObject>(sptProfilePath);
 
                     if (profile != null)
                     {
@@ -96,7 +96,7 @@ namespace Fika_Installer.Spt
         {
             if (File.Exists(_launcherConfigPath))
             {
-                JsonObject? launcherConfig = JsonUtils.DeserializeFromFile(_launcherConfigPath);
+                JsonObject? launcherConfig = JsonUtils.DeserializeFromFile<JsonObject>(_launcherConfigPath);
 
                 return launcherConfig;
             }

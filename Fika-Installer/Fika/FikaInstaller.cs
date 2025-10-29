@@ -30,6 +30,7 @@ namespace Fika_Installer
 
             if (gitHubRelease == null)
             {
+                Logger.Error("Failed to retrieve release from Github.", true);
                 return false;
             }
 
@@ -53,6 +54,7 @@ namespace Fika_Installer
 
             if (asset == null)
             {
+                Logger.Error("Failed to retrieve asset from release.", true);
                 return false;
             }
 
@@ -60,6 +62,7 @@ namespace Fika_Installer
 
             if (!DownloadRelease(asset, tempDir))
             {
+                Logger.Error("Failed to download release.", true);
                 return false;
             }
 
@@ -68,6 +71,7 @@ namespace Fika_Installer
 
             if (!ExtractRelease(releaseZipFilePath, installDir))
             {
+                Logger.Error("Failed to extract release.", true);
                 return false;
             }
 
@@ -87,7 +91,8 @@ namespace Fika_Installer
                 Path.Combine(bepInExConfigPath, "com.fika.headless.cfg"),
                 Path.Combine(userModsPath, "fika-server"),
                 Path.Combine(installDir, "HeadlessConfig.json"),
-                Path.Combine(installDir, "FikaHeadlessManager.exe")
+                Path.Combine(installDir, "FikaHeadlessManager.exe"),
+                Path.Combine(installDir, "FikaInstallerTemp")
             ];
 
             try
@@ -118,26 +123,6 @@ namespace Fika_Installer
             }
 
             return true;
-        }
-
-        public void ApplyFirewallRules()
-        {
-            Logger.Log("Applying Fika firewall rules...");
-
-            string sptPath = Path.Combine(installDir, "SPT");
-            string sptServerPath = Path.Combine(sptPath, SptConstants.ServerExeName);
-
-            if (File.Exists(sptServerPath))
-            {
-                FwUtils.CreateFirewallRule("Fika (SPT) - TCP 6969", "Inbound", "TCP", "6969", sptServerPath);
-            }
-
-            string escapeFromTarkovPath = Path.Combine(installDir, EftConstants.GameExeName);
-
-            if (File.Exists(escapeFromTarkovPath))
-            {
-                FwUtils.CreateFirewallRule("Fika (Core) - UDP 25565", "Inbound", "UDP", "25565", escapeFromTarkovPath);
-            }
         }
 
         public string? GetCompatibleEftVersionFromRelease(GitHubRelease gitHubRelease)
@@ -177,33 +162,17 @@ namespace Fika_Installer
             Logger.Log($"Downloading {assetName}...");
 
             string outputPath = Path.Combine(outputDir, assetName);
-            bool downloadResult = FileUtils.DownloadFileWithProgress(assetUrl, outputPath);
 
-            if (!downloadResult)
-            {
-                Logger.Error($"An error occurred while downloading {assetName}.", true);
-            }
-
-            return downloadResult;
+            return FileUtils.DownloadFile(assetUrl, outputPath, Logger.IsInteractive);
         }
 
         private bool ExtractRelease(string releasePath, string outputDir)
         {
-            try
-            {
-                string fileName = Path.GetFileName(releasePath);
+            string fileName = Path.GetFileName(releasePath);
 
-                Logger.Log($"Extracting {fileName}...");
-                FileUtils.ExtractZip(releasePath, outputDir);
+            Logger.Log($"Extracting {fileName}...");
 
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Logger.Error($"An error occurred when extracting the ZIP archive: {ex.Message}", true);
-            }
-
-            return false;
+            return FileUtils.ExtractZip(releasePath, outputDir);
         }
     }
 }

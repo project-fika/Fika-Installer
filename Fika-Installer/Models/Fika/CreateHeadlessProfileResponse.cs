@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Fika_Installer.Models.Fika
+namespace Fika_Installer.Models.Fika.Network
 {
     public class CreateHeadlessProfileResponse
     {

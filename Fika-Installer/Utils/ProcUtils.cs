@@ -4,15 +4,16 @@ namespace Fika_Installer.Utils
 {
     public static class ProcUtils
     {
-        public static bool ExecuteSilent(string path, string args)
+        public static Process? Execute(string path, string args, ProcessWindowStyle processWindowStyle, bool elevated = false)
         {
             ProcessStartInfo startInfo = new()
             {
                 FileName = path,
                 WorkingDirectory = Path.GetDirectoryName(path),
                 Arguments = args,
-                UseShellExecute = false,
-                CreateNoWindow = true
+                UseShellExecute = true,
+                Verb = elevated ? "runas" : "",
+                WindowStyle = processWindowStyle
             };
 
             Process process = new()
@@ -24,14 +25,15 @@ namespace Fika_Installer.Utils
             {
                 process.Start();
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                Logger.Error(ex.Message);
+                return null;
             }
 
             process.WaitForExit();
 
-            return process.ExitCode == 0;
+            return process;
         }
     }
 }

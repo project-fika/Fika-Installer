@@ -15,8 +15,9 @@ namespace Fika_Installer
 
                 return gitHubRelease;
             }
-            catch
+            catch (Exception ex)
             {
+                Logger.Error(ex.Message);
                 return null;
             }
         }

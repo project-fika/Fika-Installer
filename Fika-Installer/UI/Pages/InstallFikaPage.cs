@@ -1,17 +1,29 @@
-﻿using Fika_Installer.Spt;
+﻿using Fika_Installer.Models.Enums;
+using Fika_Installer.Spt;
 using Fika_Installer.Utils;
 
 namespace Fika_Installer.UI.Pages
 {
-    public class InstallFikaPage(string installDir) : Page
+    public partial class PageFunctions
     {
-        public override void OnShow()
+        public static void InstallFika(string installDir)
         {
-            bool isSptInstalled = SptUtils.IsSptInstalled(installDir);
+            Logger.Log("Installing Fika...");
 
-            if (!isSptInstalled)
+            bool fikaDetected = File.Exists(Installer.FikaCorePath(installDir));
+
+            if (fikaDetected)
             {
-                ConUtils.WriteError("SPT not found. Please place Fika-Installer inside your SPT directory.", true);
+                Logger.Error("Fika is already installed.", true);
+                return;
+            }
+
+            bool isSptInstalled = SptUtils.IsSptInstalled(installDir);
+            bool isSptFolderDetected = SptUtils.IsSptFolderDetected(installDir);
+
+            if (!isSptInstalled && !isSptFolderDetected)
+            {
+                Logger.Error("SPT not found. Please place Fika-Installer inside your SPT directory.", true);
                 return;
             }
 
@@ -19,6 +31,7 @@ namespace Fika_Installer.UI.Pages
 
             if (!sptInstaller.InstallSptRequirements(installDir))
             {
+                Logger.Error("Failed to install SPT requirements.", true);
                 return;
             }
 
@@ -26,12 +39,21 @@ namespace Fika_Installer.UI.Pages
 
             if (!fikaInstaller.InstallReleaseList(FikaReleaseLists.StandardFika))
             {
+                Logger.Error("Installer failed.");
                 return;
             }
 
-            fikaInstaller.ApplyFirewallRules();
+            FwUtils.CreateFirewallRules(installDir);
 
             Logger.Success("Fika installed successfully!", true);
+        }
+    }
+
+    public class InstallFikaPage(string installDir) : Page
+    {
+        public override void OnShow()
+        {
+            PageFunctions.InstallFika(installDir);
         }
     }
 }
