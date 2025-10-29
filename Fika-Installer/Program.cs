@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace Fika_Installer
 {
-    // Jank fix to avoid loading winhttp.dll from SPT directory which causes crashes for some people
+    // Jank fix to avoid using winhttp.dll from SPT directory which causes crashes for some people
     // This causes winhttp.dll to get loaded twice in memory, but this one will be prioritized due to load order
     static class StartupNative
     {
