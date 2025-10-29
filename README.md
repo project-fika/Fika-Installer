@@ -26,17 +26,17 @@ There is an "Advanced options" menu with a few additional features:
 ## CLI
 ### Supported arguments:
 ```md
-  install fika [--path <spt_path>] [--method <HardCopy> <Symlink>]
-  install headless [--path <spt_path>] [--method <HardCopy> <Symlink>] [--profileId <headless_profile_id>]
-  update fika
-  update headless
-  uninstall
+install fika [--path <spt_path>] [--method <HardCopy> <Symlink>]
+install headless [--path <spt_path>] [--method <HardCopy> <Symlink>] [--profileId <headless_profile_id>]
+update fika
+update headless
+uninstall
 ```
 ### Optional arguments:
 ```md
-  --path is the EFT/SPT folder path to copy the files from to create a duplicate instance.
-  --method is the install method (HardCopy or Symlink). Only works if -path is defined.
-  --profileId is the headless profile id. If not specified, a new headless profile will be created.
+--path is the EFT/SPT folder path to copy the files from to create a duplicate instance.
+--method is the install method (HardCopy or Symlink). Only works if -path is defined.
+--profileId is the headless profile id. If not specified, a new headless profile will be created.
 ```
 ## Admin requirement
 Fika-Installer requires admin elevation for firewall configuration and symlinking. Fika-Installer does not perform any other modifications to your system.
