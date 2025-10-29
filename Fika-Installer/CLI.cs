@@ -32,6 +32,9 @@ namespace Fika_Installer
             {
                 Console.WriteLine("");
                 Console.WriteLine(message);
+
+                // Exit with error code if we display a message
+                Environment.Exit(1);
             }
 
             Environment.Exit(0);
@@ -110,11 +113,7 @@ namespace Fika_Installer
                             PrintHelp("Invalid install argument. Supported arguments: fika, headless");
                             break;
                     }
-                    break; // end install
-
-                case "uninstall":
-                    UI.Pages.PageFunctions.UninstallFika(Installer.CurrentDir);
-                    break; // end uninstall
+                    break;
 
                 case "update":
                     if (args.Length < 2)
@@ -133,11 +132,28 @@ namespace Fika_Installer
                             PrintHelp("Update command requires argument. Supported arguments: fika, headless");
                             break;
                     }
-                    break; // end update
+                    break;
+
+                case "uninstall":
+                    UI.Pages.PageFunctions.UninstallFika(Installer.CurrentDir);
+                    break;
 
                 // internal use only
                 case "create-firewall-rules":
                     FwUtils.CreateFirewallRulesElevated(Installer.CurrentDir);
+                    break;
+
+                case "remove-firewall-rules":
+                    FwUtils.RemoveFirewallRulesElevated(Installer.CurrentDir);
+                    break;
+
+                case "create-symlink":
+                    if (args.Length < 3)
+                    {
+                        PrintHelp("create-symlink command requires fromPath and toPath arguments.");
+                    }
+
+                    FileUtils.CreateFolderSymlinkElevated(args[1], args[2]);
                     break;
 
                 case "help":

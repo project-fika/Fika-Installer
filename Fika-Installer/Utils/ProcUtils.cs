@@ -25,8 +25,9 @@ namespace Fika_Installer.Utils
             {
                 process.Start();
             }
-            catch
+            catch (Exception ex)
             {
+                Logger.Error(ex.Message);
                 return null;
             }
 

@@ -1,4 +1,5 @@
 ﻿using Fika_Installer.Spt;
+using Fika_Installer.Utils;
 using System.Text.Json.Nodes;
 
 namespace Fika_Installer.UI.Pages
@@ -9,14 +10,6 @@ namespace Fika_Installer.UI.Pages
         {
             Logger.Log("Uninstalling Fika...");
 
-            bool fikaDetected = File.Exists(Installer.FikaCorePath(installDir));
-
-            if (!fikaDetected)
-            {
-                Logger.Error("Fika not found. Please install Fika first.", true);
-                return;
-            }
-
             FikaInstaller fikaInstaller = new(installDir);
 
             if (!fikaInstaller.UninstallFika())
@@ -24,6 +17,8 @@ namespace Fika_Installer.UI.Pages
                 Logger.Error("An error occurred during uninstallation.", true);
                 return;
             }
+
+            FwUtils.RemoveFirewallRules(installDir);
 
             SptInstance sptInstance = new(installDir);
 

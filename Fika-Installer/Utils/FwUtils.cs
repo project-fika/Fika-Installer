@@ -22,6 +22,31 @@ namespace Fika_Installer.Utils
             ];
         }
 
+        public static bool FirewallRuleExists(string displayName, string program, out bool ruleExists)
+        {
+            ruleExists = false;
+
+            string firewallCmd = $@"
+                $existingRule = Get-NetFirewallRule -DisplayName '{displayName}' -ErrorAction SilentlyContinue |
+                Get-NetFirewallApplicationFilter |
+                Where-Object {{ $_.Program -eq '{program}' }}
+                    
+                if (-not $existingRule) {{ exit 1 }}
+            ";
+
+            Process? psProcess = ProcUtils.Execute("powershell.exe", $"{_powershellCmd} \"{firewallCmd}\"", ProcessWindowStyle.Hidden);
+
+            if (psProcess == null)
+            {
+                Logger.Error("Error when starting Powershell.");
+                return false;
+            }
+
+            ruleExists = psProcess.ExitCode == 0;
+
+            return true;
+        }
+
         /// <summary>
         /// Creates the necessary firewall rules for Fika, if they do not already exist or if forced.
         /// Spawns new instance of current exe with elevated permissions to create the rules.
@@ -36,25 +61,14 @@ namespace Fika_Installer.Utils
 
             foreach (var rule in firewallRuleSet)
             {
-                string firewallCmd = $@"
-                    $existingRule = Get-NetFirewallRule -DisplayName '{rule.DisplayName}' |
-                    Get-NetFirewallApplicationFilter |
-                    Where-Object {{ $_.Program -eq '{rule.Program}' }}
-                    
-                    if (-not $existingRule) {{ exit 1 }}
-                ";
+                bool success = FirewallRuleExists(rule.DisplayName, rule.Program, out bool ruleExists);
 
-                Process? psProcess = ProcUtils.Execute("powershell.exe", $"{_powershellCmd} \"{firewallCmd}\"", ProcessWindowStyle.Hidden);
-
-                if (psProcess == null)
+                if (!success)
                 {
-                    Logger.Error("Error when starting Powershell.");
                     return false;
                 }
 
-                bool ruleAlreadySet = psProcess.ExitCode == 0;
-
-                if (!ruleAlreadySet)
+                if (!ruleExists)
                 {
                     createFirewallRulesRequired = true;
                     break;
@@ -63,31 +77,42 @@ namespace Fika_Installer.Utils
 
             if (createFirewallRulesRequired || force)
             {
-                try
-                {                        
-                    Process? elevatedProcess = ProcUtils.Execute(Application.ExecutablePath, $"create-firewall-rules {installDir}", ProcessWindowStyle.Minimized, true);
-
-                    if (elevatedProcess == null)
-                    {
-                        Logger.Error("Failed to start elevated process for firewall rule creation.", true);
-                        return false;
-                    }
-
-                    // TODO: Powershell does not return an exit code when error is thrown on a cmdlet.
-                    if (elevatedProcess.ExitCode == 0)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        Logger.Error($"Elevated process returned exit code {elevatedProcess.ExitCode}.");
-                        return false;
-                    }
-                }
-                catch (Exception ex)
+                Logger.Log("Creating firewall rules...");
+                
+                if (SecUtils.IsRunAsAdmin())
                 {
-                    Logger.Error(ex.Message);
-                    return false;
+                    CreateFirewallRulesElevated(installDir);
+                    return true;
+                }
+                else
+                {
+                    try
+                    {
+                        Process? elevatedProcess = ProcUtils.Execute(Application.ExecutablePath, $"create-firewall-rules {installDir}", ProcessWindowStyle.Minimized, true);
+
+                        if (elevatedProcess == null)
+                        {
+                            Logger.Error("Failed to start elevated process for firewall rule creation.", true);
+                            return false;
+                        }
+
+                        // TODO: Powershell does not return an exit code when error is thrown on a cmdlet.
+                        if (elevatedProcess.ExitCode == 0)
+                        {
+                            Logger.Log("Applied firewall rules.");
+                            return true;
+                        }
+                        else
+                        {
+                            Logger.Error($"Elevated process returned exit code {elevatedProcess.ExitCode}.");
+                            return false;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error(ex.Message);
+                        return false;
+                    }
                 }
             }
             else
@@ -98,11 +123,107 @@ namespace Fika_Installer.Utils
         }
 
         /// <summary>
+        /// Remove firewall rules for Fika, if they exist or if forced.
+        /// Spawns new instance of current exe with elevated permissions to remove the rules.
+        /// </summary>
+        public static bool RemoveFirewallRules(string installDir, bool force = false)
+        {
+            FirewallRule[] firewallRuleSet = FirewallRules(installDir);
+
+            bool removeFirewallRulesRequired = false;
+
+            Logger.Log("Checking existing firewall rules...");
+
+            foreach (var rule in firewallRuleSet)
+            {
+                bool success = FirewallRuleExists(rule.DisplayName, rule.Program, out bool ruleExists);
+
+                if (!success)
+                {
+                    return false;
+                }
+
+                if (ruleExists)
+                {
+                    removeFirewallRulesRequired = true;
+                    break;
+                }
+            }
+
+            if (removeFirewallRulesRequired || force)
+            {
+                Logger.Log("Removing firewall rules...");
+
+                if (SecUtils.IsRunAsAdmin())
+                {
+                    RemoveFirewallRulesElevated(installDir);
+                    return true;
+                }
+                else
+                {
+                    try
+                    {
+                        Process? elevatedProcess = ProcUtils.Execute(Application.ExecutablePath, $"remove-firewall-rules {installDir}", ProcessWindowStyle.Minimized, true);
+
+                        if (elevatedProcess == null)
+                        {
+                            Logger.Error("Failed to start elevated process for firewall rule removal.", true);
+                            return false;
+                        }
+
+                        // TODO: Powershell does not return an exit code when error is thrown on a cmdlet.
+                        if (elevatedProcess.ExitCode == 0)
+                        {
+                            Logger.Log("Firewall rules removed.");
+                            return true;
+                        }
+                        else
+                        {
+                            Logger.Error($"Elevated process returned exit code {elevatedProcess.ExitCode}.");
+                            return false;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error(ex.Message);
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                Logger.Log("Firewall rules not found.");
+                return true;
+            }
+        }
+
+        private static void CreateFirewallRule(string displayName, string direction, string protocol, string port, string program = "")
+        {
+            string firewallCmd = $@"
+                $existingRule = Get-NetFirewallRule -DisplayName '{displayName}' -ErrorAction SilentlyContinue |
+                Get-NetFirewallApplicationFilter |
+                Where-Object {{ $_.Program -eq '{program}' }}
+
+                if (-not $existingRule) {{
+                    New-NetFirewallRule -DisplayName '{displayName}' -Direction {direction} -Protocol {protocol} -LocalPort {port} -Program '{program}' -Action Allow -Enabled True -Profile Any
+                }}
+            ";
+
+            ProcUtils.Execute("powershell.exe", $"{_powershellCmd} \"{firewallCmd}\"", ProcessWindowStyle.Hidden, true);
+        }
+
+        /// <summary>
         /// INTERNAL: Writes the needed firewall rules.
         /// Called for create-firewall-rules CLI arg. Needs elevated permissions.
         /// </summary>
         public static void CreateFirewallRulesElevated(string installDir)
         {
+            if (!SecUtils.IsRunAsAdmin())
+            {
+                Logger.Error("Elevated permissions required to create firewall rules.");
+                return;
+            }
+            
             FirewallRule[] ruleset = FirewallRules(installDir);
             
             foreach (var rule in ruleset)
@@ -122,19 +243,40 @@ namespace Fika_Installer.Utils
             }
         }
 
-        private static void CreateFirewallRule(string displayName, string direction, string protocol, string port, string program = "")
+        private static void RemoveFirewallRule(string displayName, string program = "")
         {
             string firewallCmd = $@"
-                $existingRule = Get-NetFirewallRule -DisplayName '{displayName}' -ErrorAction SilentlyContinue |
+                Get-NetFirewallRule -DisplayName '{displayName}' -ErrorAction SilentlyContinue |
                 Get-NetFirewallApplicationFilter |
-                Where-Object {{ $_.Program -eq '{program}' }}
-
-                if (-not $existingRule) {{
-                    New-NetFirewallRule -DisplayName '{displayName}' -Direction {direction} -Protocol {protocol} -LocalPort {port} -Program '{program}' -Action Allow -Enabled True -Profile Any
-                }}
+                Where-Object {{ $_.Program -eq '{program}' }} |
+                Remove-NetFirewallRule -ErrorAction SilentlyContinue
             ";
 
             ProcUtils.Execute("powershell.exe", $"{_powershellCmd} \"{firewallCmd}\"", ProcessWindowStyle.Hidden, true);
+        }
+
+        public static void RemoveFirewallRulesElevated(string installDir)
+        {
+            if (!SecUtils.IsRunAsAdmin())
+            {
+                Logger.Error("Elevated permissions required to remove firewall rules.");
+                return;
+            }
+
+            FirewallRule[] ruleset = FirewallRules(installDir);
+
+            foreach (var rule in ruleset)
+            {
+                if (File.Exists(rule.Program))
+                {
+                    Logger.Log($"Removing firewall rule: {rule.DisplayName} {rule.Direction} {rule.Protocol} {rule.Port} {rule.Program}");
+
+                    RemoveFirewallRule(
+                        rule.DisplayName,
+                        rule.Program
+                    );
+                }
+            }
         }
     }
 }
