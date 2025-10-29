@@ -9,6 +9,7 @@ The goal is to make the tool as simple as possible with minimal user interaction
 * Install Fika Headless with profile management (create or use an existing headless profile).
 * Update Fika or Fika-Headless.
 * Symlink SPT folder to your Fika/Fika Headless folder to save disk space.
+* Command-line arguments are supported for automation.
 
 ## Usage
 * Place the Fika-Installer executable in your SPT folder.
@@ -21,6 +22,19 @@ The goal is to make the tool as simple as possible with minimal user interaction
 There is an "Advanced options" menu with a few additional features:
 * "Install Fika in current folder" allows you to install Fika-Core and Fika-Server in the directory where Fika-Installer is located. The SPT files will be copied or symlinked.
 * "Install Fika Headless" allows you to install Fika-Core and Fika-Headless in the directory where Fika-Installer is located. The SPT files will be copied or symlinked.
+
+## CLI
+Supported arguments:
+  install fika [--path <spt_path>] [--method <HardCopy> <Symlink>]
+  install headless [--path <spt_path>] [--method <HardCopy> <Symlink>] [--profileId <headless_profile_id>]
+  update fika
+  update headless
+  uninstall
+
+Optional arguments:
+  --path is the EFT/SPT folder path to copy the files from to create a duplicate instance.
+  --method is the install method (HardCopy or Symlink). Only works if -path is defined.
+  --profileId is the headless profile id. If not specified, a new headless profile will be created.
 
 ## Admin requirement
 Fika-Installer requires admin elevation for firewall configuration and symlinking. Fika-Installer does not perform any other modifications to your system.
