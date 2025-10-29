@@ -11,8 +11,9 @@ namespace Fika_Installer.UI.Pages
             Logger.Log("Installing Fika in current folder...");
 
             bool isSptInstalled = SptUtils.IsSptInstalled(installDir);
+            bool isSptFolderDetected = SptUtils.IsSptFolderDetected(installDir);
 
-            if (!isSptInstalled)
+            if (!isSptInstalled && !isSptFolderDetected)
             {
                 SptInstaller selectedSptInstaller = new(sptFolder);
 

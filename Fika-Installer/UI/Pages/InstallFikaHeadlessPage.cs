@@ -56,7 +56,9 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            if (!isSptInstalled)
+            bool isSptFolderDetected = SptUtils.IsSptFolderDetected(installDir);
+
+            if (!isSptInstalled && !isSptFolderDetected)
             {
                 SptInstaller selectedSptInstaller = new(sptFolder);
 

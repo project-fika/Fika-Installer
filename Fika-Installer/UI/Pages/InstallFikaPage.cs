@@ -19,8 +19,9 @@ namespace Fika_Installer.UI.Pages
             }
 
             bool isSptInstalled = SptUtils.IsSptInstalled(installDir);
+            bool isSptFolderDetected = SptUtils.IsSptFolderDetected(installDir);
 
-            if (!isSptInstalled)
+            if (!isSptInstalled && !isSptFolderDetected)
             {
                 Logger.Error("SPT not found. Please place Fika-Installer inside your SPT directory.", true);
                 return;
