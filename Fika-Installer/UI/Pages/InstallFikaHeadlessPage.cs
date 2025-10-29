@@ -12,6 +12,14 @@ namespace Fika_Installer.UI.Pages
         {
             Logger.Log("Installing Fika Headless...");
 
+            bool headlessDetected = File.Exists(Installer.FikaHeadlessPath(installDir));
+
+            if (headlessDetected)
+            {
+                Logger.Error("Fika Headless is already installed.", true);
+                return;
+            }
+
             SptInstance sptInstance;
 
             bool isSptInstalled = SptUtils.IsSptInstalled(installDir);
@@ -72,6 +80,7 @@ namespace Fika_Installer.UI.Pages
 
             if (!sptInstaller.InstallSptRequirements(installDir))
             {
+                Logger.Error("Failed to install SPT requirements.", true);
                 return;
             }
 

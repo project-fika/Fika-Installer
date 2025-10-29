@@ -31,7 +31,7 @@ namespace Fika_Installer.UI.Pages
 
             if (!sptInstaller.InstallSptRequirements(installDir))
             {
-                Logger.Error("SPT Installer failed.");
+                Logger.Error("Failed to install SPT requirements.", true);
                 return;
             }
 
