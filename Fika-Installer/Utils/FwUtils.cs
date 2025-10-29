@@ -30,6 +30,8 @@ namespace Fika_Installer.Utils
         {
             FirewallRule[] firewallRuleSet = FirewallRules(installDir);
 
+            bool createFirewallRulesRequired = false;
+
             Logger.Log("Checking existing firewall rules...");
 
             foreach (var rule in firewallRuleSet)
@@ -39,65 +41,96 @@ namespace Fika_Installer.Utils
                     Get-NetFirewallApplicationFilter |
                     Where-Object {{ $_.Program -eq '{rule.Program}' }}
                     
-                    if (-not $existingRule) {{ throw 'Not Found' }}
+                    if (-not $existingRule) {{ exit 1 }}
                 ";
 
-                Process? powershellProcess = ProcUtils.Execute("powershell.exe", $"{_powershellCmd} \"{firewallCmd}\"", ProcessWindowStyle.Hidden);
+                Process? psProcess = ProcUtils.Execute("powershell.exe", $"{_powershellCmd} \"{firewallCmd}\"", ProcessWindowStyle.Hidden);
 
-                if (powershellProcess == null)
+                if (psProcess == null)
                 {
-                    Logger.Error("Failed to verify firewall rules.");
+                    Logger.Error("Error when starting Powershell.");
                     return;
                 }
 
-                bool ruleAlreadySet = powershellProcess.ExitCode == 0;
-
-                if (!ruleAlreadySet || force)
+                if (psProcess.ExitCode != 0 && psProcess.ExitCode != 1)
                 {
-                    try
+                    Logger.Error("An error occurred while checking firewall rules.");
+                    return;
+                }
+
+                bool ruleAlreadySet = psProcess.ExitCode == 0;
+
+                if (!ruleAlreadySet)
+                {
+                    createFirewallRulesRequired = true;
+                    break;
+                }
+            }
+
+            if (createFirewallRulesRequired || force)
+            {
+                try
+                {                        
+                    Process? elevatedProcess = ProcUtils.Execute(Application.ExecutablePath, $"create-firewall-rules {installDir}", ProcessWindowStyle.Minimized, true);
+
+                    if (elevatedProcess == null)
                     {
-                        string firewallRuleArgs = $"\"{rule.DisplayName}\" \"{rule.Direction}\" \"{rule.Protocol}\" \"{rule.Port}\" \"{rule.Program}\"";
-                        
-                        Logger.Log($"Creating firewall rule: {firewallRuleArgs}...");
-
-                        Process? elevatedProcess = ProcUtils.Execute(Application.ExecutablePath, $"create-firewall-rule {firewallRuleArgs}", ProcessWindowStyle.Minimized, true);
-
-                        if (elevatedProcess == null)
-                        {
-                            Logger.Error("Failed to start elevated process for firewall rule creation.", true);
-                            return;
-                        }
-
-                        if (elevatedProcess.ExitCode == 0)
-                        {
-                            Logger.Log("Firewall rule created successfully.");
-                        }
-                        else
-                        {
-                            Logger.Error($"Failed to create firewall rule. Elevated process returned exit code {elevatedProcess.ExitCode}.", true);
-                            return;
-                        }
+                        Logger.Error("Failed to start elevated process for firewall rule creation.", true);
+                        return;
                     }
-                    catch (Exception ex)
+
+                    if (elevatedProcess.ExitCode == 0)
                     {
-                        Logger.Error($"Failed to create firewall rules: {ex.Message}", true);
+                        Logger.Log("Firewall rules created successfully.");
+                    }
+                    else
+                    {
+                        Logger.Error($"Failed to create firewall rules. Elevated process returned exit code {elevatedProcess.ExitCode}.", true);
+                        return;
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    Logger.Log("Firewall rule already set.");
+                    Logger.Error($"Failed to create firewall rules: {ex.Message}", true);
                 }
+            }
+            else
+            {
+                Logger.Log("Firewall rules already set.");
             }
         }
 
         /// <summary>
-        /// Writes the needed firewall rules.
+        /// INTERNAL: Writes the needed firewall rules.
         /// Called for create-firewall-rules CLI arg. Needs elevated permissions.
         /// </summary>
-        public static void CreateFirewallRule(string displayName, string direction, string protocol, string port, string program = "")
+        public static void CreateFirewallRulesElevated(string installDir)
+        {
+            FirewallRule[] ruleset = FirewallRules(installDir);
+            foreach (var rule in ruleset)
+            {
+                Logger.Log($"Creating firewall rule: {rule.DisplayName} {rule.Direction} {rule.Protocol} {rule.Port} {rule.Program}");
+                
+                CreateFirewallRule(
+                    rule.DisplayName,
+                    rule.Direction,
+                    rule.Protocol,
+                    rule.Port,
+                    rule.Program
+                );
+            }
+        }
+
+        private static void CreateFirewallRule(string displayName, string direction, string protocol, string port, string program = "")
         {
             string firewallCmd = $@"
+                $existingRule = Get-NetFirewallRule -DisplayName '{displayName}' -ErrorAction SilentlyContinue |
+                Get-NetFirewallApplicationFilter |
+                Where-Object {{ $_.Program -eq '{program}' }}
+
+                if (-not $existingRule) {{
                     New-NetFirewallRule -DisplayName '{displayName}' -Direction {direction} -Protocol {protocol} -LocalPort {port} -Program '{program}' -Action Allow -Enabled True -Profile Any
+                }}
             ";
 
             ProcUtils.Execute("powershell.exe", $"{_powershellCmd} \"{firewallCmd}\"", ProcessWindowStyle.Hidden, true);

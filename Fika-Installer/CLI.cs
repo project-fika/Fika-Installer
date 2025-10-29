@@ -18,9 +18,9 @@ namespace Fika_Installer
             Console.WriteLine("Supported arguments:");
             Console.WriteLine("  install fika [--path <spt_path>] [--method <HardCopy> <Symlink>]");
             Console.WriteLine("  install headless [--path <spt_path>] [--method <HardCopy> <Symlink>] [--profileId <headless_profile_id>]");
-            Console.WriteLine("  uninstall");
             Console.WriteLine("  update fika");
             Console.WriteLine("  update headless");
+            Console.WriteLine("  uninstall");
             Console.WriteLine();
 
             Console.WriteLine("Optional arguments:");
@@ -136,14 +136,13 @@ namespace Fika_Installer
                     break; // end update
 
                 // internal use only
-                case "create-firewall-rule":
+                case "create-firewall-rules":
                     if (args.Length < 2)
                     {
-                        PrintHelp("create-firewall-rule command requires install directory argument.");
+                        PrintHelp("create-firewall-rules command requires install directory argument.");
                     }
 
-                    Console.WriteLine("Creating firewall rule...");
-                    FwUtils.CreateFirewallRule(args[1], args[2], args[3], args[4], args[5]);
+                    FwUtils.CreateFirewallRulesElevated(args[1]);
                     break;
 
                 case "help":
