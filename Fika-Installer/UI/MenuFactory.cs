@@ -1,6 +1,7 @@
 ﻿using Fika_Installer.Models.Enums;
 using Fika_Installer.Models.Spt;
 using Fika_Installer.UI.Pages;
+using Fika_Installer.Utils;
 
 namespace Fika_Installer.UI
 {
@@ -70,6 +71,11 @@ namespace Fika_Installer.UI
                 MenuChoice installFikaInCurrentFolder = new("Install Fika in current folder", installFikaCurrentDirPage);
                 advancedMenuChoices.Add(installFikaInCurrentFolder);
             }
+
+            AddFirewallRulesPage addFirewallRulesPage = new(installDir);
+
+            MenuChoice addFirewallRulesChoice = new("Add firewall rules for Fika", addFirewallRulesPage);
+            advancedMenuChoices.Add(addFirewallRulesChoice);
 
             MenuChoice backChoice = new("Back", () => { });
             advancedMenuChoices.Add(backChoice);

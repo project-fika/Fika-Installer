@@ -137,12 +137,7 @@ namespace Fika_Installer
 
                 // internal use only
                 case "create-firewall-rules":
-                    if (args.Length < 2)
-                    {
-                        PrintHelp("create-firewall-rules command requires install directory argument.");
-                    }
-
-                    FwUtils.CreateFirewallRulesElevated(args[1]);
+                    FwUtils.CreateFirewallRulesElevated(Installer.CurrentDir);
                     break;
 
                 case "help":

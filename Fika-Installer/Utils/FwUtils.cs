@@ -26,7 +26,7 @@ namespace Fika_Installer.Utils
         /// Creates the necessary firewall rules for Fika, if they do not already exist or if forced.
         /// Spawns new instance of current exe with elevated permissions to create the rules.
         /// </summary>
-        public static void CreateFirewallRules(string installDir, bool force = false)
+        public static bool CreateFirewallRules(string installDir, bool force = false)
         {
             FirewallRule[] firewallRuleSet = FirewallRules(installDir);
 
@@ -49,13 +49,7 @@ namespace Fika_Installer.Utils
                 if (psProcess == null)
                 {
                     Logger.Error("Error when starting Powershell.");
-                    return;
-                }
-
-                if (psProcess.ExitCode != 0 && psProcess.ExitCode != 1)
-                {
-                    Logger.Error("An error occurred while checking firewall rules.");
-                    return;
+                    return false;
                 }
 
                 bool ruleAlreadySet = psProcess.ExitCode == 0;
@@ -76,27 +70,30 @@ namespace Fika_Installer.Utils
                     if (elevatedProcess == null)
                     {
                         Logger.Error("Failed to start elevated process for firewall rule creation.", true);
-                        return;
+                        return false;
                     }
 
+                    // TODO: Powershell does not return an exit code when error is thrown on a cmdlet.
                     if (elevatedProcess.ExitCode == 0)
                     {
-                        Logger.Log("Firewall rules created successfully.");
+                        return true;
                     }
                     else
                     {
-                        Logger.Error($"Failed to create firewall rules. Elevated process returned exit code {elevatedProcess.ExitCode}.", true);
-                        return;
+                        Logger.Error($"Elevated process returned exit code {elevatedProcess.ExitCode}.");
+                        return false;
                     }
                 }
                 catch (Exception ex)
                 {
-                    Logger.Error($"Failed to create firewall rules: {ex.Message}", true);
+                    Logger.Error(ex.Message);
+                    return false;
                 }
             }
             else
             {
                 Logger.Log("Firewall rules already set.");
+                return true;
             }
         }
 
@@ -107,17 +104,21 @@ namespace Fika_Installer.Utils
         public static void CreateFirewallRulesElevated(string installDir)
         {
             FirewallRule[] ruleset = FirewallRules(installDir);
+            
             foreach (var rule in ruleset)
             {
-                Logger.Log($"Creating firewall rule: {rule.DisplayName} {rule.Direction} {rule.Protocol} {rule.Port} {rule.Program}");
-                
-                CreateFirewallRule(
-                    rule.DisplayName,
-                    rule.Direction,
-                    rule.Protocol,
-                    rule.Port,
-                    rule.Program
-                );
+                if(File.Exists(rule.Program))
+                {
+                    Logger.Log($"Creating firewall rule: {rule.DisplayName} {rule.Direction} {rule.Protocol} {rule.Port} {rule.Program}");
+
+                    CreateFirewallRule(
+                        rule.DisplayName,
+                        rule.Direction,
+                        rule.Protocol,
+                        rule.Port,
+                        rule.Program
+                    );
+                }
             }
         }
 
