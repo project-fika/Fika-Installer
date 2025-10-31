@@ -6,6 +6,11 @@ namespace Fika_Installer.Utils
     {
         private const string _psExeName = "Powershell.exe";
         private const string _psCmdArgs = "-NoProfile -ExecutionPolicy Bypass -Command";
+        private static readonly FirewallRule[] _firewallRules =
+        [
+            new("Fika (SPT) - TCP 6969", "Inbound", "TCP", "6969", Path.Combine(Installer.CurrentDir, "SPT", SptConstants.ServerExeName)),
+            new("Fika (Core) - UDP 25565", "Inbound", "UDP", "25565", Path.Combine(Installer.CurrentDir, EftConstants.GameExeName))
+        ];
 
         public record FirewallRule(
             string DisplayName,
@@ -14,14 +19,6 @@ namespace Fika_Installer.Utils
             string Port,
             string Program
         );
-
-        private static FirewallRule[] GetFirewallRules()
-        {
-            return [
-                new("Fika (SPT) - TCP 6969", "Inbound", "TCP", "6969", Path.Combine(Installer.CurrentDir, "SPT", SptConstants.ServerExeName)),
-                new("Fika (Core) - UDP 25565", "Inbound", "UDP", "25565", Path.Combine(Installer.CurrentDir, EftConstants.GameExeName))
-            ];
-        }
 
         /// <summary>
         /// Creates the necessary firewall rules for Fika, if they do not already exist or if forced.
@@ -151,9 +148,7 @@ namespace Fika_Installer.Utils
                 return;
             }
             
-            FirewallRule[] ruleset = GetFirewallRules();
-            
-            foreach (var rule in ruleset)
+            foreach (var rule in _firewallRules)
             {
                 if (File.Exists(rule.Program))
                 {
@@ -190,9 +185,7 @@ namespace Fika_Installer.Utils
                 return;
             }
 
-            FirewallRule[] ruleset = GetFirewallRules();
-
-            foreach (var rule in ruleset)
+            foreach (var rule in _firewallRules)
             {
                 if (File.Exists(rule.Program))
                 {
@@ -208,13 +201,11 @@ namespace Fika_Installer.Utils
 
         private static bool FirewallRulesExists(out bool rulesExists)
         {
-            rulesExists = false;
-
-            FirewallRule[] ruleset = GetFirewallRules();
-
             Logger.Log("Checking existing firewall rules...");
 
-            foreach (var rule in ruleset)
+            rulesExists = false;
+
+            foreach (var rule in _firewallRules)
             {
                 string firewallCmd = $@"
                 $existingRule = Get-NetFirewallRule -DisplayName '{rule.DisplayName}' -ErrorAction SilentlyContinue |
