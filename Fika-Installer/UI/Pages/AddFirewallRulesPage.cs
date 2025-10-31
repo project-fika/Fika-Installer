@@ -5,8 +5,6 @@ namespace Fika_Installer.UI.Pages
     {
         public static void CreateFirewallRules(string installDir)
         {
-            Logger.Log("Creating firewall rules...");
-
             if (!FwUtils.CreateFirewallRules(installDir))
             {
                 Logger.Error("An error occurred when creating firewall rules.", true);
