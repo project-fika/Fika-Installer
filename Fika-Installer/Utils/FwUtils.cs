@@ -15,11 +15,11 @@ namespace Fika_Installer.Utils
             string Program
         );
 
-        private static FirewallRule[] FirewallRules(string installDir)
+        private static FirewallRule[] GetFirewallRules()
         {
             return [
-                new("Fika (SPT) - TCP 6969", "Inbound", "TCP", "6969", Path.Combine(installDir, "SPT", SptConstants.ServerExeName)),
-                new("Fika (Core) - UDP 25565", "Inbound", "UDP", "25565", Path.Combine(installDir, EftConstants.GameExeName))
+                new("Fika (SPT) - TCP 6969", "Inbound", "TCP", "6969", Path.Combine(Installer.CurrentDir, "SPT", SptConstants.ServerExeName)),
+                new("Fika (Core) - UDP 25565", "Inbound", "UDP", "25565", Path.Combine(Installer.CurrentDir, EftConstants.GameExeName))
             ];
         }
 
@@ -29,14 +29,14 @@ namespace Fika_Installer.Utils
         /// </summary>
         public static bool CreateFirewallRules(string installDir, bool force = false)
         {
-            bool success = FirewallRuleExists(installDir, out bool ruleExists);
+            bool success = FirewallRulesExists(out bool rulesExists);
 
             if (!success)
             {
                 return false;
             }
 
-            if (!ruleExists || force)
+            if (!rulesExists || force)
             {
                 Logger.Log("Creating firewall rules...");
                 
@@ -78,16 +78,16 @@ namespace Fika_Installer.Utils
         /// Remove firewall rules for Fika, if they exist or if forced.
         /// Spawns new instance of current exe with elevated permissions to remove the rules.
         /// </summary>
-        public static bool RemoveFirewallRules(string installDir, bool force = false)
+        public static bool RemoveFirewallRules(bool force = false)
         {
-            bool success = FirewallRuleExists(installDir, out bool ruleExists);
+            bool success = FirewallRulesExists(out bool rulesExists);
 
             if (!success)
             {
                 return false;
             }
 
-            if (ruleExists || force)
+            if (rulesExists || force)
             {
                 Logger.Log("Removing firewall rules...");
 
@@ -125,7 +125,7 @@ namespace Fika_Installer.Utils
         }
 
         private static void CreateFirewallRule(string displayName, string direction, string protocol, string port, string program = "")
-        {
+        {           
             string createFwRuleCmd = $@"
                 $existingRule = Get-NetFirewallRule -DisplayName '{displayName}' -ErrorAction SilentlyContinue |
                 Get-NetFirewallApplicationFilter |
@@ -151,7 +151,7 @@ namespace Fika_Installer.Utils
                 return;
             }
             
-            FirewallRule[] ruleset = FirewallRules(installDir);
+            FirewallRule[] ruleset = GetFirewallRules();
             
             foreach (var rule in ruleset)
             {
@@ -190,7 +190,7 @@ namespace Fika_Installer.Utils
                 return;
             }
 
-            FirewallRule[] ruleset = FirewallRules(installDir);
+            FirewallRule[] ruleset = GetFirewallRules();
 
             foreach (var rule in ruleset)
             {
@@ -206,11 +206,11 @@ namespace Fika_Installer.Utils
             }
         }
 
-        private static bool FirewallRuleExists(string installDir, out bool ruleExists)
+        private static bool FirewallRulesExists(out bool rulesExists)
         {
-            ruleExists = false;
+            rulesExists = false;
 
-            FirewallRule[] ruleset = FirewallRules(installDir);
+            FirewallRule[] ruleset = GetFirewallRules();
 
             Logger.Log("Checking existing firewall rules...");
 
@@ -232,9 +232,14 @@ namespace Fika_Installer.Utils
                     return false;
                 }
 
+                // Returns exit code 1 if rule does not exist
                 if (psProcess.ExitCode == 0)
                 {
-                    ruleExists = true;
+                    rulesExists = true;
+                }
+                else
+                {
+                    rulesExists = false;
                     break;
                 }
             }

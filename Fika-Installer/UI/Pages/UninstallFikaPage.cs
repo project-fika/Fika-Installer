@@ -18,7 +18,7 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            FwUtils.RemoveFirewallRules(installDir);
+            FwUtils.RemoveFirewallRules();
 
             SptInstance sptInstance = new(installDir);
 
