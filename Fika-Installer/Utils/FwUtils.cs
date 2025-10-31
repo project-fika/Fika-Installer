@@ -29,29 +29,14 @@ namespace Fika_Installer.Utils
         /// </summary>
         public static bool CreateFirewallRules(string installDir, bool force = false)
         {
-            FirewallRule[] firewallRuleSet = FirewallRules(installDir);
+            bool success = FirewallRuleExists(installDir, out bool ruleExists);
 
-            bool createFirewallRulesRequired = false;
-
-            Logger.Log("Checking existing firewall rules...");
-
-            foreach (var rule in firewallRuleSet)
+            if (!success)
             {
-                bool success = FirewallRuleExists(rule.DisplayName, rule.Program, out bool ruleExists);
-
-                if (!success)
-                {
-                    return false;
-                }
-
-                if (!ruleExists)
-                {
-                    createFirewallRulesRequired = true;
-                    break;
-                }
+                return false;
             }
 
-            if (createFirewallRulesRequired || force)
+            if (!ruleExists || force)
             {
                 Logger.Log("Creating firewall rules...");
                 
@@ -68,7 +53,6 @@ namespace Fika_Installer.Utils
                     // TODO: Powershell does not return an exit code when error is thrown on a cmdlet.
                     if (elevatedProcess.ExitCode == 0)
                     {
-                        Logger.Log("Applied firewall rules.");
                         return true;
                     }
                     else
@@ -96,29 +80,14 @@ namespace Fika_Installer.Utils
         /// </summary>
         public static bool RemoveFirewallRules(string installDir, bool force = false)
         {
-            FirewallRule[] firewallRuleSet = FirewallRules(installDir);
+            bool success = FirewallRuleExists(installDir, out bool ruleExists);
 
-            bool removeFirewallRulesRequired = false;
-
-            Logger.Log("Checking existing firewall rules...");
-
-            foreach (var rule in firewallRuleSet)
+            if (!success)
             {
-                bool success = FirewallRuleExists(rule.DisplayName, rule.Program, out bool ruleExists);
-
-                if (!success)
-                {
-                    return false;
-                }
-
-                if (ruleExists)
-                {
-                    removeFirewallRulesRequired = true;
-                    break;
-                }
+                return false;
             }
 
-            if (removeFirewallRulesRequired || force)
+            if (ruleExists || force)
             {
                 Logger.Log("Removing firewall rules...");
 
@@ -134,7 +103,6 @@ namespace Fika_Installer.Utils
 
                     if (elevatedProcess.ExitCode == 0)
                     {
-                        Logger.Log("Firewall rules removed.");
                         return true;
                     }
                     else
@@ -238,27 +206,38 @@ namespace Fika_Installer.Utils
             }
         }
 
-        private static bool FirewallRuleExists(string displayName, string program, out bool ruleExists)
+        private static bool FirewallRuleExists(string installDir, out bool ruleExists)
         {
             ruleExists = false;
 
-            string firewallCmd = $@"
-                $existingRule = Get-NetFirewallRule -DisplayName '{displayName}' -ErrorAction SilentlyContinue |
+            FirewallRule[] ruleset = FirewallRules(installDir);
+
+            Logger.Log("Checking existing firewall rules...");
+
+            foreach (var rule in ruleset)
+            {
+                string firewallCmd = $@"
+                $existingRule = Get-NetFirewallRule -DisplayName '{rule.DisplayName}' -ErrorAction SilentlyContinue |
                 Get-NetFirewallApplicationFilter |
-                Where-Object {{ $_.Program -eq '{program}' }}
+                Where-Object {{ $_.Program -eq '{rule.Program}' }}
                     
                 if (-not $existingRule) {{ exit 1 }}
             ";
 
-            Process? psProcess = ProcUtils.Execute(_psExeName, $"{_psCmdArgs} \"{firewallCmd}\"", ProcessWindowStyle.Hidden);
+                Process? psProcess = ProcUtils.Execute(_psExeName, $"{_psCmdArgs} \"{firewallCmd}\"", ProcessWindowStyle.Hidden);
 
-            if (psProcess == null)
-            {
-                Logger.Error("Error when checking firewall rules.");
-                return false;
+                if (psProcess == null)
+                {
+                    Logger.Error("Error when checking firewall rules.");
+                    return false;
+                }
+
+                if (psProcess.ExitCode == 0)
+                {
+                    ruleExists = true;
+                    break;
+                }
             }
-
-            ruleExists = psProcess.ExitCode == 0;
 
             return true;
         }
