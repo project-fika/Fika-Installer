@@ -188,22 +188,15 @@ namespace Fika_Installer.Utils
 
         public static bool CreateFolderSymlink(string fromPath, string toPath)
         {
-            if (SecUtils.IsRunAsAdmin())
-            {
-                return CreateFolderSymlinkElevated(fromPath, toPath);
-            }
-            else
-            {
-                Process? processElevated = ProcUtils.Execute(Application.ExecutablePath, $"create-symlink \"{fromPath}\" \"{toPath}\"", ProcessWindowStyle.Minimized, true);
+            Process? processElevated = ProcUtils.ExecuteElevateSelf($"create-symlink \"{fromPath}\" \"{toPath}\"");
 
-                if (processElevated == null)
-                {
-                    Logger.Error("Failed to run elevated process.");
-                    return false;
-                }
-
-                return processElevated.ExitCode == 0;
+            if (processElevated == null)
+            {
+                Logger.Error("Failed to run elevated process.");
+                return false;
             }
+
+            return processElevated.ExitCode == 0;
         }
 
         public static bool CreateFolderSymlinkElevated(string fromPath, string toPath)

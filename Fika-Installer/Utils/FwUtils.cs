@@ -4,8 +4,6 @@ namespace Fika_Installer.Utils
 {
     public static class FwUtils
     {
-        private const string _psExeName = "Powershell.exe";
-        private const string _psCmdArgs = "-NoProfile -ExecutionPolicy Bypass -Command";
         private static readonly FirewallRule[] _firewallRules =
         [
             new("Fika (SPT) - TCP 6969", "Inbound", "TCP", "6969", Path.Combine(Installer.CurrentDir, "SPT", SptConstants.ServerExeName)),
@@ -39,7 +37,7 @@ namespace Fika_Installer.Utils
                 
                 try
                 {
-                    Process? elevatedProcess = ProcUtils.Execute(Application.ExecutablePath, $"create-firewall-rules", ProcessWindowStyle.Minimized, true);
+                    Process? elevatedProcess = ProcUtils.ExecuteElevateSelf("create-firewall-rules");
 
                     if (elevatedProcess == null)
                     {
@@ -90,7 +88,7 @@ namespace Fika_Installer.Utils
 
                 try
                 {
-                    Process? elevatedProcess = ProcUtils.Execute(Application.ExecutablePath, $"remove-firewall-rules", ProcessWindowStyle.Minimized, true);
+                    Process? elevatedProcess = ProcUtils.ExecuteElevateSelf("remove-firewall-rules");
 
                     if (elevatedProcess == null)
                     {
@@ -133,7 +131,7 @@ namespace Fika_Installer.Utils
                 }}
             ";
 
-            ProcUtils.Execute(_psExeName, $"{_psCmdArgs} \"{createFwRuleCmd}\"", ProcessWindowStyle.Hidden, true);
+            ProcUtils.ExecutePsCmd(createFwRuleCmd);
         }
 
         /// <summary>
@@ -174,7 +172,7 @@ namespace Fika_Installer.Utils
                 Remove-NetFirewallRule -ErrorAction SilentlyContinue
             ";
 
-            ProcUtils.Execute(_psExeName, $"{_psCmdArgs} \"{removeFwRuleCmd}\"", ProcessWindowStyle.Hidden, true);
+            ProcUtils.ExecutePsCmd(removeFwRuleCmd);
         }
 
         public static void RemoveFirewallRulesElevated()
@@ -215,7 +213,7 @@ namespace Fika_Installer.Utils
                 if (-not $existingRule) {{ exit 1 }}
             ";
 
-                Process? psProcess = ProcUtils.Execute(_psExeName, $"{_psCmdArgs} \"{firewallCmd}\"", ProcessWindowStyle.Hidden);
+                Process? psProcess = ProcUtils.ExecutePsCmd(firewallCmd);
 
                 if (psProcess == null)
                 {
