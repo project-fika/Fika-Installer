@@ -140,7 +140,7 @@ namespace Fika_Installer.Utils
         /// INTERNAL: Writes the needed firewall rules.
         /// Called for create-firewall-rules CLI arg. Needs elevated permissions.
         /// </summary>
-        public static void CreateFirewallRulesElevated(string installDir)
+        public static void CreateFirewallRulesElevated()
         {
             if (!SecUtils.IsRunAsAdmin())
             {
@@ -177,7 +177,7 @@ namespace Fika_Installer.Utils
             ProcUtils.Execute(_psExeName, $"{_psCmdArgs} \"{removeFwRuleCmd}\"", ProcessWindowStyle.Hidden, true);
         }
 
-        public static void RemoveFirewallRulesElevated(string installDir)
+        public static void RemoveFirewallRulesElevated()
         {
             if (!SecUtils.IsRunAsAdmin())
             {

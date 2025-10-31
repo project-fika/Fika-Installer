@@ -140,11 +140,11 @@ namespace Fika_Installer
 
                 // internal use only
                 case "create-firewall-rules":
-                    FwUtils.CreateFirewallRulesElevated(Installer.CurrentDir);
+                    FwUtils.CreateFirewallRulesElevated();
                     break;
 
                 case "remove-firewall-rules":
-                    FwUtils.RemoveFirewallRulesElevated(Installer.CurrentDir);
+                    FwUtils.RemoveFirewallRulesElevated();
                     break;
 
                 case "create-symlink":
