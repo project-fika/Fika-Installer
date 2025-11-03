@@ -37,7 +37,7 @@ namespace Fika_Installer.UI.Pages
         }
     }
 
-    public class UninstallFikaPage(MenuFactory menuFactory, string installDir) : Page
+    public class UninstallFikaPage(MenuFactory menuFactory) : Page
     {
         public override void OnShow()
         {
@@ -46,7 +46,7 @@ namespace Fika_Installer.UI.Pages
 
             if (selectedChoice.Text == "Yes")
             {
-                PageFunctions.UninstallFika(installDir);
+                PageFunctions.UninstallFika(Installer.CurrentDir);
             }
         }
     }

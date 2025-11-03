@@ -26,13 +26,11 @@
         }
     }
 
-    public class UpdateFikaHeadlessPage(string installDir) : Page
+    public class UpdateFikaHeadlessPage() : Page
     {
         public override void OnShow()
         {
-            FikaInstaller fikaInstaller = new(installDir);
-
-            PageFunctions.UpdateHeadless(installDir);
+            PageFunctions.UpdateHeadless(Installer.CurrentDir);
         }
     }
 }

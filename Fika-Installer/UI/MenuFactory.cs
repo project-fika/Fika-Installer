@@ -5,29 +5,29 @@ using Fika_Installer.Utils;
 
 namespace Fika_Installer.UI
 {
-    public class MenuFactory(string installDir)
+    public class MenuFactory()
     {
         public Menu CreateMainMenu()
         {
             List<MenuChoice> mainMenuChoices = [];
 
-            bool fikaDetected = File.Exists(Installer.FikaCorePath(installDir));
+            bool fikaDetected = File.Exists(Installer.FikaCorePath(Installer.CurrentDir));
 
             if (fikaDetected)
             {
-                UpdateFikaPage updateFikaPage = new(installDir);
+                UpdateFikaPage updateFikaPage = new();
 
                 MenuChoice updateFikaChoice = new("Update Fika", updateFikaPage);
                 mainMenuChoices.Add(updateFikaChoice);
 
-                UninstallFikaPage uninstallFikaPage = new(this, installDir);
+                UninstallFikaPage uninstallFikaPage = new(this);
 
                 MenuChoice uninstallFikaChoice = new("Uninstall Fika", uninstallFikaPage);
                 mainMenuChoices.Add(uninstallFikaChoice);
             }
             else
             {
-                InstallFikaPage installFikaPage = new(installDir);
+                InstallFikaPage installFikaPage = new();
 
                 MenuChoice installFikaChoice = new("Install Fika", installFikaPage);
                 mainMenuChoices.Add(installFikaChoice);
@@ -45,34 +45,34 @@ namespace Fika_Installer.UI
         {
             List<MenuChoice> advancedMenuChoices = [];
 
-            bool fikaHeadlessDetected = File.Exists(Installer.FikaHeadlessPath(installDir));
+            bool fikaHeadlessDetected = File.Exists(Installer.FikaHeadlessPath(Installer.CurrentDir));
 
             if (fikaHeadlessDetected)
             {
-                UpdateFikaHeadlessPage updateFikaHeadlessPage = new(installDir);
+                UpdateFikaHeadlessPage updateFikaHeadlessPage = new();
 
                 MenuChoice updateFikaHeadlessChoice = new("Update Fika Headless", updateFikaHeadlessPage);
                 advancedMenuChoices.Add(updateFikaHeadlessChoice);
             }
             else
             {
-                InstallFikaHeadlessPage installFikaHeadlessPage = new(this, installDir);
+                InstallFikaHeadlessPage installFikaHeadlessPage = new(this);
 
                 MenuChoice installFikaHeadlessChoice = new("Install Fika Headless", installFikaHeadlessPage);
                 advancedMenuChoices.Add(installFikaHeadlessChoice);
             }
 
-            bool fikaCoreDetected = File.Exists(Installer.FikaCorePath(installDir));
+            bool fikaCoreDetected = File.Exists(Installer.FikaCorePath(Installer.CurrentDir));
 
             if (!fikaCoreDetected)
             {
-                InstallFikaCurrentDirPage installFikaCurrentDirPage = new(this, installDir);
+                InstallFikaCurrentDirPage installFikaCurrentDirPage = new(this);
 
                 MenuChoice installFikaInCurrentFolder = new("Install Fika in current folder", installFikaCurrentDirPage);
                 advancedMenuChoices.Add(installFikaInCurrentFolder);
             }
 
-            AddFirewallRulesPage addFirewallRulesPage = new(installDir);
+            AddFirewallRulesPage addFirewallRulesPage = new();
 
             MenuChoice addFirewallRulesChoice = new("Add firewall rules for Fika", addFirewallRulesPage);
             advancedMenuChoices.Add(addFirewallRulesChoice);

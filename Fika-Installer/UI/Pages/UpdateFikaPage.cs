@@ -26,11 +26,11 @@
         }
     }
 
-    public class UpdateFikaPage(string installDir) : Page
+    public class UpdateFikaPage() : Page
     {
         public override void OnShow()
         {
-            PageFunctions.UpdateFika(installDir);
+            PageFunctions.UpdateFika(Installer.CurrentDir);
         }
     }
 }

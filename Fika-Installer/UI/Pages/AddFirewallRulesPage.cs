@@ -3,9 +3,9 @@ namespace Fika_Installer.UI.Pages
 {
     public partial class PageFunctions
     {
-        public static void CreateFirewallRules(string installDir)
+        public static void CreateFirewallRules()
         {
-            if (!FwUtils.CreateFirewallRules(installDir))
+            if (!FwUtils.CreateFirewallRules())
             {
                 Logger.Error("An error occurred when creating firewall rules.", true);
                 return;
@@ -15,11 +15,11 @@ namespace Fika_Installer.UI.Pages
         }
     }
 
-    public class AddFirewallRulesPage(string installDir) : Page
+    public class AddFirewallRulesPage() : Page
     {
         public override void OnShow()
         {
-            PageFunctions.CreateFirewallRules(installDir);
+            PageFunctions.CreateFirewallRules();
         }
     }
 }

@@ -50,24 +50,24 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            FwUtils.CreateFirewallRules(installDir);
+            FwUtils.CreateFirewallRules();
 
             Logger.Success("Fika installed successfully!", true);
         }
     }
     
-    public class InstallFikaCurrentDirPage(MenuFactory menuFactory, string installDir) : Page
+    public class InstallFikaCurrentDirPage(MenuFactory menuFactory) : Page
     {
         public override void OnShow()
         {
             string sptFolder;
             InstallMethod installMethod = InstallMethod.HardCopy;
 
-            bool isSptInstalled = SptUtils.IsSptInstalled(installDir);
+            bool isSptInstalled = SptUtils.IsSptInstalled(Installer.CurrentDir);
 
             if (isSptInstalled)
             {
-                sptFolder = installDir;
+                sptFolder = Installer.CurrentDir;
             }
             else
             {
@@ -91,7 +91,7 @@ namespace Fika_Installer.UI.Pages
                 }
             }
 
-            PageFunctions.InstallFikaCurrentDir(installDir, sptFolder, installMethod);
+            PageFunctions.InstallFikaCurrentDir(Installer.CurrentDir, sptFolder, installMethod);
         }
     }
 }

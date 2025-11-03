@@ -22,7 +22,7 @@ namespace Fika_Installer.Utils
         /// Creates the necessary firewall rules for Fika, if they do not already exist or if forced.
         /// Spawns new instance of current exe with elevated permissions to create the rules.
         /// </summary>
-        public static bool CreateFirewallRules(string installDir, bool force = false)
+        public static bool CreateFirewallRules(bool force = false)
         {
             bool success = FirewallRulesExists(out bool rulesExists);
 
@@ -146,7 +146,7 @@ namespace Fika_Installer.Utils
                 return;
             }
             
-            foreach (var rule in _firewallRules)
+            foreach (FirewallRule rule in _firewallRules)
             {
                 if (File.Exists(rule.Program))
                 {
@@ -183,7 +183,7 @@ namespace Fika_Installer.Utils
                 return;
             }
 
-            foreach (var rule in _firewallRules)
+            foreach (FirewallRule rule in _firewallRules)
             {
                 if (File.Exists(rule.Program))
                 {

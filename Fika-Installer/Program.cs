@@ -57,7 +57,7 @@ namespace Fika_Installer
 
             Header.Show();
 
-            MenuFactory menuFactory = new(Installer.CurrentDir);
+            MenuFactory menuFactory = new();
 
             while (true)
             {
