@@ -99,7 +99,7 @@ namespace Fika_Installer
                         case "fika":
                             if (Installer.CurrentDir == sptFolder)
                             {
-                                UI.Pages.PageFunctions.InstallFika();
+                                UI.Pages.PageFunctions.InstallFika(Installer.CurrentDir);
                             }
                             else
                             {

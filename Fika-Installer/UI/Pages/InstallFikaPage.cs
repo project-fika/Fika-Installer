@@ -6,11 +6,11 @@ namespace Fika_Installer.UI.Pages
 {
     public partial class PageFunctions
     {
-        public static void InstallFika()
+        public static void InstallFika(string installDir)
         {
             Logger.Log("Installing Fika...");
 
-            bool fikaDetected = File.Exists(Installer.FikaCorePath(Installer.CurrentDir));
+            bool fikaDetected = File.Exists(Installer.FikaCorePath(installDir));
 
             if (fikaDetected)
             {
@@ -18,8 +18,8 @@ namespace Fika_Installer.UI.Pages
                 return;
             }
 
-            bool isSptInstalled = SptUtils.IsSptInstalled(Installer.CurrentDir);
-            bool isSptFolderDetected = SptUtils.IsSptFolderDetected(Installer.CurrentDir);
+            bool isSptInstalled = SptUtils.IsSptInstalled(installDir);
+            bool isSptFolderDetected = SptUtils.IsSptFolderDetected(installDir);
 
             if (!isSptInstalled && !isSptFolderDetected)
             {
@@ -53,7 +53,7 @@ namespace Fika_Installer.UI.Pages
     {
         public override void OnShow()
         {
-            PageFunctions.InstallFika();
+            PageFunctions.InstallFika(Installer.CurrentDir);
         }
     }
 }
