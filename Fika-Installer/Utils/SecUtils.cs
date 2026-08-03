@@ -1,14 +1,13 @@
 ﻿using System.Security.Principal;
 
-namespace Fika_Installer.Utils
+namespace Fika_Installer.Utils;
+
+public class SecUtils
 {
-    public class SecUtils
+    public static bool IsRunAsAdmin()
     {
-        public static bool IsRunAsAdmin()
-        {
-            using WindowsIdentity identity = WindowsIdentity.GetCurrent();
-            WindowsPrincipal principal = new(identity);
-            return principal.IsInRole(WindowsBuiltInRole.Administrator);
-        }
+        using var identity = WindowsIdentity.GetCurrent();
+        WindowsPrincipal principal = new(identity);
+        return principal.IsInRole(WindowsBuiltInRole.Administrator);
     }
 }

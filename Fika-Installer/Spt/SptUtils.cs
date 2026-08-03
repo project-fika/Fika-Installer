@@ -1,23 +1,22 @@
-﻿namespace Fika_Installer.Spt
+﻿namespace Fika_Installer.Spt;
+
+public static class SptUtils
 {
-    public static class SptUtils
+    public static bool IsSptInstalled(string path)
     {
-        public static bool IsSptInstalled(string path)
-        {
-            string sptPath = Path.Combine(path, "SPT");
-            string sptServerPath = Path.Combine(sptPath, SptConstants.ServerExeName);
-            string sptLauncherPath = Path.Combine(sptPath, SptConstants.LauncherExeName);
+        var sptPath = Path.Combine(path, "SPT_Runtime");
+        var sptServerPath = Path.Combine(sptPath, SptConstants.ServerExeName);
+        var sptLauncherPath = Path.Combine(sptPath, SptConstants.LauncherExeName);
 
-            bool sptServerFound = File.Exists(sptServerPath);
-            bool sptLauncherFound = File.Exists(sptLauncherPath);
+        var sptServerFound = File.Exists(sptServerPath);
+        var sptLauncherFound = File.Exists(sptLauncherPath);
 
-            return sptServerFound && sptLauncherFound;
-        }
+        return sptServerFound && sptLauncherFound;
+    }
 
-        public static bool IsSptFolderDetected(string path)
-        {
-            string sptFolder = Path.Combine(path, "SPT");
-            return Directory.Exists(sptFolder);
-        }
+    public static bool IsSptFolderDetected(string path)
+    {
+        var sptFolder = Path.Combine(path, "SPT_Runtime");
+        return Directory.Exists(sptFolder);
     }
 }

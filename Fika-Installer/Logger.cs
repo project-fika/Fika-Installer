@@ -1,201 +1,203 @@
 ﻿using Fika_Installer.Utils;
 
-namespace Fika_Installer
+namespace Fika_Installer;
+
+public interface ILogger
 {
-    public interface ILogger
+    void Log(string message);
+    void Success(string message);
+    void Warning(string message);
+    void Error(string message);
+}
+
+public interface IPageLogger : ILogger
+{
+    void Confirm(string message, bool confirm = false);
+    void Success(string message, bool confirm = false);
+    void Error(string message, bool confirm = false);
+}
+
+public sealed class FileLogger(string logFilePath) : ILogger
+{
+    public void Log(string message)
     {
-        void Log(string message);
-        void Success(string message);
-        void Warning(string message);
-        void Error(string message);
+        WriteLog(message, "INFO");
     }
 
-    public interface IPageLogger : ILogger
+    public void Success(string message)
     {
-        void Confirm(string message, bool confirm = false);
-        void Success(string message, bool confirm = false);
-        void Error(string message, bool confirm = false);
+        Log(message);
     }
 
-    public class FileLogger(string logFilePath) : ILogger
+    public void Warning(string message)
     {
-        public void Log(string message)
-        {
-            WriteLog(message, "INFO");
-        }
+        WriteLog(message, "WARN");
+    }
 
-        public void Success(string message)
-        {
-            Log(message);
-        }
+    public void Error(string message)
+    {
+        WriteLog(message, "ERROR");
+    }
 
-        public void Warning(string message)
+    private void WriteLog(string message, string severity)
+    {
+        try
         {
-            WriteLog(message, "WARN");
-        }
+            var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+            var logEntry = $"{timestamp} [{severity}] {message}\r\n";
 
-        public void Error(string message)
-        {
-            WriteLog(message, "ERROR");
+            File.AppendAllText(logFilePath, logEntry);
         }
+        catch { }
+    }
+}
 
-        private void WriteLog(string message, string severity)
+public sealed class PageLogger : IPageLogger
+{
+    public void Log(string message)
+    {
+        Console.WriteLine(message);
+    }
+
+    public void Confirm(string message)
+    {
+        Confirm(message, false);
+    }
+
+    public void Confirm(string message, bool confirm = false)
+    {
+        ConUtils.WriteConfirm(message, confirm);
+    }
+
+    public void Success(string message)
+    {
+        Success(message, false);
+    }
+
+    public void Success(string message, bool confirm = false)
+    {
+        ConUtils.WriteSuccess(message, confirm);
+    }
+
+    public void Warning(string message)
+    {
+        ConUtils.WriteWarning(message);
+    }
+
+    public void Error(string message)
+    {
+        Error(message, false);
+    }
+
+    public void Error(string message, bool confirm = false)
+    {
+        ConUtils.WriteError(message, confirm);
+    }
+}
+
+public static class Logger
+{
+    private static readonly List<ILogger> _loggers = [];
+    public static bool IsInteractive;
+
+    public static void AddLogger(ILogger logger)
+    {
+        _loggers.Add(logger);
+    }
+
+    public static void SetInteractive(bool isInteractive)
+    {
+        IsInteractive = isInteractive;
+    }
+
+    public static void Log(string message)
+    {
+        foreach (var logger in _loggers)
         {
-            try
+            if (logger is IPageLogger pageLogger)
             {
-                string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
-                string logEntry = $"{timestamp} [{severity}] {message}\r\n";
-
-                File.AppendAllText(logFilePath, logEntry);
+                pageLogger.Log(message);
             }
-            catch { }
+            else
+            {
+                logger.Log(message);
+            }
         }
     }
 
-    public class PageLogger : IPageLogger
+    public static void Confirm(string message)
     {
-        public void Log(string message)
+        foreach (var logger in _loggers)
         {
-            Console.WriteLine(message);
-        }
-
-        public void Confirm(string message)
-        {
-            Confirm(message, false);
-        }
-
-        public void Confirm(string message, bool confirm = false)
-        {
-            ConUtils.WriteConfirm(message, confirm);
-        }
-
-        public void Success(string message)
-        {
-            Success(message, false);
-        }
-
-        public void Success(string message, bool confirm = false)
-        {
-            ConUtils.WriteSuccess(message, confirm);
-        }
-
-        public void Warning(string message)
-        {
-            ConUtils.WriteWarning(message);
-        }
-
-        public void Error(string message)
-        {
-            Error(message, false);
-        }
-
-        public void Error(string message, bool confirm = false)
-        {
-            ConUtils.WriteError(message, confirm);
+            if (logger is IPageLogger pageLogger)
+            {
+                pageLogger.Confirm(message);
+            }
+            else
+            {
+                logger.Log(message);
+            }
         }
     }
 
-    public static class Logger
+    public static void Success(string message)
     {
-        private static readonly List<ILogger> _loggers = [];
-        public static bool IsInteractive = false;
+        Success(message, false);
+    }
 
-        public static void AddLogger(ILogger logger)
+    public static void Success(string message, bool confirm = false)
+    {
+        foreach (var logger in _loggers)
         {
-            _loggers.Add(logger);
-        }
-
-        public static void SetInteractive(bool isInteractive)
-        {
-            IsInteractive = isInteractive;
-        }
-
-        public static void Log(string message)
-        {
-            foreach (var logger in _loggers)
+            if (logger is IPageLogger pageLogger)
             {
-                if (logger is IPageLogger pageLogger)
-                {
-                    pageLogger.Log(message);
-                }
-                else
-                {
-                    logger.Log(message);
-                }
+                pageLogger.Success(message, IsInteractive ? confirm : false);
+            }
+            else
+            {
+                logger.Success(message);
+            }
+        }
+    }
+
+    public static void Warning(string message)
+    {
+        foreach (var logger in _loggers)
+        {
+            if (logger is IPageLogger pageLogger)
+            {
+                pageLogger.Warning(message);
+            }
+            else
+            {
+                logger.Warning(message);
+            }
+        }
+    }
+
+    public static void Error(string message)
+    {
+        Error(message, false);
+    }
+
+    public static void Error(string message, bool confirm = false)
+    {
+        foreach (var logger in _loggers)
+        {
+            if (logger is IPageLogger pageLogger)
+            {
+                pageLogger.Error(message, IsInteractive ? confirm : false);
+            }
+            else
+            {
+                logger.Error(message);
             }
         }
 
-        public static void Confirm(string message)
+        // non-interactive, exit with error code
+        if (!IsInteractive)
         {
-            foreach (var logger in _loggers)
-            {
-                if (logger is IPageLogger pageLogger)
-                {
-                    pageLogger.Confirm(message);
-                }
-                else
-                {
-                    logger.Log(message);
-                }
-            }
-        }
-
-        public static void Success(string message)
-        {
-            Success(message, false);
-        }
-
-        public static void Success(string message, bool confirm = false)
-        {
-            foreach (var logger in _loggers)
-            {
-                if (logger is IPageLogger pageLogger)
-                {
-                    pageLogger.Success(message, IsInteractive ? confirm : false);
-                }
-                else
-                {
-                    logger.Success(message);
-                }
-            }
-        }
-
-        public static void Warning(string message)
-        {
-            foreach (var logger in _loggers)
-            {
-                if (logger is IPageLogger pageLogger)
-                {
-                    pageLogger.Warning(message);
-                }
-                else
-                {
-                    logger.Warning(message);
-                }
-            }
-        }
-
-        public static void Error(string message)
-        {
-            Error(message, false);
-        }
-
-        public static void Error(string message, bool confirm = false)
-        {
-            foreach (var logger in _loggers)
-            {
-                if (logger is IPageLogger pageLogger)
-                {
-                    pageLogger.Error(message, IsInteractive ? confirm : false);
-                }
-                else
-                {
-                    logger.Error(message);
-                }
-            }
-
-            // non-interactive, exit with error code
-            if (!IsInteractive) Environment.Exit(1);
+            Environment.Exit(1);
         }
     }
 }

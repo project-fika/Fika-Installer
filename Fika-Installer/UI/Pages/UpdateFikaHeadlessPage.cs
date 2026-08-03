@@ -1,38 +1,37 @@
-﻿namespace Fika_Installer.UI.Pages
+﻿namespace Fika_Installer.UI.Pages;
+
+public partial class PageFunctions
 {
-    public partial class PageFunctions
+    public static void UpdateHeadless(string installDir)
     {
-        public static void UpdateHeadless(string installDir)
+        Logger.Log("Updating Fika Headless...");
+
+        var fikaDetected = File.Exists(Installer.FikaCorePath(installDir));
+
+        if (!fikaDetected)
         {
-            Logger.Log("Updating Fika Headless...");
-
-            bool fikaDetected = File.Exists(Installer.FikaCorePath(installDir));
-
-            if (!fikaDetected)
-            {
-                Logger.Error("Fika not found. Please install Fika first.", true);
-                return;
-            }
-
-            FikaInstaller fikaInstaller = new(installDir);
-
-            if (!fikaInstaller.InstallReleaseList(FikaReleaseLists.HeadlessFika))
-            {
-                Logger.Error("Installer failed.");
-                return;
-            }
-
-            Logger.Success("Fika Headless updated successfully!", true);
+            Logger.Error("Fika not found. Please install Fika first.", true);
+            return;
         }
+
+        FikaInstaller fikaInstaller = new(installDir);
+
+        if (!fikaInstaller.InstallReleaseList(FikaReleaseLists.HeadlessFika))
+        {
+            Logger.Error("Installer failed.");
+            return;
+        }
+
+        Logger.Success("Fika Headless updated successfully!", true);
     }
+}
 
-    public class UpdateFikaHeadlessPage(string installDir) : Page
+public class UpdateFikaHeadlessPage(string installDir) : Page
+{
+    public override void OnShow()
     {
-        public override void OnShow()
-        {
-            FikaInstaller fikaInstaller = new(installDir);
+        FikaInstaller fikaInstaller = new(installDir);
 
-            PageFunctions.UpdateHeadless(installDir);
-        }
+        PageFunctions.UpdateHeadless(installDir);
     }
 }

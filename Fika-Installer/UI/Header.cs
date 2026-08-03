@@ -1,29 +1,28 @@
-﻿namespace Fika_Installer.UI
+﻿namespace Fika_Installer.UI;
+
+public static class Header
 {
-    public static class Header
+    public static void Show()
     {
-        public static void Show()
-        {
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.BackgroundColor = ConsoleColor.Blue;
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.BackgroundColor = ConsoleColor.Blue;
 
-            string fikaInstallerVersionString = Installer.VersionString;
+        var fikaInstallerVersionString = Installer.VersionString;
 
-            int margin = 5;
-            int headerBackgroundLength = fikaInstallerVersionString.Length + margin * 2;
+        var margin = 5;
+        var headerBackgroundLength = fikaInstallerVersionString.Length + margin * 2;
 
-            string headerBackground = new(' ', headerBackgroundLength);
-            string headerTextSpacer = new(' ', margin);
+        string headerBackground = new(' ', headerBackgroundLength);
+        string headerTextSpacer = new(' ', margin);
 
-            string headerText = $"{headerTextSpacer}{fikaInstallerVersionString}{headerTextSpacer}";
+        var headerText = $"{headerTextSpacer}{fikaInstallerVersionString}{headerTextSpacer}";
 
-            Console.WriteLine(headerBackground);
-            Console.WriteLine(headerText);
-            Console.WriteLine(headerBackground);
+        Console.WriteLine(headerBackground);
+        Console.WriteLine(headerText);
+        Console.WriteLine(headerBackground);
 
-            Console.WriteLine();
+        Console.WriteLine();
 
-            Console.ResetColor();
-        }
+        Console.ResetColor();
     }
 }

@@ -1,36 +1,35 @@
 ﻿using System.Diagnostics;
 
-namespace Fika_Installer.Spt
+namespace Fika_Installer.Spt;
+
+public sealed class SptServer(SptInstance sptInstance)
 {
-    public class SptServer(SptInstance sptInstance)
+    public string ExePath { get; set; } = sptInstance.ServerExePath;
+    public Process? Process { get; set; }
+
+    public void Start()
     {
-        public string ExePath { get; set; } = sptInstance.ServerExePath;
-        public Process? Process { get; set; }
-
-        public void Start()
+        ProcessStartInfo startInfo = new()
         {
-            ProcessStartInfo startInfo = new()
-            {
-                FileName = ExePath,
-                WorkingDirectory = Path.GetDirectoryName(ExePath),
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
+            FileName = ExePath,
+            WorkingDirectory = Path.GetDirectoryName(ExePath),
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
 
-            Process = new()
-            {
-                StartInfo = startInfo
-            };
-
-            Process.Start();
-        }
-
-        public void Stop()
+        Process = new()
         {
-            if (Process != null && !Process.HasExited)
-            {
-                Process.Kill();
-            }
+            StartInfo = startInfo
+        };
+
+        Process.Start();
+    }
+
+    public void Stop()
+    {
+        if (Process?.HasExited == false)
+        {
+            Process.Kill();
         }
     }
 }

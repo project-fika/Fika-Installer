@@ -1,8 +1,7 @@
-﻿namespace Fika_Installer.Models.Fika
+﻿namespace Fika_Installer.Models.Fika;
+
+public sealed record FikaRelease(string releaseName, string releaseUrl)
 {
-    public class FikaRelease(string releaseName, string releaseUrl)
-    {
-        public string Name { get; set; } = releaseName;
-        public string Url { get; set; } = releaseUrl;
-    }
+    public string Name { get; set; } = releaseName;
+    public string Url { get; set; } = releaseUrl;
 }

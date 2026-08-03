@@ -1,8 +1,7 @@
-﻿namespace Fika_Installer.Models.Enums
+﻿namespace Fika_Installer.Models.Enums;
+
+public enum InstallMethod
 {
-    public enum InstallMethod
-    {
-        HardCopy,
-        Symlink
-    }
+    HardCopy,
+    Symlink
 }
