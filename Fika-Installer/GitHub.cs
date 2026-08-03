@@ -1,38 +1,34 @@
-﻿using Fika_Installer.Models.GitHub;
-using System.Text.Json;
+﻿using System.Text.Json;
+using Fika_Installer.Models.GitHub;
 
-namespace Fika_Installer
+namespace Fika_Installer;
+
+public static class GitHub
 {
-    public static class GitHub
+    public static GitHubRelease? GetReleaseFromUrl(string url)
     {
-        public static GitHubRelease? GetReleaseFromUrl(string url)
+        try
         {
-            try
-            {
-                string releaseJson = GetHttpContent(url);
-
-                GitHubRelease? gitHubRelease = JsonSerializer.Deserialize<GitHubRelease>(releaseJson);
-
-                return gitHubRelease;
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex.Message);
-                return null;
-            }
+            var releaseJson = GetHttpContent(url);
+            return JsonSerializer.Deserialize<GitHubRelease>(releaseJson);
         }
-
-        public static string GetHttpContent(string url)
+        catch (Exception ex)
         {
-            using (HttpClient client = new())
-            {
-                client.DefaultRequestHeaders.UserAgent.ParseAdd("FikaInstaller");
+            Logger.Error(ex.Message);
+            return null;
+        }
+    }
 
-                HttpResponseMessage response = client.GetAsync(url).Result;
-                response.EnsureSuccessStatusCode();
+    public static string GetHttpContent(string url)
+    {
+        using (HttpClient client = new())
+        {
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("FikaInstaller");
 
-                return response.Content.ReadAsStringAsync().Result;
-            }
+            var response = client.GetAsync(url).Result;
+            response.EnsureSuccessStatusCode();
+
+            return response.Content.ReadAsStringAsync().Result;
         }
     }
 }

@@ -1,237 +1,236 @@
-﻿using IWshRuntimeLibrary;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO.Compression;
+using IWshRuntimeLibrary;
 using File = System.IO.File;
 using ProgressBar = Fika_Installer.UI.ProgressBar;
 
-namespace Fika_Installer.Utils
+namespace Fika_Installer.Utils;
+
+public static class FileUtils
 {
-    public static class FileUtils
+    public static string BrowseFolder(string description)
     {
-        public static string BrowseFolder(string description)
+        using (var dialog = new FolderBrowserDialog())
         {
-            using (var dialog = new FolderBrowserDialog())
+            dialog.Description = description;
+
+            var result = dialog.ShowDialog();
+
+            if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(dialog.SelectedPath))
             {
-                dialog.Description = description;
-
-                DialogResult result = dialog.ShowDialog();
-
-                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(dialog.SelectedPath))
-                {
-                    return dialog.SelectedPath;
-                }
+                return dialog.SelectedPath;
             }
-
-            return string.Empty;
         }
 
-        public static bool CopyFolder(string sourcePath, string destinationPath, List<string> exclusions, bool showProgress = false)
+        return string.Empty;
+    }
+
+    public static bool CopyFolder(string sourcePath, string destinationPath, List<string> exclusions, bool showProgress = false)
+    {
+        var result = false;
+
+        List<string> allFiles = Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories)
+            .Where(file =>
+            {
+                var relativePath = Path.GetRelativePath(sourcePath, file);
+
+                return !exclusions.Any(ex =>
+                    relativePath == ex ||
+                    relativePath.StartsWith(ex + Path.DirectorySeparatorChar));
+            })
+            .ToList();
+
+        var totalFiles = allFiles.Count;
+        var filesCopied = 0;
+
+        ProgressBar? progressBar = null;
+
+        if (showProgress)
         {
-            bool result = false;
+            progressBar = new();
+        }
 
-            List<string> allFiles = Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories)
-                .Where(file =>
-                {
-                    string relativePath = Path.GetRelativePath(sourcePath, file);
-
-                    return !exclusions.Any(ex =>
-                        relativePath == ex ||
-                        relativePath.StartsWith(ex + Path.DirectorySeparatorChar));
-                })
-                .ToList();
-
-            int totalFiles = allFiles.Count;
-            int filesCopied = 0;
-
-            ProgressBar? progressBar = null;
-
-            if (showProgress)
+        try
+        {
+            foreach (var filePath in allFiles)
             {
-                progressBar = new();
-            }
+                var relativePath = Path.GetRelativePath(sourcePath, filePath);
+                var fileName = Path.GetFileName(filePath);
+                var destFile = Path.Combine(destinationPath, relativePath);
+                var destDir = Path.GetDirectoryName(destFile);
 
-            try
-            {
-                foreach (string filePath in allFiles)
+                if (string.IsNullOrWhiteSpace(destDir))
                 {
-                    string relativePath = Path.GetRelativePath(sourcePath, filePath);
-                    string fileName = Path.GetFileName(filePath);
-                    string destFile = Path.Combine(destinationPath, relativePath);
-                    string? destDir = Path.GetDirectoryName(destFile);
-
-                    if (string.IsNullOrWhiteSpace(destDir))
-                    {
-                        continue;
-                    }
-
-                    if (showProgress)
-                    {
-                        string message = $"Copying: {fileName}";
-                        double progress = (double)filesCopied / totalFiles;
-                        progressBar?.Draw(message, progress);
-                    }
-
-                    if (!Directory.Exists(destDir))
-                    {
-                        Directory.CreateDirectory(destDir);
-                    }
-
-                    File.Copy(filePath, destFile, overwrite: true);
-                    filesCopied++;
+                    continue;
                 }
 
-                result = true;
-            }
-            catch (Exception ex)
-            {
-                progressBar?.Dispose();
-                Logger.Error(ex.Message);
+                if (showProgress)
+                {
+                    var message = $"Copying: {fileName}";
+                    var progress = (double)filesCopied / totalFiles;
+                    progressBar?.Draw(message, progress);
+                }
+
+                if (!Directory.Exists(destDir))
+                {
+                    Directory.CreateDirectory(destDir);
+                }
+
+                File.Copy(filePath, destFile, overwrite: true);
+                filesCopied++;
             }
 
+            result = true;
+        }
+        catch (Exception ex)
+        {
             progressBar?.Dispose();
-
-            return result;
+            Logger.Error(ex.Message);
         }
 
-        public static bool DownloadFile(string downloadUrl, string outputPath, bool showProgress = false)
+        progressBar?.Dispose();
+
+        return result;
+    }
+
+    public static bool DownloadFile(string downloadUrl, string outputPath, bool showProgress = false)
+    {
+        var result = false;
+
+        ProgressBar? progressBar = null;
+
+        if (showProgress)
         {
-            bool result = false;
+            progressBar = new();
+        }
 
-            ProgressBar? progressBar = null;
+        try
+        {
+            var directoryPath = Path.GetDirectoryName(outputPath);
 
-            if (showProgress)
+            if (directoryPath == null)
             {
-                progressBar = new();
+                return false;
             }
 
-            try
+            if (!Directory.Exists(directoryPath))
             {
-                string? directoryPath = Path.GetDirectoryName(outputPath);
+                Directory.CreateDirectory(directoryPath);
+            }
 
-                if (directoryPath == null)
+            var fileName = Path.GetFileName(outputPath);
+
+            using (HttpClient client = new HttpClient
+            {
+                Timeout = TimeSpan.FromMinutes(30)
+            })
+            {
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("FikaInstaller");
+
+                using (var response = client.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead).Result)
                 {
-                    return false;
-                }
+                    response.EnsureSuccessStatusCode();
 
-                if (!Directory.Exists(directoryPath))
-                {
-                    Directory.CreateDirectory(directoryPath);
-                }
+                    var totalBytes = response.Content.Headers.ContentLength;
 
-                string fileName = Path.GetFileName(outputPath);
-
-                using (HttpClient client = new HttpClient
-                {
-                    Timeout = TimeSpan.FromMinutes(30)
-                })
-                {
-                    client.DefaultRequestHeaders.UserAgent.ParseAdd("FikaInstaller");
-
-                    using (HttpResponseMessage response = client.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead).Result)
+                    using (var contentStream = response.Content.ReadAsStreamAsync().Result)
                     {
-                        response.EnsureSuccessStatusCode();
-
-                        long? totalBytes = response.Content.Headers.ContentLength;
-
-                        using (Stream contentStream = response.Content.ReadAsStreamAsync().Result)
+                        using (FileStream fileStream = new(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
                         {
-                            using (FileStream fileStream = new(outputPath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                            var buffer = new byte[8192];
+                            long totalRead = 0;
+                            int read;
+
+                            while ((read = contentStream.Read(buffer, 0, buffer.Length)) > 0)
                             {
-                                byte[] buffer = new byte[8192];
-                                long totalRead = 0;
-                                int read;
+                                fileStream.Write(buffer, 0, read);
+                                totalRead += read;
 
-                                while ((read = contentStream.Read(buffer, 0, buffer.Length)) > 0)
+                                if (totalBytes.HasValue && showProgress)
                                 {
-                                    fileStream.Write(buffer, 0, read);
-                                    totalRead += read;
-
-                                    if (totalBytes.HasValue && showProgress)
-                                    {
-                                        double progress = (double)totalRead / totalBytes.Value;
-                                        progressBar?.Draw($"Downloading: {fileName}", progress);
-                                    }
+                                    var progress = (double)totalRead / totalBytes.Value;
+                                    progressBar?.Draw($"Downloading: {fileName}", progress);
                                 }
                             }
                         }
-
-                        result = true;
                     }
+
+                    result = true;
                 }
             }
-            catch (Exception ex)
-            {
-                progressBar?.Dispose();
-                Logger.Error(ex.Message);
-            }
-
+        }
+        catch (Exception ex)
+        {
             progressBar?.Dispose();
-
-            return result;
+            Logger.Error(ex.Message);
         }
 
-        public static bool ExtractZip(string zipFilePath, string outputDirectory)
-        {
-            try
-            {
-                Directory.CreateDirectory(outputDirectory);
-                ZipFile.ExtractToDirectory(zipFilePath, outputDirectory, overwriteFiles: true);
+        progressBar?.Dispose();
 
-                return true;
-            }
-            catch (Exception ex)
+        return result;
+    }
+
+    public static bool ExtractZip(string zipFilePath, string outputDirectory)
+    {
+        try
+        {
+            Directory.CreateDirectory(outputDirectory);
+            ZipFile.ExtractToDirectory(zipFilePath, outputDirectory, overwriteFiles: true);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Logger.Error(ex.Message);
+            return false;
+        }
+    }
+
+    public static bool CreateFolderSymlink(string fromPath, string toPath)
+    {
+        if (SecUtils.IsRunAsAdmin())
+        {
+            return CreateFolderSymlinkElevated(fromPath, toPath);
+        }
+        else
+        {
+            var processElevated = ProcUtils.Execute(Application.ExecutablePath, $"create-symlink \"{fromPath}\" \"{toPath}\"", ProcessWindowStyle.Minimized, true);
+
+            if (processElevated == null)
             {
-                Logger.Error(ex.Message);
+                Logger.Error("Failed to run elevated process.");
                 return false;
             }
-        }
 
-        public static bool CreateFolderSymlink(string fromPath, string toPath)
+            return processElevated.ExitCode == 0;
+        }
+    }
+
+    public static bool CreateFolderSymlinkElevated(string fromPath, string toPath)
+    {
+        try
         {
-            if (SecUtils.IsRunAsAdmin())
-            {
-                return CreateFolderSymlinkElevated(fromPath, toPath);
-            }
-            else
-            {
-                Process? processElevated = ProcUtils.Execute(Application.ExecutablePath, $"create-symlink \"{fromPath}\" \"{toPath}\"", ProcessWindowStyle.Minimized, true);
+            Directory.CreateSymbolicLink(toPath, fromPath);
 
-                if (processElevated == null)
-                {
-                    Logger.Error("Failed to run elevated process.");
-                    return false;
-                }
-
-                return processElevated.ExitCode == 0;
-            }
+            return true;
         }
-
-        public static bool CreateFolderSymlinkElevated(string fromPath, string toPath)
+        catch (Exception ex)
         {
-            try
-            {
-                Directory.CreateSymbolicLink(toPath, fromPath);
+            Logger.Error(ex.Message);
 
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex.Message);
-
-                return false;
-            }
+            return false;
         }
+    }
 
-        public static void CreateShortcut(string shortcutPath, string targetPath, string workingDir, string iconPath, string description)
-        {
-            WshShell shell = new();
-            IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(shortcutPath);
+    public static void CreateShortcut(string shortcutPath, string targetPath, string workingDir, string iconPath, string description)
+    {
+        WshShell shell = new();
+        IWshShortcut shortcut = (IWshShortcut)shell.CreateShortcut(shortcutPath);
 
-            shortcut.TargetPath = targetPath;
-            shortcut.WorkingDirectory = workingDir;
-            shortcut.IconLocation = iconPath;
-            shortcut.Description = description;
-            shortcut.Save();
-        }
+        shortcut.TargetPath = targetPath;
+        shortcut.WorkingDirectory = workingDir;
+        shortcut.IconLocation = iconPath;
+        shortcut.Description = description;
+        shortcut.Save();
     }
 }

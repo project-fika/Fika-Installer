@@ -1,8 +1,7 @@
-﻿namespace Fika_Installer.Models.Enums
+﻿namespace Fika_Installer.Models.Enums;
+
+public enum FikaPingResult
 {
-    public enum FikaPingResult
-    {
-        Success,
-        Failed
-    }
+    Success,
+    Failed
 }

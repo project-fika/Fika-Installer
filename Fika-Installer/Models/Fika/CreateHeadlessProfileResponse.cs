@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Fika_Installer.Models.Fika.Network
+namespace Fika_Installer.Models.Fika.Network;
+
+public sealed record CreateHeadlessProfileResponse
 {
-    public class CreateHeadlessProfileResponse
-    {
-        [JsonPropertyName("id")]
-        public string Id { get; set; } = "";
-    }
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = "";
 }
