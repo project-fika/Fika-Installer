@@ -29,7 +29,7 @@ public class Menu
             var paging = Choices.Count > 9;
             var pageSize = paging ? 8 : 9;
 
-            if (!string.IsNullOrEmpty(Message))
+            if (!string.IsNullOrWhiteSpace(Message))
             {
                 Console.WriteLine(Message);
                 Console.WriteLine();

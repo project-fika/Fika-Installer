@@ -30,7 +30,7 @@ public sealed class SptInstaller(string sptDir)
 
         if (installType == InstallMethod.Symlink)
         {
-            var eftDataFolderName = "EscapeFromTarkov_Data";
+            const string eftDataFolderName = "EscapeFromTarkov_Data";
 
             excludeFiles.Add(eftDataFolderName);
 

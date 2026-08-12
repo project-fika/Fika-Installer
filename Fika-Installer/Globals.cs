@@ -5,18 +5,19 @@ namespace Fika_Installer;
 
 public static class Installer
 {
-    private static readonly string _versionMajor = Assembly.GetExecutingAssembly().GetName().Version.Major.ToString();
-    private static readonly string _versionMinor = Assembly.GetExecutingAssembly().GetName().Version.Minor.ToString();
-    private static readonly string _versionBuild = Assembly.GetExecutingAssembly().GetName().Version.Build.ToString();
+    private static readonly string _versionMajor = Assembly.GetExecutingAssembly().GetName().Version!.Major.ToString();
+    private static readonly string _versionMinor = Assembly.GetExecutingAssembly().GetName().Version!.Minor.ToString();
+    private static readonly string _versionBuild = Assembly.GetExecutingAssembly().GetName().Version!.Build.ToString();
 
-    public static readonly string VersionString = $"Fika Installer v{_versionMajor}.{_versionMinor}.{_versionBuild}";
-    public static readonly string CurrentDir = Directory.GetCurrentDirectory();
-    public static readonly string TempDir = Path.Combine(CurrentDir, "FikaInstallerTemp");
+    public static string VersionString { get; } = $"Fika Installer v{_versionMajor}.{_versionMinor}.{_versionBuild}";
+    public static string CurrentDir { get; } = Directory.GetCurrentDirectory();
+    public static string TempDir { get; } = Path.Combine(CurrentDir, "FikaInstallerTemp");
 
     public static string FikaCorePath(string installDir)
     {
         return Path.Combine(installDir, @"BepInEx\plugins\Fika\Fika.Core.dll");
     }
+
     public static string FikaHeadlessPath(string installDir)
     {
         return Path.Combine(installDir, @"BepInEx\plugins\Fika\Fika.Headless.dll");
@@ -46,11 +47,12 @@ public static class FikaReleaseLists
 
 public static class SptConstants
 {
-    public static readonly string ServerExeName = "SPT.Server.exe";
-    public static readonly string LauncherExeName = "SPT.Launcher.exe";
+    public const string ServerExeName = "SPT.Server.exe";
+
+    public const string LauncherExeName = "SPT.Launcher.exe";
 }
 
 public static class EftConstants
 {
-    public static readonly string GameExeName = "EscapeFromTarkov.exe";
+    public const string GameExeName = "EscapeFromTarkov.exe";
 }

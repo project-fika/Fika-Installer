@@ -13,7 +13,7 @@ public class BrowseSptFolderPage : Page
 
         var selectedFolderPath = FileUtils.BrowseFolder("Please select your SPT installation folder.");
 
-        if (string.IsNullOrEmpty(selectedFolderPath))
+        if (string.IsNullOrWhiteSpace(selectedFolderPath))
         {
             return;
         }

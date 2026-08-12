@@ -2,17 +2,9 @@
 
 namespace Fika_Installer.Models.GitHub;
 
-public sealed record GitHubRelease
-{
-    [JsonPropertyName("name")]
-    public string Name { get; set; } = "";
-
-    [JsonPropertyName("tag_name")]
-    public string TagName { get; set; } = "";
-
-    [JsonPropertyName("body")]
-    public string Body { get; set; } = "";
-
-    [JsonPropertyName("assets")]
-    public List<GitHubAsset> Assets { get; set; } = [];
-}
+public sealed record GitHubRelease(
+    [property: JsonPropertyName("name")] string Name = "",
+    [property: JsonPropertyName("tag_name")] string TagName = "",
+    [property: JsonPropertyName("body")] string Body = "",
+    [property: JsonPropertyName("assets")] List<GitHubAsset> Assets = null!
+);

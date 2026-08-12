@@ -5,18 +5,19 @@
     <RootNamespace>Fika_Installer</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<UseWindowsForms>true</UseWindowsForms>
-	<CETCompat>false</CETCompat>
-	<AssemblyVersion>1.2.0</AssemblyVersion>
+		<UseWindowsForms>true</UseWindowsForms>
+		<CETCompat>false</CETCompat>
+		<AssemblyVersion>1.2.1</AssemblyVersion>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 	
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>true</SelfContained>
-	<PublishSingleFile>true</PublishSingleFile>
-	<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-	<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
-	<PublishDir>$(ProjectDir)Build\</PublishDir>
+		<PublishSingleFile>true</PublishSingleFile>
+		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+		<PublishDir>$(ProjectDir)Build\</PublishDir>
   </PropertyGroup>
 
   <Target Name="TriggerPublish" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">

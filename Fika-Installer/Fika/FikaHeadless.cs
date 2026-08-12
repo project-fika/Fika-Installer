@@ -27,7 +27,7 @@ public sealed class FikaHeadless
 
     public string? CreateHeadlessProfile()
     {
-        var sptProcessName = "SPT.Server";
+        const string sptProcessName = "SPT.Server";
         var sptServerRunning = Process.GetProcessesByName(sptProcessName).Length != 0;
 
         /* Make sure SPT server is not running */
@@ -57,7 +57,7 @@ public sealed class FikaHeadless
         var port = httpConfig?["port"]?.GetValue<int>();
         var apiKey = fikaServerConfig["server"]?["apiKey"]?.GetValue<string>();
 
-        if (string.IsNullOrEmpty(ip) || port == null || string.IsNullOrEmpty(apiKey))
+        if (string.IsNullOrWhiteSpace(ip) || port == null || string.IsNullOrWhiteSpace(apiKey))
         {
             Logger.Error("Invalid configuration in Fika Server config file.");
             return null;
@@ -100,7 +100,7 @@ public sealed class FikaHeadless
 
         _sptServer.Stop();
 
-        if (string.IsNullOrEmpty(_headlessProfileId))
+        if (string.IsNullOrWhiteSpace(_headlessProfileId))
         {
             return null;
         }
@@ -113,7 +113,7 @@ public sealed class FikaHeadless
 
     public bool CopyHeadlessConfig(string profileId, string destPath)
     {
-        var headlessConfigFileName = "HeadlessConfig.json";
+        const string headlessConfigFileName = "HeadlessConfig.json";
         var headlessConfigDirPath = Path.Combine(_fikaServerScriptsFolder, profileId);
         var headlessConfigPath = Path.Combine(headlessConfigDirPath, headlessConfigFileName);
 
@@ -161,7 +161,7 @@ public sealed class FikaHeadless
 
     private bool SetHeadlessAmount(JsonObject fikaServerConfig, int amount)
     {
-        fikaServerConfig["headless"]["profiles"]["amount"] = amount;
+        fikaServerConfig["headless"]!["profiles"]!["amount"] = amount;
 
         return JsonUtils.SerializeToFile(_fikaServerConfigPath, fikaServerConfig);
     }

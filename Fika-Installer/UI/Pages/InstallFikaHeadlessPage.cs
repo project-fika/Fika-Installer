@@ -44,14 +44,14 @@ public partial class PageFunctions
         {
             headlessProfileId = fikaHeadless.CreateHeadlessProfile();
 
-            if (string.IsNullOrEmpty(headlessProfileId))
+            if (string.IsNullOrWhiteSpace(headlessProfileId))
             {
                 Logger.Error("An error occurred while creating the headless profile. Please check the SPT Server logs.", true);
                 return;
             }
         }
 
-        if (string.IsNullOrEmpty(headlessProfileId))
+        if (string.IsNullOrWhiteSpace(headlessProfileId))
         {
             Logger.Error("Headless profile ID unexpectedly null.", true);
             return;

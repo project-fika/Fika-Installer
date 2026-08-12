@@ -96,7 +96,7 @@ public class ProgressBar
 
         var messageLength = _message.Length; // Message + space
         var barWidth = _barWidth + 2; // Progress bar + [ and ]
-        var percentageLength = 5; // Space + 100%
+        const int percentageLength = 5; // Space + 100%
         var progressBarTotalLength = messageLength + barWidth + percentageLength;
 
         Erase(0, _progressBarCursorTopPos, progressBarTotalLength);

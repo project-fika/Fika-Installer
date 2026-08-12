@@ -9,7 +9,7 @@ public static class Header
 
         var fikaInstallerVersionString = Installer.VersionString;
 
-        var margin = 5;
+        const int margin = 5;
         var headerBackgroundLength = fikaInstallerVersionString.Length + margin * 2;
 
         string headerBackground = new(' ', headerBackgroundLength);

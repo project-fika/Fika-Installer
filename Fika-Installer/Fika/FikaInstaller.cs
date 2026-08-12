@@ -37,7 +37,7 @@ public sealed partial class FikaInstaller(string installDir)
         var compatibleEftVersion = GetCompatibleEftVersionFromRelease(gitHubRelease);
         var currentEftVersion = GetEftVersion();
 
-        if (!string.IsNullOrEmpty(compatibleEftVersion) && !string.IsNullOrEmpty(currentEftVersion))
+        if (!string.IsNullOrWhiteSpace(compatibleEftVersion) && !string.IsNullOrWhiteSpace(currentEftVersion))
         {
             if (compatibleEftVersion != currentEftVersion)
             {
@@ -143,7 +143,7 @@ public sealed partial class FikaInstaller(string installDir)
 
         if (File.Exists(eftExePath))
         {
-            FileVersionInfo? tarkovVersionInfo = FileVersionInfo.GetVersionInfo(eftExePath);
+            var tarkovVersionInfo = FileVersionInfo.GetVersionInfo(eftExePath);
 
             if (tarkovVersionInfo.FileVersion != null)
             {
